@@ -1,6 +1,9 @@
+using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using Flow.Launcher.Core.Plugin;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
@@ -75,21 +78,60 @@ namespace Flow.Launcher.Test
         }
 
         [Test]
-        public async Task GivenPreviewHidden_WhenMarkdownResultWithDefaultVisibilitySelected_ThenInternalPreviewStaysHidden_Async()
+        public void GivenContentBlocks_WhenViewModelCreated_ThenBlockPreviewIsShownAndLegacyIsHidden()
         {
-            // Content type only controls rendering; it must not force the pane open.
-            // Forcing is the job of PreviewVisibility.Always.
-            var settings = new Settings
+            var settings = new Settings();
+            var result = new Result
             {
-                AlwaysPreview = false
+                Title = "Markdown",
+                RichPreview = new Result.RichPreviewInfo
+                {
+                    ContentBlocks = [new MarkdownPreviewBlock { InlineMarkdown = "# Title" }]
+                }
             };
-            var viewModel = CreatePreviewViewModel(settings, ResultAreaColumnPreviewHidden);
 
-            viewModel.PreviewSelectedItem =
-                ViewModel("Markdown", PreviewVisibility.Optional, settings, PreviewContentType.Markdown);
-            await InvokeUpdatePreviewAsync(viewModel);
+            var viewModel = new ResultViewModel(result, settings);
 
-            ClassicAssert.IsFalse(viewModel.InternalPreviewVisible);
+            ClassicAssert.IsTrue(viewModel.HasContentBlocks);
+            ClassicAssert.AreEqual(Visibility.Visible, viewModel.ShowContentBlocksPreview);
+            ClassicAssert.AreEqual(Visibility.Collapsed, viewModel.ShowLegacyPreview);
+        }
+
+        [Test]
+        public void GivenNoContentBlocks_WhenViewModelCreated_ThenLegacyPreviewIsShown()
+        {
+            var settings = new Settings();
+            var result = new Result
+            {
+                Title = "Normal",
+            };
+
+            var viewModel = new ResultViewModel(result, settings);
+
+            ClassicAssert.IsFalse(viewModel.HasContentBlocks);
+            ClassicAssert.AreEqual(Visibility.Collapsed, viewModel.ShowContentBlocksPreview);
+            ClassicAssert.AreEqual(Visibility.Visible, viewModel.ShowLegacyPreview);
+        }
+
+        [Test]
+        public void GivenPreviewPanelAndContentBlocks_WhenViewModelCreated_ThenCustomPanelTakesPrecedence()
+        {
+            var settings = new Settings();
+            var result = new Result
+            {
+                Title = "Custom",
+                PreviewPanel = new Lazy<UserControl>(() => new UserControl()),
+                RichPreview = new Result.RichPreviewInfo
+                {
+                    ContentBlocks = [new MarkdownPreviewBlock { InlineMarkdown = "# Title" }]
+                }
+            };
+
+            var viewModel = new ResultViewModel(result, settings);
+
+            // The custom panel is the most preferred preview source, so it hides the entire default area
+            ClassicAssert.AreEqual(Visibility.Collapsed, viewModel.ShowDefaultPreview);
+            ClassicAssert.IsTrue(viewModel.HasContentBlocks);
         }
 
         [Test]
@@ -343,17 +385,12 @@ namespace Flow.Launcher.Test
         private static ResultViewModel ViewModel(
             string title,
             PreviewVisibility visibility,
-            Settings settings,
-            PreviewContentType contentType = PreviewContentType.ImageWithText)
+            Settings settings)
             => new(
                 new Result
                 {
                     Title = title,
                     PreviewVisibility = visibility,
-                    Preview = new Result.PreviewInfo
-                    {
-                        ContentType = contentType
-                    }
                 },
                 settings);
 
