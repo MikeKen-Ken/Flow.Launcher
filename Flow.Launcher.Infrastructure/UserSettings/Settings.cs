@@ -582,8 +582,6 @@ namespace Flow.Launcher.Infrastructure.UserSettings
 
         public HttpProxy Proxy { get; set; } = new HttpProxy();
 
-        public WebDavSyncSettings WebDavSync { get; set; } = new WebDavSyncSettings();
-
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public LastQueryMode LastQueryMode { get; set; } = LastQueryMode.Selected;
 

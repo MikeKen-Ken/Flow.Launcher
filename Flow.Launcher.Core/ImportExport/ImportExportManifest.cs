@@ -1,10 +1,10 @@
 using System;
 
-namespace Flow.Launcher.Core.WebDavSync;
+namespace Flow.Launcher.Core.ImportExport;
 
-public sealed class WebDavSyncManifest
+public sealed class ImportExportManifest
 {
-    public int Version { get; set; } = 1;
+    public int Version { get; set; } = ImportExportConstants.ManifestVersion;
 
     public DateTime ExportedAtUtc { get; set; }
 

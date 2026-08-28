@@ -11,7 +11,7 @@ using Flow.Launcher.Core.Configuration;
 using Flow.Launcher.Core.ExternalPlugins.Environments;
 using Flow.Launcher.Core.Plugin;
 using Flow.Launcher.Core.Resource;
-using Flow.Launcher.Core.WebDavSync;
+using Flow.Launcher.Core.ImportExport;
 using Flow.Launcher.Helper;
 using Flow.Launcher.Infrastructure;
 using Flow.Launcher.Infrastructure.Http;
@@ -93,7 +93,7 @@ namespace Flow.Launcher
                         .AddTransient<SettingsPanePluginsViewModel>()
                         .AddTransient<SettingsPanePluginStoreViewModel>()
                         .AddTransient<SettingsPaneProxyViewModel>()
-                        .AddTransient<SettingsPaneWebDavViewModel>()
+                        .AddTransient<SettingsPaneImportExportViewModel>()
                         .AddTransient<SettingsPaneThemeViewModel>()
                         // Use transient instance for dialog view models because
                         // settings will change and we need to recreate them
@@ -132,11 +132,11 @@ namespace Flow.Launcher
         {
             try
             {
-                WebDavPendingApply.ApplyIfNeeded();
+                ImportExportPendingApply.ApplyIfNeeded();
             }
             catch (Exception e)
             {
-                Log.Error(nameof(App), $"Failed to apply pending WebDAV sync package: {e.Message}");
+                Log.Error(nameof(App), $"Failed to apply pending import package: {e.Message}");
             }
 
             // Initialize settings so that we can get language code

@@ -1,0 +1,87 @@
+<ui:Page
+    x:Class="Flow.Launcher.SettingPages.Views.SettingsPaneImportExport"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:viewModels="clr-namespace:Flow.Launcher.SettingPages.ViewModels"
+    Title="Import / Export"
+    d:DataContext="{d:DesignInstance viewModels:SettingsPaneImportExportViewModel}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Page.Resources>
+        <ResourceDictionary Source="pack://application:,,,/Resources/SettingWindowStyle.xaml" />
+    </Page.Resources>
+    <ui:ScrollViewerEx
+        FontSize="14"
+        VirtualizingStackPanel.IsVirtualizing="True"
+        VirtualizingStackPanel.ScrollUnit="Pixel">
+
+        <StackPanel Margin="5 0 24 0">
+            <TextBlock
+                Margin="0 23 0 10"
+                FontSize="30"
+                Style="{StaticResource PageTitle}"
+                Text="{DynamicResource importExport}"
+                TextAlignment="left" />
+
+            <TextBlock
+                Margin="0 0 0 14"
+                Foreground="{DynamicResource Color15B}"
+                Text="{DynamicResource importExportDescription}"
+                TextWrapping="Wrap" />
+
+            <ui:SettingsCard Header="{DynamicResource importExportSettings}">
+                <CheckBox
+                    IsChecked="{Binding IncludeSettings}"
+                    IsEnabled="{Binding CanRunActions}" />
+            </ui:SettingsCard>
+
+            <ui:SettingsCard Margin="0 4 0 0" Header="{DynamicResource importExportPlugins}">
+                <CheckBox
+                    IsChecked="{Binding IncludePlugins}"
+                    IsEnabled="{Binding CanRunActions}" />
+            </ui:SettingsCard>
+
+            <ui:SettingsCard
+                Margin="0 14 0 0"
+                Description="{DynamicResource importExportExportDescription}"
+                Header="{DynamicResource importExportExport}">
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                    <Button
+                        MinWidth="150"
+                        Command="{Binding ExportToFolderCommand}"
+                        Content="{DynamicResource importExportExportFolder}"
+                        IsEnabled="{Binding CanRunActions}" />
+                    <Button
+                        MinWidth="150"
+                        Command="{Binding ExportToZipCommand}"
+                        Content="{DynamicResource importExportExportZip}"
+                        IsEnabled="{Binding CanRunActions}" />
+                </ikw:SimpleStackPanel>
+            </ui:SettingsCard>
+
+            <ui:SettingsCard
+                Margin="0 4 0 0"
+                Description="{DynamicResource importExportImportDescription}"
+                Header="{DynamicResource importExportImport}">
+                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                    <Button
+                        MinWidth="150"
+                        Command="{Binding ImportFromFolderCommand}"
+                        Content="{DynamicResource importExportImportFolder}"
+                        IsEnabled="{Binding CanRunActions}" />
+                    <Button
+                        MinWidth="150"
+                        Command="{Binding ImportFromZipCommand}"
+                        Content="{DynamicResource importExportImportZip}"
+                        IsEnabled="{Binding CanRunActions}"
+                        Style="{StaticResource AccentButtonStyle}" />
+                </ikw:SimpleStackPanel>
+            </ui:SettingsCard>
+        </StackPanel>
+    </ui:ScrollViewerEx>
+</ui:Page>

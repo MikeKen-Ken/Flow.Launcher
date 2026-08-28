@@ -139,9 +139,9 @@
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
 
-                        <ui:NavigationViewItem x:Name="WebDav" Content="{DynamicResource webDavSync}">
+                        <ui:NavigationViewItem x:Name="ImportExport" Content="{DynamicResource importExport}">
                             <ui:NavigationViewItem.Icon>
-                                <ui:FontIcon Glyph="&#xE753;" />
+                                <ui:FontIcon Glyph="&#xE8C6;" />
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
 

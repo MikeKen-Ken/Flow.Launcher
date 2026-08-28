@@ -1,8 +1,8 @@
 using Flow.Launcher.Infrastructure.UserSettings;
 
-namespace Flow.Launcher.Core.WebDavSync;
+namespace Flow.Launcher.Core.ImportExport;
 
-public sealed class WebDavSyncPaths
+public sealed class ImportExportPaths
 {
     public string DataDirectory { get; init; } = string.Empty;
 
@@ -12,7 +12,7 @@ public sealed class WebDavSyncPaths
 
     public string ThemesDirectory { get; init; } = string.Empty;
 
-    public static WebDavSyncPaths FromDataLocation() => new()
+    public static ImportExportPaths FromDataLocation() => new()
     {
         DataDirectory = DataLocation.DataDirectory(),
         SettingsDirectory = DataLocation.SettingsDirectory,

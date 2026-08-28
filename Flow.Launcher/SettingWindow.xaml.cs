@@ -61,7 +61,7 @@ public partial class SettingWindow
                     nameof(SettingsPaneTheme) => 3,
                     nameof(SettingsPaneHotkey) => 4,
                     nameof(SettingsPaneProxy) => 5,
-                    nameof(SettingsPaneWebDav) => 6,
+                    nameof(SettingsPaneImportExport) => 6,
                     nameof(SettingsPaneAbout) => 7,
                     _ => 0
                 };
@@ -218,7 +218,7 @@ public partial class SettingWindow
                 nameof(Theme) => typeof(SettingsPaneTheme),
                 nameof(Hotkey) => typeof(SettingsPaneHotkey),
                 nameof(Proxy) => typeof(SettingsPaneProxy),
-                nameof(WebDav) => typeof(SettingsPaneWebDav),
+                nameof(ImportExport) => typeof(SettingsPaneImportExport),
                 nameof(About) => typeof(SettingsPaneAbout),
                 _ => typeof(SettingsPaneGeneral)
             };
