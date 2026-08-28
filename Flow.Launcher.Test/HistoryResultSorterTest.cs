@@ -119,6 +119,25 @@ namespace Flow.Launcher.Test
             ClassicAssert.AreEqual(2, result.Count);
         }
 
+        [Test]
+        public void AssignDisplayRanking_LocksPreparedOrderAgainstSelectionCount()
+        {
+            var items = new[]
+            {
+                Item("test", new DateTime(2026, 8, 28)),
+                Item("hub", new DateTime(2026, 8, 21))
+            };
+            items[1].AddSelectedCount = true;
+            items[1].Score = 0;
+
+            HistoryResultSorter.AssignDisplayRanking(items);
+
+            ClassicAssert.IsFalse(items[0].AddSelectedCount);
+            ClassicAssert.IsFalse(items[1].AddSelectedCount);
+            ClassicAssert.Greater(items[0].Score, items[1].Score);
+            ClassicAssert.AreEqual(items[0].Score - 1, items[1].Score);
+        }
+
         private static LastOpenedHistoryResult Item(
             string title,
             DateTime executed,

@@ -1371,7 +1371,7 @@ namespace Flow.Launcher.ViewModel
             int? maxResult = null,
             HistorySortOrder sortOrder = HistorySortOrder.NewestFirst)
         {
-            var results = new List<Result>();
+            var results = new List<LastOpenedHistoryResult>();
 
             historyItems = HistoryResultSorter.Prepare(historyItems, Settings.HistoryStyle, sortOrder, maxResult);
 
@@ -1402,7 +1402,9 @@ namespace Flow.Launcher.ViewModel
                 results.Add(copiedItem);
             }
 
-            return results;
+            // Result lists are ranked by Score; lock in the prepared order and skip selection-count boosts.
+            HistoryResultSorter.AssignDisplayRanking(results);
+            return new List<Result>(results);
         }
 
         /// <summary>

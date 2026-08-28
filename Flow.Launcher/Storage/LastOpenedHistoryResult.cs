@@ -116,7 +116,9 @@ public class LastOpenedHistoryResult : Result
             // Used for Last Opened History style reopening, currently need to be assigned at MainViewModel.cs
             AsyncAction = null,
             Glyph = glyph,
-            ExecutedDateTime = ExecutedDateTime
+            ExecutedDateTime = ExecutedDateTime,
+            // Keep the prepared history order instead of boosting by how often the original result was selected.
+            AddSelectedCount = false
             // Note: Other properties are left as default — copy if needed.
         };
     }

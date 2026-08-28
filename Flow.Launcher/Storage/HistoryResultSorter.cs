@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Flow.Launcher.Infrastructure.UserSettings;
+using Flow.Launcher.Plugin;
 
 namespace Flow.Launcher.Storage;
 
@@ -10,6 +11,12 @@ namespace Flow.Launcher.Storage;
 /// </summary>
 public static class HistoryResultSorter
 {
+    /// <summary>
+    /// Score origin used so history keeps its prepared order after the result list is ranked by <see cref="Result.Score"/>.
+    /// Stays below <see cref="Result.MaxScore"/> so user-pinned results remain on top.
+    /// </summary>
+    internal const int DisplayScoreOrigin = Result.MaxScore / 2;
+
     /// <summary>
     /// Groups last-opened items when needed, then sorts and optionally limits the list for display.
     /// </summary>
@@ -36,6 +43,20 @@ public static class HistoryResultSorter
         }
 
         return historyItems;
+    }
+
+    /// <summary>
+    /// Assigns descending scores so the result view keeps this list order instead of re-ranking by selection count.
+    /// </summary>
+    public static void AssignDisplayRanking(IList<LastOpenedHistoryResult> displayItems)
+    {
+        ArgumentNullException.ThrowIfNull(displayItems);
+
+        for (var i = 0; i < displayItems.Count; i++)
+        {
+            displayItems[i].AddSelectedCount = false;
+            displayItems[i].Score = DisplayScoreOrigin - i;
+        }
     }
 
     private static IEnumerable<LastOpenedHistoryResult> Sort(
