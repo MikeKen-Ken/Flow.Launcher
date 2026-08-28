@@ -219,7 +219,23 @@ public partial class SettingsPanePluginsViewModel : BaseModel
     }
 
     [RelayCommand]
-    private Task CheckPluginUpdatesAsync() => CheckForUpdatesCoreAsync();
+    private async Task CheckPluginUpdatesAsync()
+    {
+        try
+        {
+            await CheckForUpdatesCoreAsync();
+
+            if (!HasAvailableUpdates)
+            {
+                App.API.ShowMsg(Localize.updateNoResultTitle(), Localize.updateNoResultSubtitle());
+            }
+        }
+        catch (Exception e)
+        {
+            App.API.LogException(nameof(SettingsPanePluginsViewModel), "Failed to check for plugin updates", e);
+            App.API.ShowMsgError(Localize.checkUpdatesFailed());
+        }
+    }
 
     public int AvailableUpdatesCount => PluginViewModels?.Count(vm => vm.HasUpdate) ?? 0;
     public bool HasAvailableUpdates => AvailableUpdatesCount > 0;

@@ -681,6 +681,8 @@
 
     <!--  Update  -->
     <system:String x:Key="update_flowlauncher_update_check">Checking for new update</system:String>
+    <system:String x:Key="update_flowlauncher_already_checking">An update check is already in progress.</system:String>
+    <system:String x:Key="update_flowlauncher_not_squirrel">In-app updates are only available when Flow Launcher is installed with the Setup installer.</system:String>
     <system:String x:Key="update_flowlauncher_already_on_latest">You already have the latest Flow Launcher version</system:String>
     <system:String x:Key="update_flowlauncher_update_found">Update found</system:String>
     <system:String x:Key="update_flowlauncher_updating">Updating...</system:String>
