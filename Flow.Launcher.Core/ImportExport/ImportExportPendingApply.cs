@@ -3,6 +3,7 @@ using System.IO;
 using System.Text.Json;
 using Flow.Launcher.Infrastructure;
 using Flow.Launcher.Infrastructure.Logger;
+using Flow.Launcher.Infrastructure.UserSettings;
 
 namespace Flow.Launcher.Core.ImportExport;
 
