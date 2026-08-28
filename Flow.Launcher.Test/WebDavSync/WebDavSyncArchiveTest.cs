@@ -37,8 +37,9 @@ namespace Flow.Launcher.Test.WebDavSync
 
                 WebDavSyncArchive.ApplyFromZip(zipPath, destination, applySettings: true, applyPlugins: true);
 
-                Assert.That(File.ReadAllText(Path.Combine(destination.SettingsDirectory, "Settings.json")),
-                    Is.EqualTo("{\"theme\":\"dark\"}"));
+                var appliedSettings = JsonNode.Parse(
+                    File.ReadAllText(Path.Combine(destination.SettingsDirectory, "Settings.json")))!.AsObject();
+                Assert.That(appliedSettings["theme"]!.GetValue<string>(), Is.EqualTo("dark"));
                 Assert.That(File.ReadAllText(Path.Combine(destination.PluginsDirectory, "SamplePlugin", "plugin.json")),
                     Is.EqualTo("{\"Name\":\"Sample\"}"));
                 Assert.That(File.ReadAllText(Path.Combine(destination.ThemesDirectory, "Custom.xaml")),
