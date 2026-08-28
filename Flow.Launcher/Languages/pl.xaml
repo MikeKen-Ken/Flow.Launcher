@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:system="clr-namespace:System;assembly=mscorlib">
     <!--  Startup  -->
     <system:String x:Key="runtimePluginInstalledChooseRuntimePrompt">
@@ -180,6 +180,12 @@ Kliknij &quot;nie&quot;, jeśli jest już zainstalowany. Zostaniesz wtedy popros
     <system:String x:Key="homePageToolTip">Wyświetl wyniki strony głównej, gdy pole wyszukiwania jest puste.</system:String>
     <system:String x:Key="historyResultsForHomePage">Pokaż wyniki historii na stronie głównej</system:String>
     <system:String x:Key="historyResultsCountForHomePage">Maksymalna liczba wyników historii wyświetlanych na stronie głównej</system:String>
+    <system:String x:Key="historySortOrderForHomePage">History Sort Order</system:String>
+    <system:String x:Key="historySortOrderForHomePageTooltip">Choose how history results are ordered on the Home Page</system:String>
+    <system:String x:Key="historySortNewestFirst">Newest first</system:String>
+    <system:String x:Key="historySortOldestFirst">Oldest first</system:String>
+    <system:String x:Key="historySortTitleAscending">Title (A to Z)</system:String>
+    <system:String x:Key="historySortTitleDescending">Title (Z to A)</system:String>
     <system:String x:Key="historyStyle">Styl historii</system:String>
     <system:String x:Key="historyStyleTooltip">Wybierz typ historii pokazywany na stronie historii i głównej</system:String>
     <system:String x:Key="queryHistory">Historia zapytań</system:String>

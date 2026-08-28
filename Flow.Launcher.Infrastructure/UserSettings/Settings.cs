@@ -264,6 +264,21 @@ namespace Flow.Launcher.Infrastructure.UserSettings
 
         public int MaxHistoryResultsToShowForHomePage { get; set; } = 5;
 
+        private HistorySortOrder _historySortOrderForHomePage = HistorySortOrder.NewestFirst;
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public HistorySortOrder HistorySortOrderForHomePage
+        {
+            get => _historySortOrderForHomePage;
+            set
+            {
+                if (_historySortOrderForHomePage != value)
+                {
+                    _historySortOrderForHomePage = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public bool AutoRestartAfterChanging { get; set; } = false;
         public bool ShowUnknownSourceWarning { get; set; } = true;
         public bool AutoUpdatePlugins { get; set; } = true;
@@ -567,6 +582,8 @@ namespace Flow.Launcher.Infrastructure.UserSettings
 
         public HttpProxy Proxy { get; set; } = new HttpProxy();
 
+        public WebDavSyncSettings WebDavSync { get; set; } = new WebDavSyncSettings();
+
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public LastQueryMode LastQueryMode { get; set; } = LastQueryMode.Selected;
 
@@ -785,5 +802,21 @@ namespace Flow.Launcher.Infrastructure.UserSettings
 
         [EnumLocalizeKey(nameof(Localize.executedHistory))]
         LastOpened
+    }
+
+    [EnumLocalize]
+    public enum HistorySortOrder
+    {
+        [EnumLocalizeKey(nameof(Localize.historySortNewestFirst))]
+        NewestFirst,
+
+        [EnumLocalizeKey(nameof(Localize.historySortOldestFirst))]
+        OldestFirst,
+
+        [EnumLocalizeKey(nameof(Localize.historySortTitleAscending))]
+        TitleAscending,
+
+        [EnumLocalizeKey(nameof(Localize.historySortTitleDescending))]
+        TitleDescending
     }
 }

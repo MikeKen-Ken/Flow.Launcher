@@ -181,6 +181,12 @@
     <system:String x:Key="homePageToolTip">當查詢文字為空時，顯示首頁結果。</system:String>
     <system:String x:Key="historyResultsForHomePage">在首頁顯示歷史記錄</system:String>
     <system:String x:Key="historyResultsCountForHomePage">首頁顯示最多歷史搜尋結果</system:String>
+    <system:String x:Key="historySortOrderForHomePage">歷史排序方式</system:String>
+    <system:String x:Key="historySortOrderForHomePageTooltip">選擇首頁中歷史記錄的排序方式</system:String>
+    <system:String x:Key="historySortNewestFirst">最新優先</system:String>
+    <system:String x:Key="historySortOldestFirst">最早優先</system:String>
+    <system:String x:Key="historySortTitleAscending">標題 (A 到 Z)</system:String>
+    <system:String x:Key="historySortTitleDescending">標題 (Z 到 A)</system:String>
     <system:String x:Key="historyStyle">History Style</system:String>
     <system:String x:Key="historyStyleTooltip">Choose the type of history to show in the History and Home Page</system:String>
     <system:String x:Key="queryHistory">Query history</system:String>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:system="clr-namespace:System;assembly=mscorlib">
     <!--  Startup  -->
     <system:String x:Key="runtimePluginInstalledChooseRuntimePrompt">
@@ -181,6 +181,12 @@
     <system:String x:Key="homePageToolTip">Muestra los resultados de la página de inicio cuando el texto de la consulta está vacío.</system:String>
     <system:String x:Key="historyResultsForHomePage">Mostrar historial de resultados en la página de inicio</system:String>
     <system:String x:Key="historyResultsCountForHomePage">Número máximo de resultados del historial en la página de inicio</system:String>
+    <system:String x:Key="historySortOrderForHomePage">History Sort Order</system:String>
+    <system:String x:Key="historySortOrderForHomePageTooltip">Choose how history results are ordered on the Home Page</system:String>
+    <system:String x:Key="historySortNewestFirst">Newest first</system:String>
+    <system:String x:Key="historySortOldestFirst">Oldest first</system:String>
+    <system:String x:Key="historySortTitleAscending">Title (A to Z)</system:String>
+    <system:String x:Key="historySortTitleDescending">Title (Z to A)</system:String>
     <system:String x:Key="historyStyle">Estilo del historial</system:String>
     <system:String x:Key="historyStyleTooltip">Elija el tipo de historial que desea mostrar en el historial y la página de inicio</system:String>
     <system:String x:Key="queryHistory">Historial de consultas</system:String>

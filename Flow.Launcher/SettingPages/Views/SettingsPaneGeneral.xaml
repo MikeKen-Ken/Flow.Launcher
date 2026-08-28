@@ -441,6 +441,16 @@
                             ValidationMode="InvalidInputOverwritten"
                             Value="{Binding MaxHistoryResultsToShowValue}" />
                     </ui:SettingsCard>
+                    <ui:SettingsCard
+                        Description="{DynamicResource historySortOrderForHomePageTooltip}"
+                        Header="{DynamicResource historySortOrderForHomePage}">
+                        <ComboBox
+                            MinWidth="210"
+                            DisplayMemberPath="Display"
+                            ItemsSource="{Binding HistorySortOrders}"
+                            SelectedValue="{Binding Settings.HistorySortOrderForHomePage}"
+                            SelectedValuePath="Value" />
+                    </ui:SettingsCard>
                 </ui:SettingsExpander.Items>
             </ui:SettingsExpander>
 

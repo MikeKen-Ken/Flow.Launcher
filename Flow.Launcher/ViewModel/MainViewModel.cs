@@ -1366,26 +1366,14 @@ namespace Flow.Launcher.ViewModel
             }
         }
 
-        private List<Result> GetHistoryItems(IEnumerable<LastOpenedHistoryResult> historyItems, int? maxResult = null)
+        private List<Result> GetHistoryItems(
+            IEnumerable<LastOpenedHistoryResult> historyItems,
+            int? maxResult = null,
+            HistorySortOrder sortOrder = HistorySortOrder.NewestFirst)
         {
             var results = new List<Result>();
 
-            // Order by executed time descending: Latest -> Oldest
-            historyItems = historyItems.OrderByDescending(x => x.ExecutedDateTime);
-
-            if (Settings.HistoryStyle == HistoryStyle.LastOpened)
-            {
-                // Items saved to disk are differentiated by Query also, but LastOpened style only cares about unique results
-                historyItems = historyItems
-                    .GroupBy(r => new { r.Title, r.SubTitle, r.PluginID, r.RecordKey })
-                    .Select(g => g.First());
-            }
-
-            // Max history results to return for display
-            if (maxResult.HasValue)
-            {
-                historyItems = historyItems.Take(maxResult.Value);
-            }
+            historyItems = HistoryResultSorter.Prepare(historyItems, Settings.HistoryStyle, sortOrder, maxResult);
 
             foreach (var item in historyItems)
             {
@@ -1679,7 +1667,10 @@ namespace Flow.Launcher.ViewModel
             void QueryHistoryTask(CancellationToken token)
             {
                 // Select last history results
-                var results = GetHistoryItems(_history.LastOpenedHistoryItems, Settings.MaxHistoryResultsToShowForHomePage);
+                var results = GetHistoryItems(
+                    _history.LastOpenedHistoryItems,
+                    Settings.MaxHistoryResultsToShowForHomePage,
+                    Settings.HistorySortOrderForHomePage);
 
                 if (token.IsCancellationRequested) return;
 

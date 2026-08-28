@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:system="clr-namespace:System;assembly=mscorlib">
     <!--  Startup  -->
     <system:String x:Key="runtimePluginInstalledChooseRuntimePrompt">
@@ -181,6 +181,12 @@
     <system:String x:Key="homePageToolTip">Show home page results when query text is empty.</system:String>
     <system:String x:Key="historyResultsForHomePage">Show History Results in Home Page</system:String>
     <system:String x:Key="historyResultsCountForHomePage">Maximum History Results Shown in Home Page</system:String>
+    <system:String x:Key="historySortOrderForHomePage">History Sort Order</system:String>
+    <system:String x:Key="historySortOrderForHomePageTooltip">Choose how history results are ordered on the Home Page</system:String>
+    <system:String x:Key="historySortNewestFirst">Newest first</system:String>
+    <system:String x:Key="historySortOldestFirst">Oldest first</system:String>
+    <system:String x:Key="historySortTitleAscending">Title (A to Z)</system:String>
+    <system:String x:Key="historySortTitleDescending">Title (Z to A)</system:String>
     <system:String x:Key="historyStyle">History Style</system:String>
     <system:String x:Key="historyStyleTooltip">Choose the type of history to show in the History and Home Page</system:String>
     <system:String x:Key="queryHistory">Query history</system:String>

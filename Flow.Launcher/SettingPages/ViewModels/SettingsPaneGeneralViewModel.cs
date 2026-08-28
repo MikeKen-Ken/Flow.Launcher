@@ -149,6 +149,8 @@ public partial class SettingsPaneGeneralViewModel : BaseModel
 
     public List<HistoryStyleLocalized> HistoryStyles { get; } = HistoryStyleLocalized.GetValues();
 
+    public List<HistorySortOrderLocalized> HistorySortOrders { get; } = HistorySortOrderLocalized.GetValues();
+
     public bool EnableDialogJump
     {
         get => Settings.EnableDialogJump;
@@ -230,6 +232,7 @@ public partial class SettingsPaneGeneralViewModel : BaseModel
         DropdownDataGeneric<SearchPrecisionScore>.UpdateLabels(SearchPrecisionScores);
         DropdownDataGeneric<LastQueryMode>.UpdateLabels(LastQueryModes);
         HistoryStyleLocalized.UpdateLabels(HistoryStyles);
+        HistorySortOrderLocalized.UpdateLabels(HistorySortOrders);
         DropdownDataGeneric<DoublePinyinSchemas>.UpdateLabels(DoublePinyinSchemas);
         DropdownDataGeneric<DialogJumpWindowPositions>.UpdateLabels(DialogJumpWindowPositions);
         DropdownDataGeneric<DialogJumpResultBehaviours>.UpdateLabels(DialogJumpResultBehaviours);

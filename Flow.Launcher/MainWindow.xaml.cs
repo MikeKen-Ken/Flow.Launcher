@@ -352,6 +352,7 @@ namespace Flow.Launcher
                     case nameof(Settings.ShowHomePage):
                     case nameof(Settings.ShowHistoryResultsForHomePage):
                     case nameof(Settings.HistoryStyle):
+                    case nameof(Settings.HistorySortOrderForHomePage):
                         if (_viewModel.QueryResultsSelected() && string.IsNullOrEmpty(_viewModel.QueryText))
                         {
                             _viewModel.QueryResults();

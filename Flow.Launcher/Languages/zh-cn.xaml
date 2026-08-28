@@ -181,6 +181,12 @@
     <system:String x:Key="homePageToolTip">当查询文本为空时显示主页结果。</system:String>
     <system:String x:Key="historyResultsForHomePage">在主页中显示历史记录</system:String>
     <system:String x:Key="historyResultsCountForHomePage">在主页显示的最大历史结果数</system:String>
+    <system:String x:Key="historySortOrderForHomePage">历史排序方式</system:String>
+    <system:String x:Key="historySortOrderForHomePageTooltip">选择主页中历史记录的排序方式</system:String>
+    <system:String x:Key="historySortNewestFirst">最新优先</system:String>
+    <system:String x:Key="historySortOldestFirst">最早优先</system:String>
+    <system:String x:Key="historySortTitleAscending">标题 (A 到 Z)</system:String>
+    <system:String x:Key="historySortTitleDescending">标题 (Z 到 A)</system:String>
     <system:String x:Key="historyStyle">历史样式</system:String>
     <system:String x:Key="historyStyleTooltip">选择要在历史和主页中显示的历史类型</system:String>
     <system:String x:Key="queryHistory">查询历史</system:String>

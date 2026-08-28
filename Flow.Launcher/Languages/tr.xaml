@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:system="clr-namespace:System;assembly=mscorlib">
     <!--  Startup  -->
     <system:String x:Key="runtimePluginInstalledChooseRuntimePrompt">
@@ -181,6 +181,12 @@
     <system:String x:Key="homePageToolTip">Sorgu metni boş olduğunda ana sayfa sonuçlarını gösterin.</system:String>
     <system:String x:Key="historyResultsForHomePage">Geçmiş Sonuçlarını Ana Sayfada Göster</system:String>
     <system:String x:Key="historyResultsCountForHomePage">Ana Sayfada Gösterilen Maksimum Geçmiş Sonuçları</system:String>
+    <system:String x:Key="historySortOrderForHomePage">History Sort Order</system:String>
+    <system:String x:Key="historySortOrderForHomePageTooltip">Choose how history results are ordered on the Home Page</system:String>
+    <system:String x:Key="historySortNewestFirst">Newest first</system:String>
+    <system:String x:Key="historySortOldestFirst">Oldest first</system:String>
+    <system:String x:Key="historySortTitleAscending">Title (A to Z)</system:String>
+    <system:String x:Key="historySortTitleDescending">Title (Z to A)</system:String>
     <system:String x:Key="historyStyle">Geçmiş Stili</system:String>
     <system:String x:Key="historyStyleTooltip">Geçmiş ve Ana Sayfada gösterilecek geçmiş türünü seçin</system:String>
     <system:String x:Key="queryHistory">Sorgu geçmişi</system:String>

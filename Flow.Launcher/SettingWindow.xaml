@@ -139,6 +139,12 @@
                             </ui:NavigationViewItem.Icon>
                         </ui:NavigationViewItem>
 
+                        <ui:NavigationViewItem x:Name="WebDav" Content="{DynamicResource webDavSync}">
+                            <ui:NavigationViewItem.Icon>
+                                <ui:FontIcon Glyph="&#xE753;" />
+                            </ui:NavigationViewItem.Icon>
+                        </ui:NavigationViewItem>
+
                         <ui:NavigationViewItem x:Name="About" Content="{DynamicResource about}">
                             <ui:NavigationViewItem.Icon>
                                 <ui:BitmapIcon ShowAsMonochrome="False" UriSource="/Images/info.png" />

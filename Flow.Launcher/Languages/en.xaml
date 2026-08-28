@@ -176,6 +176,12 @@
     <system:String x:Key="homePageToolTip">Show home page results when query text is empty.</system:String>
     <system:String x:Key="historyResultsForHomePage">Show History Results in Home Page</system:String>
     <system:String x:Key="historyResultsCountForHomePage">Maximum History Results Shown in Home Page</system:String>
+    <system:String x:Key="historySortOrderForHomePage">History Sort Order</system:String>
+    <system:String x:Key="historySortOrderForHomePageTooltip">Choose how history results are ordered on the Home Page</system:String>
+    <system:String x:Key="historySortNewestFirst">Newest first</system:String>
+    <system:String x:Key="historySortOldestFirst">Oldest first</system:String>
+    <system:String x:Key="historySortTitleAscending">Title (A to Z)</system:String>
+    <system:String x:Key="historySortTitleDescending">Title (Z to A)</system:String>
     <system:String x:Key="historyStyle">History Style</system:String>
     <system:String x:Key="historyStyleTooltip">Choose the type of history to show in the History and Home Page</system:String>
     <system:String x:Key="queryHistory">Query history</system:String>
@@ -460,6 +466,42 @@
     <system:String x:Key="saveProxySuccessfully">Proxy configuration saved successfully</system:String>
     <system:String x:Key="proxyIsCorrect">Proxy configured correctly</system:String>
     <system:String x:Key="proxyConnectFailed">Proxy connection failed</system:String>
+
+    <!--  Setting WebDAV Sync  -->
+    <system:String x:Key="webDavSync">WebDAV Sync</system:String>
+    <system:String x:Key="webDavSyncDescription">Upload, download, or sync settings and plugins with a WebDAV folder so you can use the same setup on another device.</system:String>
+    <system:String x:Key="webDavSyncUrl">WebDAV URL</system:String>
+    <system:String x:Key="webDavSyncUrlToolTip">Folder URL on your WebDAV server, for example https://example.com/remote.php/dav/files/user/FlowLauncher</system:String>
+    <system:String x:Key="webDavSyncUserName">User Name</system:String>
+    <system:String x:Key="webDavSyncPassword">Password</system:String>
+    <system:String x:Key="webDavSyncSettings">Sync settings</system:String>
+    <system:String x:Key="webDavSyncPlugins">Sync plugins</system:String>
+    <system:String x:Key="webDavSyncTestConnection">Test Connection</system:String>
+    <system:String x:Key="webDavSyncUpload">Upload</system:String>
+    <system:String x:Key="webDavSyncDownload">Download</system:String>
+    <system:String x:Key="webDavSyncSync">Sync</system:String>
+    <system:String x:Key="webDavSyncLastSyncNever">No successful sync yet</system:String>
+    <system:String x:Key="webDavSyncLastSyncAt">Last successful sync: {0}</system:String>
+    <system:String x:Key="webDavSyncConfirmTitleUpload">Confirm upload</system:String>
+    <system:String x:Key="webDavSyncConfirmTitleDownload">Confirm download</system:String>
+    <system:String x:Key="webDavSyncConfirmTitleSync">Confirm sync</system:String>
+    <system:String x:Key="webDavSyncConfirmMessageUpload">This will upload your local settings and plugins to the WebDAV server and replace the remote copy.{0}{0}This cannot be undone. Continue?</system:String>
+    <system:String x:Key="webDavSyncConfirmMessageDownload">This will download settings and plugins from the WebDAV server and replace your local copy.{0}{0}Flow Launcher will restart after the download. This cannot be undone. Continue?</system:String>
+    <system:String x:Key="webDavSyncConfirmMessageSync">This will compare your local copy with the WebDAV server and upload or download as needed.{0}{0}A download replaces local files and restarts Flow Launcher. Continue?</system:String>
+    <system:String x:Key="webDavSyncConfirmButton">Continue</system:String>
+    <system:String x:Key="webDavSyncSuccessUpload">Local settings and plugins were uploaded to the WebDAV server.</system:String>
+    <system:String x:Key="webDavSyncSuccessDownload">Remote settings and plugins were downloaded. Flow Launcher will restart to apply them.</system:String>
+    <system:String x:Key="webDavSyncSuccessSync">Sync finished.</system:String>
+    <system:String x:Key="webDavSyncAlreadyInSync">Local and remote copies are already in sync.</system:String>
+    <system:String x:Key="webDavSyncTestSuccess">Connected to the WebDAV server successfully.</system:String>
+    <system:String x:Key="webDavSyncTestFailed">Could not connect to the WebDAV server: {0}</system:String>
+    <system:String x:Key="webDavSyncFailed">WebDAV sync failed: {0}</system:String>
+    <system:String x:Key="webDavSyncUrlRequired">WebDAV URL is required.</system:String>
+    <system:String x:Key="webDavSyncUrlInvalid">WebDAV URL must be an absolute HTTPS address.</system:String>
+    <system:String x:Key="webDavSyncNothingSelected">Select settings, plugins, or both before syncing.</system:String>
+    <system:String x:Key="webDavSyncRemoteMissing">No sync package was found on the WebDAV server.</system:String>
+    <system:String x:Key="webDavSyncCancelled">The WebDAV sync operation was cancelled.</system:String>
+    <system:String x:Key="webDavSyncProgress">WebDAV Sync</system:String>
 
     <!--  Setting About  -->
     <system:String x:Key="about">About</system:String>
