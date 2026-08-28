@@ -8,27 +8,47 @@ on:
   push:
     branches:
       - dev
+    tags:
+      - 'v*'
   pull_request:
     branches:
       - dev
+
+permissions:
+  contents: write
 
 jobs:
   build:
 
     runs-on: windows-latest
     env:
-      FlowVersion: 1.20.2
+      VersionPrefix: 2.1.3
       NUGET_CERT_REVOCATION_MODE: offline
-      BUILD_NUMBER: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v7
+      - name: Determine build version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            if ("${{ github.ref_name }}" -notmatch '^v(?<version>\d+\.\d+\.\d+)$') {
+              throw "Release tags must use the format vMAJOR.MINOR.PATCH."
+            }
+            $buildVersion = $Matches.version
+          }
+          else {
+            $buildVersion = "$env:VersionPrefix.${{ github.run_number }}"
+          }
+
+          "flow_version=$buildVersion" >> $env:GITHUB_OUTPUT
+          "flowVersion=$buildVersion" >> $env:GITHUB_ENV
       - name: Set Flow.Launcher.csproj version
         id: update
         uses: vers-one/dotnet-project-version-updater@v1.8
         with:
           file: |
             "**/SolutionAssemblyInfo.cs"
-          version: ${{ env.FlowVersion }}.${{ env.BUILD_NUMBER }}
+          version: ${{ steps.version.outputs.flow_version }}
       - name: Setup .NET
         uses: actions/setup-dotnet@v6
         with:
@@ -90,3 +110,16 @@ jobs:
           path: |
             Output\Packages\RELEASES
           compression-level: 0
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v3
+        with:
+          name: Flow Launcher ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: |
+            Output\Packages\Flow-Launcher-*.exe
+            Output\Packages\Flow-Launcher-Portable.zip
+            Output\Packages\FlowLauncher-*-full.nupkg
+            Output\Packages\RELEASES

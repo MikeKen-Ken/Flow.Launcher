@@ -136,7 +136,9 @@ namespace Flow.Launcher
 
         private static async Task<string> GetReleaseNotesMarkdownAsync()
         {
-            var releaseNotesJSON = await Http.GetStringAsync("https://api.github.com/repos/Flow-Launcher/Flow.Launcher/releases");
+            var repositoryUri = new Uri(Properties.Settings.Default.GithubRepo);
+            var releaseNotesApi = $"https://api.github.com/repos{repositoryUri.AbsolutePath}/releases";
+            var releaseNotesJSON = await Http.GetStringAsync(releaseNotesApi);
 
             if (string.IsNullOrEmpty(releaseNotesJSON))
             {
