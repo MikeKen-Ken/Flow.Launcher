@@ -26,12 +26,14 @@ using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.Plugin.SharedCommands;
 using Flow.Launcher.Storage;
-using History = Flow.Launcher.Storage.History;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.VisualStudio.Threading;
 
 namespace Flow.Launcher.ViewModel
 {
+    // File-level alias loses to the enclosing Flow.Launcher.History namespace (CS0118).
+    using History = global::Flow.Launcher.Storage.History;
+
     public partial class MainViewModel : BaseModel, ISavable, IDisposable, IResultUpdateRegister
     {
         #region Private Fields
