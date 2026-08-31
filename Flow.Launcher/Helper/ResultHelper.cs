@@ -41,6 +41,16 @@ public static class ResultHelper
         }
     }
 
+    public static void NavigateToHistoryQuery(LastOpenedHistoryResult item)
+    {
+        var plugin = PluginManager.GetPluginForId(item.PluginID);
+        var queryText = plugin == null
+            ? item.Query
+            : HistoryReplay.BuildQueryText(item, plugin.Metadata);
+        App.API.BackToQueryResults();
+        App.API.ChangeQuery(queryText);
+    }
+
     public static async Task<Result?> PopulateResultsAsync(string pluginId, string trimmedQuery, string title, string subTitle, string recordKey)
     {
         var plugin = PluginManager.GetPluginForId(pluginId);

@@ -1391,12 +1391,7 @@ namespace Flow.Launcher.ViewModel
                         if (item.Provenance != null
                             && item.Provenance.ReplayMode != HistoryReplayMode.Execute)
                         {
-                            var plugin = PluginManager.GetPluginForId(item.PluginID);
-                            var queryText = plugin == null
-                                ? item.Query
-                                : HistoryReplay.BuildQueryText(item, plugin.Metadata);
-                            App.API.BackToQueryResults();
-                            App.API.ChangeQuery(queryText);
+                            ResultHelper.NavigateToHistoryQuery(item);
                             return false;
                         }
 
@@ -1410,12 +1405,7 @@ namespace Flow.Launcher.ViewModel
                         }
 
                         // If we cannot get the result, fallback to re-query
-                        var plugin = PluginManager.GetPluginForId(item.PluginID);
-                        var queryText = plugin == null
-                            ? copiedItem.Query
-                            : HistoryReplay.BuildQueryText(item, plugin.Metadata);
-                        App.API.BackToQueryResults();
-                        App.API.ChangeQuery(queryText);
+                        ResultHelper.NavigateToHistoryQuery(item);
                         return false;
                     };
                 }
