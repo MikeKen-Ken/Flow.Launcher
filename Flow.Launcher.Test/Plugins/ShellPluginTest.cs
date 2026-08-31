@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.Plugin.Shell;
+using Moq;
 using NUnit.Framework;
 
 namespace Flow.Launcher.Test.Plugins
@@ -12,6 +13,14 @@ namespace Flow.Launcher.Test.Plugins
     public class ShellPluginTest
     {
         private const string ClosePrompt = "Press any key to close...";
+
+        [TearDown]
+        public void TearDown()
+        {
+            typeof(Main)
+                .GetProperty(nameof(Main.Context), BindingFlags.Static | BindingFlags.NonPublic)!
+                .SetValue(null, null);
+        }
 
         private static ProcessStartInfo Create(
             string command = "test",
@@ -433,10 +442,12 @@ namespace Flow.Launcher.Test.Plugins
         public void Query_AssignsCommandAsStableRecordKey()
         {
             const string command = "echo flow-history-record-key";
+            var api = new Mock<IPublicAPI>();
+            api.Setup(x => x.GetTranslation(It.IsAny<string>())).Returns((string key) => key);
+            api.Setup(x => x.LoadSettingJsonStorage<Settings>()).Returns(new Settings());
+
             var plugin = new Main();
-            typeof(Main)
-                .GetField("_settings", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .SetValue(plugin, new Settings());
+            plugin.Init(new PluginInitContext { API = api.Object });
 
             var result = plugin.Query(new Query { Search = command }).First(r => r.Title == command);
 
