@@ -18,6 +18,11 @@
     <SolidColorBrush x:Key="HotkeyForeground" Color="#51000000" />
     <SolidColorBrush x:Key="HotkeySelectedForeground" Color="#51000000" />
     <SolidColorBrush x:Key="ClockDateForeground" Color="#44000000" />
+    <SolidColorBrush x:Key="HistoryDestructiveBackground" Color="#FFF4CE" />
+    <SolidColorBrush x:Key="HistoryDestructiveForeground" Color="#7A3E00" />
+    <SolidColorBrush x:Key="HistoryExecuteBackground" Color="#E5F1FB" />
+    <SolidColorBrush x:Key="HistoryExecuteForeground" Color="#005A9E" />
+    <SolidColorBrush x:Key="HistoryCommandForeground" Color="#005A9E" />
     <Color x:Key="ItemSelectedBackgroundColorBrush">#7EFFFFFF</Color>
 
     <SolidColorBrush x:Key="BasicSystemAccentColor" Color="{m:DynamicColor SystemAccentColor}" />

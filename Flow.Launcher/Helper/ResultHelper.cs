@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Flow.Launcher.Core.Plugin;
+using Flow.Launcher.History;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.Storage;
 
@@ -13,7 +14,31 @@ public static class ResultHelper
 {
     public static async Task<Result?> PopulateResultsAsync(LastOpenedHistoryResult item)
     {
-        return await PopulateResultsAsync(item.PluginID, item.Query, item.Title, item.SubTitle, item.RecordKey);
+        var plugin = PluginManager.GetPluginForId(item.PluginID);
+        if (plugin == null) return null;
+
+        var query = HistoryReplay.BuildQuery(item, plugin.Metadata)
+            ?? QueryBuilder.Build(item.Query, item.Query, PluginManager.GetNonGlobalPlugins());
+        if (query == null) return null;
+
+        try
+        {
+            var freshResults = await PluginManager.QueryForPluginAsync(plugin, query, CancellationToken.None);
+            var semanticMatches = freshResults?.Where(r => HistoryReplay.IsSemanticMatch(item, r));
+
+            if (string.IsNullOrEmpty(item.RecordKey))
+            {
+                return semanticMatches?.FirstOrDefault(r => r.Title == item.Title && r.SubTitle == item.SubTitle);
+            }
+
+            return semanticMatches?.FirstOrDefault(r => r.RecordKey == item.RecordKey)
+                ?? semanticMatches?.FirstOrDefault(r => r.Title == item.Title && r.SubTitle == item.SubTitle);
+        }
+        catch (System.Exception e)
+        {
+            App.API.LogException(nameof(ResultHelper), $"Failed to query results for {plugin.Metadata.Name}", e);
+            return null;
+        }
     }
 
     public static async Task<Result?> PopulateResultsAsync(string pluginId, string trimmedQuery, string title, string subTitle, string recordKey)

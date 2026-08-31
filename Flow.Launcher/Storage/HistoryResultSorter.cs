@@ -31,7 +31,14 @@ public static class HistoryResultSorter
         if (historyStyle == HistoryStyle.LastOpened)
         {
             historyItems = historyItems
-                .GroupBy(r => new { r.Title, r.SubTitle, r.PluginID, r.RecordKey })
+                .GroupBy(r => new
+                {
+                    r.Title,
+                    r.SubTitle,
+                    r.PluginID,
+                    r.RecordKey,
+                    ActionId = r.Provenance?.ActionId ?? string.Empty
+                })
                 .Select(g => g.MaxBy(x => x.ExecutedDateTime)!);
         }
 

@@ -303,6 +303,13 @@ namespace Flow.Launcher.Plugin
         public bool AddSelectedCount { get; set; } = true;
 
         /// <summary>
+        /// Optional semantic information used to identify, present, and safely replay this result in history.
+        /// Flow Launcher captures plugin identity and query provenance separately.
+        /// </summary>
+        [JsonIgnore]
+        public HistoryActionDescriptor HistoryAction { get; set; }
+
+        /// <summary>
         /// The key to identify the record. This is used when FL checks whether the result is the topmost record. Or FL calculates the hashcode of the result for user selected records.
         /// This can be useful when your plugin will change the Title or SubTitle of the result dynamically.
         /// If the plugin does not specific this, FL just uses Title and SubTitle to identify this result.
@@ -377,6 +384,7 @@ namespace Flow.Launcher.Plugin
                 Preview = Preview is null ? null : Preview with { },
                 PreviewVisibility = PreviewVisibility,
                 AddSelectedCount = AddSelectedCount,
+                HistoryAction = HistoryAction,
                 RecordKey = RecordKey,
                 ShowBadge = ShowBadge,
                 QuerySuggestionText = QuerySuggestionText

@@ -5,9 +5,11 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using Flow.Launcher.History;
 using Flow.Launcher.Infrastructure.Image;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
+using Flow.Launcher.Storage;
 
 namespace Flow.Launcher.ViewModel
 {
@@ -18,6 +20,8 @@ namespace Flow.Launcher.ViewModel
         private static readonly PrivateFontCollection FontCollection = new();
         private static readonly Dictionary<string, string> Fonts = new();
 
+        private readonly HistoryPresentation _historyPresentation;
+
         public ResultViewModel(Result result, Settings settings)
         {
             Settings = settings;
@@ -25,6 +29,11 @@ namespace Flow.Launcher.ViewModel
             if (result == null) return;
 
             Result = result;
+
+            if (result is LastOpenedHistoryResult historyResult)
+            {
+                _historyPresentation = HistoryPresentation.From(historyResult);
+            }
 
             if (Result.Glyph is { FontFamily: not null } glyph)
             {
@@ -154,6 +163,34 @@ namespace Flow.Launcher.ViewModel
         public string ShowSubTitleToolTip => string.IsNullOrEmpty(Result.SubTitleToolTip)
             ? Result.SubTitle
             : Result.SubTitleToolTip;
+
+        public Visibility ShowDefaultSubTitle => _historyPresentation == null
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+
+        public Visibility ShowHistoryPresentation => _historyPresentation == null
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        public Visibility ShowHistoryPluginName => string.IsNullOrEmpty(_historyPresentation?.PluginName)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        public Visibility ShowHistoryAction => string.IsNullOrEmpty(_historyPresentation?.ActionLabel)
+            ? Visibility.Collapsed
+            : Visibility.Visible;
+
+        public string HistoryPluginName => _historyPresentation?.PluginName ?? string.Empty;
+
+        public string HistoryActionLabel => _historyPresentation?.ActionLabel ?? string.Empty;
+
+        public HistoryActionKind HistoryActionKind => _historyPresentation?.ActionKind ?? HistoryActionKind.Unknown;
+
+        public string HistoryCommand => _historyPresentation?.Command ?? string.Empty;
+
+        public string HistoryExecutedTime => _historyPresentation?.ExecutedTime ?? string.Empty;
+
+        public string HistoryExecutedTimeToolTip => _historyPresentation?.ExecutedTimeToolTip ?? string.Empty;
 
         private volatile bool _imageLoaded;
         private volatile bool _badgeImageLoaded;

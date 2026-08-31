@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using Flow.Launcher.Core.Plugin;
+using Flow.Launcher.History;
 using Flow.Launcher.Plugin;
 
 namespace Flow.Launcher.Storage
@@ -61,6 +62,8 @@ namespace Flow.Launcher.Storage
             // containing datetime string.
             if (string.IsNullOrEmpty(result.PluginID)) return;
 
+            var pluginMetadata = PluginManager.GetPluginForId(result.PluginID)?.Metadata;
+
             // Maintain the max history limit
             if (LastOpenedHistoryItems.Count > _maxHistory)
             {
@@ -72,6 +75,7 @@ namespace Flow.Launcher.Storage
                 TryGetLastOpenedHistoryResult(result, out var existingHistoryItem))
             {
                 existingHistoryItem.ExecutedDateTime = DateTime.Now;
+                existingHistoryItem.Provenance = HistoryProvenance.Capture(result, pluginMetadata);
 
                 if (existingHistoryItem.IcoPath != result.IcoPath)
                     existingHistoryItem.IcoPath = result.IcoPath;
@@ -82,7 +86,7 @@ namespace Flow.Launcher.Storage
             }
             else
             {
-                LastOpenedHistoryItems.Add(new LastOpenedHistoryResult(result));
+                LastOpenedHistoryItems.Add(new LastOpenedHistoryResult(result, pluginMetadata));
             }
         }
 
@@ -114,6 +118,12 @@ namespace Flow.Launcher.Storage
                 if (pluginPair == null) continue;
 
                 item.PluginDirectory = pluginPair.Metadata.PluginDirectory;
+                item.Provenance ??= HistoryProvenance.FromLegacy(item.Query, pluginPair.Metadata);
+                if (string.IsNullOrEmpty(item.Provenance.PluginName))
+                {
+                    item.Provenance.PluginName = pluginPair.Metadata.Name;
+                }
+                item.Provenance.PluginIconPath = pluginPair.Metadata.IcoPath;
             }
         }
     }

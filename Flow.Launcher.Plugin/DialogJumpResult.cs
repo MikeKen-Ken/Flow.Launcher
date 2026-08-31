@@ -44,6 +44,7 @@
                 ProgressBarColor = ProgressBarColor,
                 Preview = Preview,
                 AddSelectedCount = AddSelectedCount,
+                HistoryAction = HistoryAction,
                 RecordKey = RecordKey,
                 ShowBadge = ShowBadge,
                 DialogJumpPath = DialogJumpPath
@@ -83,6 +84,7 @@
                 ProgressBarColor = result.ProgressBarColor,
                 Preview = result.Preview,
                 AddSelectedCount = result.AddSelectedCount,
+                HistoryAction = result.HistoryAction,
                 RecordKey = result.RecordKey,
                 ShowBadge = result.ShowBadge,
                 DialogJumpPath = dialogJumpPath

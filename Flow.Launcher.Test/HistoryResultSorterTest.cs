@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using Flow.Launcher.Infrastructure.UserSettings;
+using Flow.Launcher.History;
+using Flow.Launcher.Plugin;
 using Flow.Launcher.Storage;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -120,6 +122,20 @@ namespace Flow.Launcher.Test
         }
 
         [Test]
+        public void Prepare_LastOpenedStyle_KeepsDifferentSemanticActions()
+        {
+            var items = new[]
+            {
+                Item("Notes", new DateTime(2024, 1, 1), actionId: "process.kill-one"),
+                Item("Notes", new DateTime(2024, 2, 1), actionId: "process.kill-all")
+            };
+
+            var result = HistoryResultSorter.Prepare(items, HistoryStyle.LastOpened, HistorySortOrder.NewestFirst).ToList();
+
+            ClassicAssert.AreEqual(2, result.Count);
+        }
+
+        [Test]
         public void AssignDisplayRanking_LocksPreparedOrderAgainstSelectionCount()
         {
             var items = new[]
@@ -143,7 +159,8 @@ namespace Flow.Launcher.Test
             DateTime executed,
             string subtitle = "",
             string pluginId = "plugin",
-            string recordKey = "key")
+            string recordKey = "key",
+            string actionId = "")
         {
             return new LastOpenedHistoryResult
             {
@@ -151,6 +168,13 @@ namespace Flow.Launcher.Test
                 SubTitle = subtitle,
                 PluginID = pluginId,
                 RecordKey = recordKey,
+                Provenance = string.IsNullOrEmpty(actionId)
+                    ? null
+                    : new HistoryProvenance
+                    {
+                        ActionId = actionId,
+                        ActionKind = HistoryActionKind.Destructive
+                    },
                 ExecutedDateTime = executed
             };
         }

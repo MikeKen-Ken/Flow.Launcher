@@ -173,6 +173,13 @@ namespace Flow.Launcher.Plugin.ProcessKiller
                     Score = pr.Score,
                     ContextData = p.ProcessName,
                     AutoCompleteText = $"{Context.CurrentPluginMetadata.ActionKeyword}{Plugin.Query.TermSeparator}{p.ProcessName}",
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "process.kill-one",
+                        Label = Localize.flowlauncher_plugin_processkiller_kill_process(),
+                        Kind = HistoryActionKind.Destructive,
+                        ReplayMode = HistoryReplayMode.ShowQuery
+                    },
                     Action = (c) =>
                     {
                         ProcessHelper.TryKill(p);
@@ -197,6 +204,13 @@ namespace Flow.Launcher.Plugin.ProcessKiller
                     Title = Localize.flowlauncher_plugin_processkiller_kill_all(firstResult?.ContextData),
                     SubTitle = Localize.flowlauncher_plugin_processkiller_kill_all_count(processlist.Count),
                     Score = 200,
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "process.kill-all",
+                        Label = Localize.flowlauncher_plugin_processkiller_kill_instances(),
+                        Kind = HistoryActionKind.Destructive,
+                        ReplayMode = HistoryReplayMode.ShowQuery
+                    },
                     Action = (c) =>
                     {
                         foreach (var p in processlist)

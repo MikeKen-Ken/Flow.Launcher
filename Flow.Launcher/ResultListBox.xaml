@@ -5,6 +5,7 @@
     xmlns:converter="clr-namespace:Flow.Launcher.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:plugin="clr-namespace:Flow.Launcher.Plugin;assembly=Flow.Launcher.Plugin"
     xmlns:vm="clr-namespace:Flow.Launcher.ViewModel"
     MaxHeight="{Binding MaxHeight}"
     HorizontalContentAlignment="Stretch"
@@ -38,6 +39,29 @@
         <converter:IconRadiusConverter x:Key="IconRadiusConverter" />
         <converter:DiameterToCenterPointConverter x:Key="DiameterToCenterPointConverter" />
         <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <Style x:Key="HistoryActionChipStyle" TargetType="Border">
+            <Setter Property="Margin" Value="7 0 7 0" />
+            <Setter Property="MaxWidth" Value="160" />
+            <Setter Property="Padding" Value="5 1 5 1" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{DynamicResource HistoryExecuteBackground}" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HistoryActionKind}" Value="{x:Static plugin:HistoryActionKind.Destructive}">
+                    <Setter Property="Background" Value="{DynamicResource HistoryDestructiveBackground}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="HistoryActionTextStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource HistoryExecuteForeground}" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding HistoryActionKind}" Value="{x:Static plugin:HistoryActionKind.Destructive}">
+                    <Setter Property="Foreground" Value="{DynamicResource HistoryDestructiveForeground}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </ListBox.Resources>
     <ListBox.ItemTemplate>
         <DataTemplate>
@@ -206,7 +230,56 @@
                                 Text="{Binding Result.SubTitle}"
                                 TextTrimming="CharacterEllipsis"
                                 ToolTip="{Binding ShowSubTitleToolTip}"
-                                ToolTipService.ShowOnDisabled="True" />
+                                ToolTipService.ShowOnDisabled="True"
+                                Visibility="{Binding ShowDefaultSubTitle}" />
+                            <Grid
+                                Grid.Row="1"
+                                Visibility="{Binding ShowHistoryPresentation}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Column="0"
+                                    MaxWidth="125"
+                                    VerticalAlignment="Center"
+                                    FontSize="{Binding Settings.ResultSubItemFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{DynamicResource ItemSubTitleStyle}"
+                                    Text="{Binding HistoryPluginName}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip="{Binding HistoryPluginName}"
+                                    Visibility="{Binding ShowHistoryPluginName}" />
+                                <Border
+                                    Grid.Column="1"
+                                    Style="{StaticResource HistoryActionChipStyle}"
+                                    Visibility="{Binding ShowHistoryAction}">
+                                    <TextBlock
+                                        FontSize="{Binding Settings.ResultSubItemFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        Style="{StaticResource HistoryActionTextStyle}"
+                                        Text="{Binding HistoryActionLabel}"
+                                        ToolTip="{Binding HistoryActionLabel}" />
+                                </Border>
+                                <TextBlock
+                                    Grid.Column="2"
+                                    MinWidth="20"
+                                    VerticalAlignment="Center"
+                                    FontFamily="Consolas"
+                                    FontSize="{Binding Settings.ResultSubItemFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Foreground="{DynamicResource HistoryCommandForeground}"
+                                    Text="{Binding HistoryCommand}"
+                                    TextTrimming="CharacterEllipsis"
+                                    ToolTip="{Binding HistoryCommand}" />
+                                <TextBlock
+                                    Grid.Column="3"
+                                    Margin="8 0 0 0"
+                                    VerticalAlignment="Center"
+                                    FontSize="{Binding Settings.ResultSubItemFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    Style="{DynamicResource ItemSubTitleStyle}"
+                                    Text="{Binding HistoryExecutedTime}"
+                                    ToolTip="{Binding HistoryExecutedTimeToolTip}" />
+                            </Grid>
                         </Grid>
 
                     </Grid>

@@ -73,6 +73,8 @@ namespace Flow.Launcher.Plugin.Shell
                         {
                             Title = m,
                             IcoPath = Image,
+                            RecordKey = m,
+                            HistoryAction = CreateHistoryAction(),
                             Action = c =>
                             {
                                 var runAsAdministrator =
@@ -113,6 +115,8 @@ namespace Flow.Launcher.Plugin.Shell
                         Title = m.Key,
                         SubTitle = Localize.flowlauncher_plugin_cmd_cmd_has_been_executed_times(m.Value),
                         IcoPath = Image,
+                        RecordKey = m.Key,
+                        HistoryAction = CreateHistoryAction(),
                         Action = c =>
                         {
                             var runAsAdministrator =
@@ -143,6 +147,8 @@ namespace Flow.Launcher.Plugin.Shell
                 Score = 5000,
                 SubTitle = Localize.flowlauncher_plugin_cmd_execute_through_shell(),
                 IcoPath = Image,
+                RecordKey = cmd,
+                HistoryAction = CreateHistoryAction(),
                 Action = c =>
                 {
                     var runAsAdministrator =
@@ -168,6 +174,8 @@ namespace Flow.Launcher.Plugin.Shell
                     Title = m.Key,
                     SubTitle = Localize.flowlauncher_plugin_cmd_cmd_has_been_executed_times(m.Value),
                     IcoPath = Image,
+                    RecordKey = m.Key,
+                    HistoryAction = CreateHistoryAction(),
                     Action = c =>
                     {
                         var runAsAdministrator =
@@ -186,6 +194,16 @@ namespace Flow.Launcher.Plugin.Shell
                 return [.. history.Take(_settings.ShowOnlyMostUsedCMDsNumber)];
 
             return [.. history];
+        }
+
+        private static HistoryActionDescriptor CreateHistoryAction()
+        {
+            return new HistoryActionDescriptor
+            {
+                Id = "shell.execute",
+                Label = Localize.flowlauncher_plugin_cmd_execute_through_shell(),
+                Kind = HistoryActionKind.Execute
+            };
         }
 
         private ProcessStartInfo PrepareProcessStartInfo(string command, bool runAsAdministrator = false)

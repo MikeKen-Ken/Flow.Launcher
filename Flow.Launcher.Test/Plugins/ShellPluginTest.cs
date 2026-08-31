@@ -1,6 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.Plugin.Shell;
 using NUnit.Framework;
@@ -427,6 +428,20 @@ namespace Flow.Launcher.Test.Plugins
         #endregion
 
         #region Common
+
+        [Test]
+        public void Query_AssignsCommandAsStableRecordKey()
+        {
+            const string command = "echo flow-history-record-key";
+            var plugin = new Main();
+            typeof(Main)
+                .GetField("_settings", BindingFlags.Instance | BindingFlags.NonPublic)!
+                .SetValue(plugin, new Settings());
+
+            var result = plugin.Query(new Query { Search = command }).First(r => r.Title == command);
+
+            Assert.That(result.RecordKey, Is.EqualTo(command));
+        }
 
         [TestCase(false, "")]
         [TestCase(true, "runas")]

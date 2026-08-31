@@ -17,6 +17,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using Flow.Launcher.Core.Plugin;
 using Flow.Launcher.Helper;
+using Flow.Launcher.History;
 using Flow.Launcher.Infrastructure;
 using Flow.Launcher.Infrastructure.DialogJump;
 using Flow.Launcher.Infrastructure.Hotkey;
@@ -1383,6 +1384,19 @@ namespace Flow.Launcher.ViewModel
                 {
                     copiedItem.AsyncAction = async c =>
                     {
+                        // Unknown future replay modes take the safer confirmation path.
+                        if (item.Provenance != null
+                            && item.Provenance.ReplayMode != HistoryReplayMode.Execute)
+                        {
+                            var plugin = PluginManager.GetPluginForId(item.PluginID);
+                            var queryText = plugin == null
+                                ? item.Query
+                                : HistoryReplay.BuildQueryText(item, plugin.Metadata);
+                            App.API.BackToQueryResults();
+                            App.API.ChangeQuery(queryText);
+                            return false;
+                        }
+
                         // Use original history item to reflect correct result because properties like subtitle have been modified in copiedItem
                         var reflectResult = await ResultHelper.PopulateResultsAsync(item);
                         if (reflectResult != null)
@@ -1393,8 +1407,12 @@ namespace Flow.Launcher.ViewModel
                         }
 
                         // If we cannot get the result, fallback to re-query
+                        var plugin = PluginManager.GetPluginForId(item.PluginID);
+                        var queryText = plugin == null
+                            ? copiedItem.Query
+                            : HistoryReplay.BuildQueryText(item, plugin.Metadata);
                         App.API.BackToQueryResults();
-                        App.API.ChangeQuery(copiedItem.Query);
+                        App.API.ChangeQuery(queryText);
                         return false;
                     };
                 }

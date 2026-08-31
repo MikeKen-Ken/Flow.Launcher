@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Json.Serialization;
+using Flow.Launcher.History;
 using Flow.Launcher.Infrastructure;
 using Flow.Launcher.Plugin;
 
@@ -22,6 +24,17 @@ public class LastOpenedHistoryResult : Result
     public DateTime ExecutedDateTime { get; set; }
 
     /// <summary>
+    /// Captured plugin and action information used for display and keyword-independent replay.
+    /// </summary>
+    public HistoryProvenance Provenance { get; set; }
+
+    /// <summary>
+    /// Indicates that this temporary copy should use the recent-action presentation.
+    /// </summary>
+    [JsonIgnore]
+    public bool UseProvenancePresentation { get; set; }
+
+    /// <summary>
     /// Initializes a new instance of <see cref="LastOpenedHistoryResult"/>.
     /// </summary>
     public LastOpenedHistoryResult()
@@ -34,6 +47,14 @@ public class LastOpenedHistoryResult : Result
     /// </summary>
     /// <param name="result">The original result to create history from.</param>
     public LastOpenedHistoryResult(Result result)
+        : this(result, null)
+    {
+    }
+
+    /// <summary>
+    /// Creates a history result and captures host-owned plugin metadata.
+    /// </summary>
+    public LastOpenedHistoryResult(Result result, PluginMetadata pluginMetadata)
     {
         Title = result.Title;
         SubTitle = result.SubTitle;
@@ -44,6 +65,7 @@ public class LastOpenedHistoryResult : Result
         IcoPath = result.IcoPath;
         PluginDirectory = result.PluginDirectory;
         Glyph = result.Glyph;
+        Provenance = HistoryProvenance.Capture(result, pluginMetadata);
         ExecutedDateTime = DateTime.Now;
         // Used for Query History style reopening
         Action = _ =>
@@ -82,7 +104,9 @@ public class LastOpenedHistoryResult : Result
                         ? new GlyphInfo(glyphValue.FontFamily, glyphValue.Glyph)
                         : null;
             showBadge = true;
-            badgeIcoPath = Constant.HistoryIcon;
+            badgeIcoPath = string.IsNullOrEmpty(Provenance?.PluginIconPath)
+                ? Constant.HistoryIcon
+                : Provenance.PluginIconPath;
         }
         else
         {
@@ -100,7 +124,15 @@ public class LastOpenedHistoryResult : Result
             // Empty PluginID so the source of last opened history results won't be updated, this copy is meant to be temporary.
             PluginID = string.Empty,
             Query = Query,
-            OriginQuery = new Query { TrimmedQuery = Query },
+            OriginQuery = new Query
+            {
+                TrimmedQuery = Query,
+                OriginalQuery = Query,
+                ActionKeyword = Provenance?.ActionKeyword ?? string.Empty,
+                Search = Provenance?.SearchText ?? Query,
+                SearchTerms = (Provenance?.SearchText ?? Query)
+                    .Split(Flow.Launcher.Plugin.Query.TermSeparator, StringSplitOptions.RemoveEmptyEntries)
+            },
             RecordKey = RecordKey,
             IcoPath = icoPath,
             ShowBadge = showBadge,
@@ -116,6 +148,12 @@ public class LastOpenedHistoryResult : Result
             // Used for Last Opened History style reopening, currently need to be assigned at MainViewModel.cs
             AsyncAction = null,
             Glyph = glyph,
+            Provenance = Provenance?.DeepCopy() ?? new HistoryProvenance
+            {
+                PluginName = PluginID,
+                SearchText = Query
+            },
+            UseProvenancePresentation = isHistoryStyleLastOpened,
             ExecutedDateTime = ExecutedDateTime,
             // Keep the prepared history order instead of boosting by how often the original result was selected.
             AddSelectedCount = false
@@ -131,6 +169,13 @@ public class LastOpenedHistoryResult : Result
     /// <returns><c>true</c> if the results are considered equal; otherwise <c>false</c>.</returns>
     public bool Equals(Result r)
     {
+        var actionId = r.HistoryAction?.Id ?? string.Empty;
+        if (!string.IsNullOrEmpty(Provenance?.ActionId)
+            && !string.Equals(Provenance.ActionId, actionId, StringComparison.Ordinal))
+        {
+            return false;
+        }
+
         if (string.IsNullOrEmpty(RecordKey) || string.IsNullOrEmpty(r.RecordKey))
         {
             return Title == r.Title
