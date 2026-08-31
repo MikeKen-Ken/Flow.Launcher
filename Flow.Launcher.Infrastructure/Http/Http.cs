@@ -18,6 +18,13 @@ namespace Flow.Launcher.Infrastructure.Http
 
         private static readonly HttpClient client = new();
 
+        /// <summary>
+        /// Captured before any in-app proxy override. An empty <see cref="WebProxy"/>
+        /// bypasses the OS proxy, which breaks GitHub/S3 downloads for users who only
+        /// configure a system proxy.
+        /// </summary>
+        private static readonly IWebProxy SystemProxy = HttpClient.DefaultProxy;
+
         static Http()
         {
             // need to be added so it would work on a win10 machine
@@ -26,7 +33,6 @@ namespace Flow.Launcher.Infrastructure.Http
                 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             client.DefaultRequestHeaders.Add("User-Agent", UserAgent);
-            HttpClient.DefaultProxy = WebProxy;
         }
 
         private static HttpProxy proxy;
@@ -49,23 +55,24 @@ namespace Flow.Launcher.Infrastructure.Http
         /// </summary>
         public static void UpdateProxy(ProxyProperty property)
         {
-            if (string.IsNullOrEmpty(Proxy.Server))
-                return;
-
             try
             {
+                if (string.IsNullOrEmpty(Proxy.Server) || (property == ProxyProperty.Enabled && !Proxy.Enabled))
+                {
+                    WebProxy.Address = null;
+                    WebProxy.Credentials = null;
+                    ApplyActiveProxy();
+                    return;
+                }
+
                 (WebProxy.Address, WebProxy.Credentials) = property switch
                 {
-                    ProxyProperty.Enabled => Proxy.Enabled switch
+                    ProxyProperty.Enabled => Proxy.UserName switch
                     {
-                        true when !string.IsNullOrEmpty(Proxy.Server) => Proxy.UserName switch
-                        {
-                            var userName when string.IsNullOrEmpty(userName) =>
-                                (new Uri($"http://{Proxy.Server}:{Proxy.Port}"), null),
-                            _ => (new Uri($"http://{Proxy.Server}:{Proxy.Port}"),
-                                new NetworkCredential(Proxy.UserName, Proxy.Password))
-                        },
-                        _ => (null, null)
+                        var userName when string.IsNullOrEmpty(userName) =>
+                            (new Uri($"http://{Proxy.Server}:{Proxy.Port}"), null),
+                        _ => (new Uri($"http://{Proxy.Server}:{Proxy.Port}"),
+                            new NetworkCredential(Proxy.UserName, Proxy.Password))
                     },
                     ProxyProperty.Server => (new Uri($"http://{Proxy.Server}:{Proxy.Port}"), WebProxy.Credentials),
                     ProxyProperty.Port => (new Uri($"http://{Proxy.Server}:{Proxy.Port}"), WebProxy.Credentials),
@@ -73,12 +80,24 @@ namespace Flow.Launcher.Infrastructure.Http
                     ProxyProperty.Password => (WebProxy.Address, new NetworkCredential(Proxy.UserName, Proxy.Password)),
                     _ => throw new ArgumentOutOfRangeException(null)
                 };
+
+                ApplyActiveProxy();
             }
             catch (UriFormatException e)
             {
                 PublicApi.Instance.ShowMsgError(Localize.pleaseTryAgain(), Localize.parseProxyFailed());
                 Log.Exception(ClassName, "Unable to parse Uri", e);
             }
+        }
+
+        private static IWebProxy ActiveProxy =>
+            Proxy is { Enabled: true } && !string.IsNullOrEmpty(Proxy.Server) && WebProxy.Address != null
+                ? WebProxy
+                : SystemProxy;
+
+        private static void ApplyActiveProxy()
+        {
+            HttpClient.DefaultProxy = ActiveProxy ?? SystemProxy ?? WebRequest.GetSystemWebProxy();
         }
 
         public static async Task DownloadAsync([NotNull] string url, [NotNull] string filePath, Action<double> reportProgress = null, CancellationToken token = default)

@@ -199,7 +199,7 @@ namespace Flow.Launcher.Core
                 e.InnerException is TimeoutException)
             {
                 _api.LogException(ClassName,
-                    $"Check your connection and proxy settings to github-cloud.s3.amazonaws.com.", e);
+                    "Check your connection and proxy settings for GitHub releases (api.github.com, github.com, release-assets.githubusercontent.com).", e);
             }
             else
             {
@@ -252,10 +252,7 @@ namespace Flow.Launcher.Core
 
             var latestUrl = latest.HtmlUrl.Replace("/tag/", "/download/");
 
-            var client = new WebClient { Proxy = Http.WebProxy };
-            var downloader = new FileDownloader(client);
-
-            var manager = new UpdateManager(latestUrl, urlDownloader: downloader);
+            var manager = new UpdateManager(latestUrl, urlDownloader: new HttpFileDownloader());
 
             return manager;
         }
