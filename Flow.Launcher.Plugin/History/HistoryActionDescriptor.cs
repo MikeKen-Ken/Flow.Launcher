@@ -28,13 +28,30 @@ public sealed record HistoryActionDescriptor
 }
 
 /// <summary>
-/// The semantic kind of an action shown in history.
+/// Presentation kind for an action shown in history. Does not control replay;
+/// use <see cref="HistoryReplayMode"/> for that.
 /// </summary>
 public enum HistoryActionKind
 {
+    /// <summary>
+    /// The action kind is unspecified or could not be determined.
+    /// </summary>
     Unknown,
+
+    /// <summary>
+    /// Style as opening a file, folder, URL, or similar resource.
+    /// </summary>
     Open,
+
+    /// <summary>
+    /// Style as a command or other non-destructive action.
+    /// </summary>
     Execute,
+
+    /// <summary>
+    /// Style as a destructive action such as delete or kill.
+    /// Does not prevent immediate replay; set <see cref="HistoryReplayMode.ShowQuery"/> to confirm first.
+    /// </summary>
     Destructive
 }
 
@@ -43,6 +60,13 @@ public enum HistoryActionKind
 /// </summary>
 public enum HistoryReplayMode
 {
+    /// <summary>
+    /// Re-runs the saved action immediately.
+    /// </summary>
     Execute,
+
+    /// <summary>
+    /// Restores the original query so the user can confirm before executing.
+    /// </summary>
     ShowQuery
 }

@@ -236,21 +236,28 @@ namespace Flow.Launcher.Helper
 
         private static void AllowPipeServerToSetForegroundWindow(SafePipeHandle pipeHandle)
         {
-            if (GetNamedPipeServerProcessId(pipeHandle, out var serverProcessId)
+            if (SingleInstanceNativeMethods.GetNamedPipeServerProcessId(pipeHandle, out var serverProcessId)
                 && serverProcessId <= int.MaxValue)
             {
-                _ = AllowSetForegroundWindow((int)serverProcessId);
+                _ = SingleInstanceNativeMethods.AllowSetForegroundWindow((int)serverProcessId);
             }
         }
 
+        #endregion
+    }
+
+    /// <summary>
+    /// Native APIs used by <see cref="SingleInstance{TApplication}"/>.
+    /// Isolated because DllImport cannot be applied inside a generic type.
+    /// </summary>
+    internal static class SingleInstanceNativeMethods
+    {
         [DllImport("user32.dll")]
-        private static extern bool AllowSetForegroundWindow(int dwProcessId);
+        internal static extern bool AllowSetForegroundWindow(int dwProcessId);
 
         [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool GetNamedPipeServerProcessId(
+        internal static extern bool GetNamedPipeServerProcessId(
             SafePipeHandle pipe,
             out uint serverProcessId);
-
-        #endregion
     }
 }
