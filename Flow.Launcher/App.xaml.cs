@@ -22,6 +22,7 @@ using Flow.Launcher.Infrastructure.Storage;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.SettingPages.ViewModels;
+using Flow.Launcher.ShellFolderSearch;
 using Flow.Launcher.ViewModel;
 using iNKORE.UI.WPF.Modern.Common;
 using Microsoft.Extensions.DependencyInjection;
@@ -130,6 +131,13 @@ namespace Flow.Launcher
         [STAThread]
         public static void Main()
         {
+            if (ShellFolderSearchMenu.HandleLifecycleCommand(Environment.GetCommandLineArgs(), out var cleanupError))
+            {
+                if (cleanupError != null)
+                    Log.Error(nameof(App), $"Failed to remove Windows Explorer folder search menu during uninstall: {cleanupError}");
+                return;
+            }
+
             try
             {
                 ImportExportPendingApply.ApplyIfNeeded();
@@ -224,6 +232,8 @@ namespace Flow.Launcher
                 RegisterDispatcherUnhandledException();
                 RegisterTaskSchedulerUnhandledException();
 
+                FolderSearchInvoker.CaptureFromCommandLine(Environment.GetCommandLineArgs());
+
                 var imageLoaderTask = ImageLoader.InitializeAsync();
 
                 Http.Proxy = _settings.Proxy;
@@ -237,6 +247,9 @@ namespace Flow.Launcher
 
                 Current.MainWindow = _mainWindow;
                 Current.MainWindow.Title = Constant.FlowLauncher;
+
+                if (FolderSearchInvoker.HasPending)
+                    API.ShowMainWindow();
 
                 // Initialize Dialog Jump before hotkey mapper since hotkey mapper will register its hotkey
                 // Initialize Dialog Jump after main window is created so that it can access main window handle
@@ -256,6 +269,7 @@ namespace Flow.Launcher
 
                 AutoStartup();
                 AutoUpdates();
+                SyncExplorerFolderContextMenu();
 
                 API.SaveAppAllSettings();
                 API.LogInfo(ClassName, "End Flow Launcher startup ------------------------------------------------------");
@@ -281,6 +295,8 @@ namespace Flow.Launcher
                     }
 
                     AutoPluginUpdates();
+
+                    FolderSearchInvoker.NotifyPluginsReady();
 
                     // Save all settings since we possibly update the plugin environment paths
                     API.SaveAppAllSettings();
@@ -313,6 +329,28 @@ namespace Flow.Launcher
                     _settings.StartFlowLauncherOnSystemStartup = false;
                     API.ShowMsgError(Localize.setAutoStartFailed(), e.Message);
                 }
+            }
+        }
+
+        private static void SyncExplorerFolderContextMenu()
+        {
+            if (!ShellFolderSearchMenu.IsSupported)
+            {
+                _settings.EnableExplorerFolderContextMenu = false;
+                return;
+            }
+
+            try
+            {
+                ShellFolderSearchMenu.Sync(
+                    _settings.EnableExplorerFolderContextMenu,
+                    Localize.searchWithFlowLauncher());
+            }
+            catch (Exception e)
+            {
+                _settings.EnableExplorerFolderContextMenu = false;
+                API.LogException(ClassName, "Failed to update Windows Explorer folder search menu", e);
+                API.ShowMsgError(Localize.explorerFolderContextMenuFailed(), e.Message);
             }
         }
 
@@ -482,8 +520,14 @@ namespace Flow.Launcher
 
         #region ISingleInstanceApp
 
-        public void OnSecondAppStarted()
+        public void OnSecondAppStarted(string[] args)
         {
+            if (FolderSearchCommand.TryGetFolder(args, out var folderPath))
+            {
+                FolderSearchInvoker.Request(folderPath);
+                return;
+            }
+
             API.ShowMainWindow();
         }
 

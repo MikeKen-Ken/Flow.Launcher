@@ -375,6 +375,21 @@
                 </ui:SettingsExpander.Items>
             </ui:SettingsExpander>
 
+            <ui:SettingsCard
+                Margin="0 4 0 0"
+                Description="{DynamicResource explorerFolderContextMenuToolTip}"
+                Header="{DynamicResource explorerFolderContextMenu}"
+                Visibility="{Binding CanEnableExplorerFolderContextMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                <ui:SettingsCard.HeaderIcon>
+                    <ui:FontIcon Glyph="&#xE721;" />
+                </ui:SettingsCard.HeaderIcon>
+
+                <ui:ToggleSwitch
+                    IsOn="{Binding EnableExplorerFolderContextMenu}"
+                    OffContent="{DynamicResource disable}"
+                    OnContent="{DynamicResource enable}" />
+            </ui:SettingsCard>
+
             <ui:SettingsExpander
                 Margin="0 14 0 0"
                 Description="{DynamicResource searchDelayToolTip}"

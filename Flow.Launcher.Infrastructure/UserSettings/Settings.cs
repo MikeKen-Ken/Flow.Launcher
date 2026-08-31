@@ -375,6 +375,12 @@ namespace Flow.Launcher.Infrastructure.UserSettings
 
         public bool AutoDialogJump { get; set; } = false;
 
+        /// <summary>
+        /// When enabled, Windows Explorer shows a context menu item that opens Flow Launcher
+        /// scoped to the selected folder.
+        /// </summary>
+        public bool EnableExplorerFolderContextMenu { get; set; } = false;
+
         public bool ShowDialogJumpWindow { get; set; } = false;
 
         [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -12,6 +12,7 @@ using Flow.Launcher.Infrastructure.DialogJump;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.Plugin.SharedModels;
+using Flow.Launcher.ShellFolderSearch;
 
 namespace Flow.Launcher.SettingPages.ViewModels;
 
@@ -171,6 +172,35 @@ public partial class SettingsPaneGeneralViewModel : BaseModel
             }
         }
     }
+
+    public bool EnableExplorerFolderContextMenu
+    {
+        get => Settings.EnableExplorerFolderContextMenu;
+        set
+        {
+            if (!CanEnableExplorerFolderContextMenu)
+                return;
+
+            if (Settings.EnableExplorerFolderContextMenu == value)
+                return;
+
+            Settings.EnableExplorerFolderContextMenu = value;
+            try
+            {
+                ShellFolderSearchMenu.Sync(value, Localize.searchWithFlowLauncher());
+            }
+            catch (Exception e)
+            {
+                // Registration rolls back to disabled on failure, and failed removals are retried at startup.
+                Settings.EnableExplorerFolderContextMenu = false;
+                App.API.ShowMsgError(Localize.explorerFolderContextMenuFailed(), e.Message);
+            }
+
+            OnPropertyChanged();
+        }
+    }
+
+    public bool CanEnableExplorerFolderContextMenu => ShellFolderSearchMenu.IsSupported;
 
     public class DialogJumpWindowPositionData : DropdownDataGeneric<DialogJumpWindowPositions> { }
     public class DialogJumpResultBehaviourData : DropdownDataGeneric<DialogJumpResultBehaviours> { }

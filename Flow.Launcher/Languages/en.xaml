@@ -447,6 +447,10 @@
     <system:String x:Key="DialogJumpResultBehaviourRightClick">Right click</system:String>
     <system:String x:Key="dialogJumpFileResultBehaviour">Dialog Jump File Navigation Behaviour</system:String>
     <system:String x:Key="dialogJumpFileResultBehaviourToolTip">Behaviour to navigate Open/Save As dialog window when the result is a file path</system:String>
+    <system:String x:Key="searchWithFlowLauncher">Search with Flow Launcher</system:String>
+    <system:String x:Key="explorerFolderContextMenu">Windows Explorer folder search</system:String>
+    <system:String x:Key="explorerFolderContextMenuToolTip">Add a context menu item to folders in Windows Explorer. Choosing it opens Flow Launcher ready to search inside that folder. On Windows 11 the item appears under Show more options.</system:String>
+    <system:String x:Key="explorerFolderContextMenuFailed">Failed to update the Windows Explorer folder search menu</system:String>
     <system:String x:Key="DialogJumpFileResultBehaviourFullPath">Fill full path in file name box</system:String>
     <system:String x:Key="DialogJumpFileResultBehaviourFullPathOpen">Fill full path in file name box and open</system:String>
     <system:String x:Key="DialogJumpFileResultBehaviourDirectory">Fill directory in path box</system:String>
