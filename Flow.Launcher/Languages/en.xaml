@@ -360,7 +360,7 @@
     <system:String x:Key="TypeIsDarkToolTip">This theme supports two (light/dark) modes.</system:String>
     <system:String x:Key="TypeHasBlurToolTip">This theme supports Blur Transparent Background.</system:String>
     <system:String x:Key="ShowSearchFilterBar">Search filter chips</system:String>
-    <system:String x:Key="ShowSearchFilterBarTip">Show file search filters such as file, folder, type:image, size, dm and dc under the search box</system:String>
+    <system:String x:Key="ShowSearchFilterBarTip">Show file search filters such as folder path, file/folder, ext, size, dm and dc under the search box</system:String>
     <system:String x:Key="searchFilter_file">File</system:String>
     <system:String x:Key="searchFilter_folder">Folder</system:String>
     <system:String x:Key="searchFilter_path">In</system:String>

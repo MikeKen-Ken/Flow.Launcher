@@ -5,8 +5,8 @@ namespace Flow.Launcher.Plugin
     /// <summary>
     /// This interface is to indicate and allow plugins to asyncronously reload their
     /// in memory data cache or other mediums when user makes a new change
-    /// that is not immediately captured. For example, for BrowserBookmark and Program
-    /// plugin does not automatically detect when a user added a new bookmark or program,
+    /// that is not immediately captured. For example, the Program
+    /// plugin does not automatically detect when a user added a new program,
     /// so this interface's function is exposed to allow user manually do the reloading after 
     /// those new additions.
     /// 

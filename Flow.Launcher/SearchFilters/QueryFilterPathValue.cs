@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Flow.Launcher.Plugin.SharedCommands;
 
 namespace Flow.Launcher.SearchFilters;
 
@@ -17,6 +18,11 @@ internal static class QueryFilterPathValue
         if (trimmed.StartsWith("path:", StringComparison.OrdinalIgnoreCase))
         {
             trimmed = StripQuotes(trimmed[5..].Trim());
+        }
+
+        if (trimmed.EndsWith('>'))
+        {
+            trimmed = trimmed[..^1].TrimEnd();
         }
 
         if (string.IsNullOrWhiteSpace(trimmed))
@@ -40,14 +46,56 @@ internal static class QueryFilterPathValue
         return string.Equals(left?.Trim(), right?.Trim(), StringComparison.OrdinalIgnoreCase);
     }
 
-    internal static string FormatToken(string value)
+    internal static string FormatCommand(string value)
     {
         if (!TryNormalize(value, out var path))
         {
-            return "path:";
+            return string.Empty;
         }
 
-        return $"path:\"{WithDirectorySlash(path)}\"";
+        return WithDirectorySlash(path) + ">";
+    }
+
+    internal static bool TrySplitScope(string queryText, out string path, out string remainder)
+    {
+        path = string.Empty;
+        remainder = queryText ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(queryText))
+        {
+            return false;
+        }
+
+        var text = queryText.TrimStart();
+        var index = text.IndexOf('>');
+        if (index <= 0)
+        {
+            return false;
+        }
+
+        var rawPath = text[..index].TrimEnd();
+        if (!rawPath.IsLocationPathString() || !TryNormalize(rawPath, out path))
+        {
+            return false;
+        }
+
+        remainder = text[(index + 1)..];
+        return true;
+    }
+
+    internal static string Combine(string path, string remainder)
+    {
+        var command = FormatCommand(path);
+        if (string.IsNullOrEmpty(command))
+        {
+            return remainder ?? string.Empty;
+        }
+
+        if (string.IsNullOrWhiteSpace(remainder))
+        {
+            return command;
+        }
+
+        return command + remainder.TrimStart();
     }
 
     internal static string ToDisplay(string value)

@@ -19,7 +19,7 @@
 A quick file search and app launcher for Windows with community-made plugins.</p>
 
 <p align="center">
-Dedicated to making your workflow more seamless. Search everything from applications, files, bookmarks, YouTube, Twitter and more. Flow will continue to evolve, designed to be open and built with the community at heart.</p>
+Dedicated to making your workflow more seamless. Search everything from applications, files, and more. Flow will continue to evolve, designed to be open and built with the community at heart.</p>
 
 <p align="center"> <sub>Remember to star it, Flow will love you more :)</sub></p>
 
@@ -95,28 +95,12 @@ Or download the [early access version](https://github.com/Flow-Launcher/Prerelea
 
 - Supports search using environment variable paths.
 
-### Web Searches & URLs
-
-<img src="https://user-images.githubusercontent.com/6903107/144517502-5325de01-d0d9-4c2e-aafb-33c3f5d82f81.png" width="400">
-<img src="https://user-images.githubusercontent.com/6903107/144831031-0e01e8ea-3247-4ba4-a7b4-48b0db620bc1.png" width="400">
-<img src="https://user-images.githubusercontent.com/6903107/222829602-aabb1144-db5c-4250-b5ae-66f8342e4ae4.png" width="400">
-
-### Browser Bookmarks
-
-<img src="https://user-images.githubusercontent.com/6903107/207143428-e6406306-4f1e-4c24-917d-d2a333d5dc2b.png" width="400">
-
 ### System Commands
 
 <img src="https://user-images.githubusercontent.com/6903107/144517557-9b5b82fc-6408-48a0-af59-69b385a0782e.png" width="400">
 
 - Provides system related commands. shutdown, lock, settings, etc.
 - [System command list](#system-command-list)
-
-### Calculator
-
-<img src="https://user-images.githubusercontent.com/6903107/207142449-7de0c30d-8d5b-4331-967e-f3e78c17ea93.png" width="400">
-
-- Do mathematical calculations and copy the result to clipboard.
 
 ### Shell Command
 
@@ -130,12 +114,6 @@ Or download the [early access version](https://github.com/Flow-Launcher/Prerelea
 <img src="https://user-images.githubusercontent.com/6903107/207145376-fbb68ec2-93b9-4b0f-befe-0aeb792367a7.png" width="400">
 
 - Save file or folder locations for quick access.
-
-### Windows & Control Panel Settings
-
-<img src="https://user-images.githubusercontent.com/6903107/207140658-52c1bea6-5b14-4db8-ae35-acc65e6bda85.png" width="400">
-
-- Search for Windows & Control Panel settings.
 
 ### Dialog Jump
 

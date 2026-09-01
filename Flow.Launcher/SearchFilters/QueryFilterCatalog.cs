@@ -1,26 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Flow.Launcher.SearchFilters;
 
 internal static class QueryFilterCatalog
 {
-    internal static readonly IReadOnlyList<string> ExtensionPresets =
+    internal static readonly (string Key, string[] Extensions)[] ExtensionGroups =
     [
-        "pdf",
-        "zip",
-        "7z",
-        "txt",
-        "md",
-        "csv",
-        "json",
-        "xml",
-        "html",
-        "xlsx",
-        "docx",
-        "pptx"
+        ("image", ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "ico", "heic"]),
+        ("video", ["mp4", "mkv", "avi", "mov", "webm", "wmv"]),
+        ("audio", ["mp3", "wav", "flac", "aac", "m4a", "ogg"]),
+        ("document", ["pdf", "txt", "md", "docx", "xlsx", "pptx", "csv", "json", "xml", "html"]),
+        ("archive", ["zip", "7z", "rar", "tar", "gz"]),
+        ("exe", ["exe", "msi", "dll", "bat", "cmd", "ps1", "iso"])
     ];
+
+    internal static readonly IReadOnlyList<string> ExtensionPresets =
+        [.. ExtensionGroups.SelectMany(group => group.Extensions)];
 
     internal static readonly IReadOnlyList<string> DatePresets =
     [
@@ -41,14 +39,7 @@ internal static class QueryFilterCatalog
         ["folder"] = QueryFilterId.Folder,
         ["folders"] = QueryFilterId.Folder,
         ["path"] = QueryFilterId.Path,
-        ["pic"] = QueryFilterId.Image,
-        ["picture"] = QueryFilterId.Image,
-        ["video"] = QueryFilterId.Video,
-        ["audio"] = QueryFilterId.Audio,
         ["size"] = QueryFilterId.Size,
-        ["zip"] = QueryFilterId.Archive,
-        ["archive"] = QueryFilterId.Archive,
-        ["exe"] = QueryFilterId.Executable,
         ["ext"] = QueryFilterId.Extension,
         ["da"] = QueryFilterId.DateAccessed,
         ["dateaccessed"] = QueryFilterId.DateAccessed,
@@ -58,26 +49,10 @@ internal static class QueryFilterCatalog
         ["datecreated"] = QueryFilterId.DateCreated
     };
 
-    private static readonly Dictionary<string, QueryFilterId> TypeValueMap = new(StringComparer.OrdinalIgnoreCase)
-    {
-        ["image"] = QueryFilterId.Image,
-        ["pic"] = QueryFilterId.Image,
-        ["picture"] = QueryFilterId.Image,
-        ["video"] = QueryFilterId.Video,
-        ["audio"] = QueryFilterId.Audio,
-        ["doc"] = QueryFilterId.Document,
-        ["document"] = QueryFilterId.Document,
-        ["archive"] = QueryFilterId.Archive,
-        ["zip"] = QueryFilterId.Archive,
-        ["exe"] = QueryFilterId.Executable
-    };
-
     internal static QueryFilterGroup GroupOf(QueryFilterId id) => id switch
     {
         QueryFilterId.File or QueryFilterId.Folder => QueryFilterGroup.Kind,
         QueryFilterId.Path => QueryFilterGroup.Path,
-        QueryFilterId.Image or QueryFilterId.Video or QueryFilterId.Audio or QueryFilterId.Document
-            or QueryFilterId.Archive or QueryFilterId.Executable => QueryFilterGroup.Type,
         QueryFilterId.Size => QueryFilterGroup.Size,
         QueryFilterId.DateModified => QueryFilterGroup.DateModified,
         QueryFilterId.DateCreated => QueryFilterGroup.DateCreated,
@@ -95,14 +70,8 @@ internal static class QueryFilterCatalog
     {
         QueryFilterId.File => "file:",
         QueryFilterId.Folder => "folder:",
-        QueryFilterId.Path => QueryFilterPathValue.FormatToken(value),
-        QueryFilterId.Image => "type:image",
-        QueryFilterId.Video => "type:video",
-        QueryFilterId.Audio => "type:audio",
-        QueryFilterId.Document => "type:document",
-        QueryFilterId.Archive => "type:archive",
-        QueryFilterId.Executable => "type:exe",
-        QueryFilterId.Extension => $"ext:{value}",
+        QueryFilterId.Path => QueryFilterPathValue.FormatCommand(value),
+        QueryFilterId.Extension => $"ext:{QueryFilterExtensionValue.Join(QueryFilterExtensionValue.Parse(value))}",
         QueryFilterId.Size => $"size:{value}",
         QueryFilterId.DateModified => $"dm:{value}",
         QueryFilterId.DateCreated => $"dc:{value}",
@@ -130,17 +99,6 @@ internal static class QueryFilterCatalog
         var prefix = token[..colon];
         value = token[(colon + 1)..];
 
-        if (prefix.Equals("type", StringComparison.OrdinalIgnoreCase))
-        {
-            if (TypeValueMap.TryGetValue(value, out var typeId))
-            {
-                id = typeId;
-                return true;
-            }
-
-            return false;
-        }
-
         if (prefix.Equals("attrib", StringComparison.OrdinalIgnoreCase)
             || prefix.Equals("attributes", StringComparison.OrdinalIgnoreCase))
         {
@@ -165,6 +123,19 @@ internal static class QueryFilterCatalog
 
                 id = mapped;
                 value = path;
+                return true;
+            }
+
+            if (mapped == QueryFilterId.Extension)
+            {
+                var extensions = QueryFilterExtensionValue.Join(QueryFilterExtensionValue.Parse(value));
+                if (string.IsNullOrEmpty(extensions))
+                {
+                    return false;
+                }
+
+                id = mapped;
+                value = extensions;
                 return true;
             }
 

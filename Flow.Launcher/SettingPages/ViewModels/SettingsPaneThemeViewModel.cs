@@ -481,15 +481,6 @@ public partial class SettingsPaneThemeViewModel : BaseModel
                 },
                 new()
                 {
-                    Title = Localize.SampleTitleWebSearch(),
-                    SubTitle = Localize.SampleSubTitleWebSearch(),
-                    IcoPath = Path.Combine(
-                        Constant.ProgramDirectory,
-                        @"Plugins\Flow.Launcher.Plugin.WebSearch\Images\web_search.png"
-                    )
-                },
-                new()
-                {
                     Title = Localize.SampleTitleProgram(),
                     SubTitle = Localize.SampleSubTitleProgram(),
                     IcoPath = Path.Combine(

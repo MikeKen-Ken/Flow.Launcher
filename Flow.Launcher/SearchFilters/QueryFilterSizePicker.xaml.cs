@@ -2,17 +2,97 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Flow.Launcher.SearchFilters;
 
 public partial class QueryFilterSizePicker : UserControl
 {
+    public static readonly DependencyProperty ChipFillProperty = DependencyProperty.Register(
+        nameof(ChipFill), typeof(Brush), typeof(QueryFilterSizePicker));
+
+    public static readonly DependencyProperty ChipFillHoverProperty = DependencyProperty.Register(
+        nameof(ChipFillHover), typeof(Brush), typeof(QueryFilterSizePicker));
+
+    public static readonly DependencyProperty ChipTextProperty = DependencyProperty.Register(
+        nameof(ChipText), typeof(Brush), typeof(QueryFilterSizePicker));
+
+    public static readonly DependencyProperty ChipStrokeProperty = DependencyProperty.Register(
+        nameof(ChipStroke), typeof(Brush), typeof(QueryFilterSizePicker));
+
+    public static readonly DependencyProperty PanelFillProperty = DependencyProperty.Register(
+        nameof(PanelFill), typeof(Brush), typeof(QueryFilterSizePicker));
+
+    public static readonly DependencyProperty PanelStrokeProperty = DependencyProperty.Register(
+        nameof(PanelStroke), typeof(Brush), typeof(QueryFilterSizePicker));
+
+    public static readonly DependencyProperty FieldFillProperty = DependencyProperty.Register(
+        nameof(FieldFill), typeof(Brush), typeof(QueryFilterSizePicker));
+
     public QueryFilterSizePicker()
     {
         InitializeComponent();
     }
 
+    public Brush ChipFill
+    {
+        get => (Brush)GetValue(ChipFillProperty);
+        set => SetValue(ChipFillProperty, value);
+    }
+
+    public Brush ChipFillHover
+    {
+        get => (Brush)GetValue(ChipFillHoverProperty);
+        set => SetValue(ChipFillHoverProperty, value);
+    }
+
+    public Brush ChipText
+    {
+        get => (Brush)GetValue(ChipTextProperty);
+        set => SetValue(ChipTextProperty, value);
+    }
+
+    public Brush ChipStroke
+    {
+        get => (Brush)GetValue(ChipStrokeProperty);
+        set => SetValue(ChipStrokeProperty, value);
+    }
+
+    public Brush PanelFill
+    {
+        get => (Brush)GetValue(PanelFillProperty);
+        set => SetValue(PanelFillProperty, value);
+    }
+
+    public Brush PanelStroke
+    {
+        get => (Brush)GetValue(PanelStrokeProperty);
+        set => SetValue(PanelStrokeProperty, value);
+    }
+
+    public Brush FieldFill
+    {
+        get => (Brush)GetValue(FieldFillProperty);
+        set => SetValue(FieldFillProperty, value);
+    }
+
     public event EventHandler CloseRequested;
+
+    internal void ApplyPalette(QueryFilterChipBrushes palette)
+    {
+        if (palette.Fill is null)
+        {
+            return;
+        }
+
+        ChipFill = palette.Fill;
+        ChipFillHover = palette.FillHover;
+        ChipText = palette.Text;
+        ChipStroke = palette.Stroke;
+        PanelFill = palette.PanelFill;
+        PanelStroke = palette.PanelStroke;
+        FieldFill = palette.FieldFill;
+    }
 
     public void Bind(QueryFilterItemViewModel item)
     {

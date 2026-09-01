@@ -37,18 +37,27 @@ public static class ErrorReporting
 
     public static void DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        // handle ui thread exceptions
+        if (ExceptionHelper.IsRecoverableDwmCompositionException(e.Exception))
+        {
+            Log.Warn(nameof(ErrorReporting), $"Ignored recoverable DWM composition exception: {e.Exception.Message}");
+            e.Handled = true;
+            return;
+        }
+
+#if DEBUG
+        // Keep non-DWM exceptions unhandled in Debug so the debugger still breaks.
+        return;
+#else
         Report(e.Exception);
-        // prevent application exist, so the user can copy prompted error info
         e.Handled = true;
+#endif
     }
 
     public static void TaskSchedulerUnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
     {
-        // log exception but do not handle unobserved task exceptions on UI thread
-        //Application.Current.Dispatcher.Invoke(() => Report(e.Exception, true));
-        Log.Exception(nameof(ErrorReporting), "Unobserved task exception occurred.", e.Exception);
-        // prevent application exit, so the user can copy the prompted error info
+        // Do not call Log.Exception here: in DEBUG it rethrows, and this callback
+        // often runs during GC of faulted fire-and-forget tasks a few minutes later.
+        Log.Error(nameof(ErrorReporting), $"Unobserved task exception occurred: {e.Exception}");
         e.SetObserved();
     }
 

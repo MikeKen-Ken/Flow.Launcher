@@ -33,52 +33,6 @@ jobs:
                  Write-Host "Updated" $plugin_old_ver.Name "version from" $plugin_old_ver.Version "to" $plugin_new_ver.Version
              }
 
-      - name: Get BrowserBookmark Version
-        id: updated-version-browserbookmark
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: 'Plugins/Flow.Launcher.Plugin.BrowserBookmark/plugin.json'
-          prop_path: 'Version'
-
-      - name: Build BrowserBookmark
-        run: |
-          dotnet publish 'Plugins/Flow.Launcher.Plugin.BrowserBookmark/Flow.Launcher.Plugin.BrowserBookmark.csproj' --framework net9.0-windows  -c Release -o "Flow.Launcher.Plugin.BrowserBookmark"
-          7z a -tzip "Flow.Launcher.Plugin.BrowserBookmark.zip" "./Flow.Launcher.Plugin.BrowserBookmark/*"
-          rm -r "Flow.Launcher.Plugin.BrowserBookmark"
-
-      - name: Publish BrowserBookmark
-        uses: softprops/action-gh-release@v3
-        with:
-          repository: "Flow-Launcher/Flow.Launcher.Plugin.BrowserBookmark"
-          files: "Flow.Launcher.Plugin.BrowserBookmark.zip"
-          tag_name: "v${{steps.updated-version-browserbookmark.outputs.prop}}"
-          body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
-          token: ${{ secrets.PUBLISH_PLUGINS }}
-
-
-      - name: Get Calculator Version
-        id: updated-version-calculator
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: 'Plugins/Flow.Launcher.Plugin.Calculator/plugin.json'
-          prop_path: 'Version'
-
-      - name: Build Calculator
-        run: |
-          dotnet publish 'Plugins/Flow.Launcher.Plugin.Calculator/Flow.Launcher.Plugin.Calculator.csproj' --framework net9.0-windows  -c Release -o "Flow.Launcher.Plugin.Calculator"
-          7z a -tzip "Flow.Launcher.Plugin.Calculator.zip" "./Flow.Launcher.Plugin.Calculator/*"
-          rm -r "Flow.Launcher.Plugin.Calculator"
-
-      - name: Publish Calculator
-        uses: softprops/action-gh-release@v3
-        with:
-          repository: "Flow-Launcher/Flow.Launcher.Plugin.Calculator"
-          files: "Flow.Launcher.Plugin.Calculator.zip"
-          tag_name: "v${{steps.updated-version-calculator.outputs.prop}}"
-          body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
-          token: ${{ secrets.PUBLISH_PLUGINS }}
-
-
       - name: Get Explorer Version
         id: updated-version-explorer
         uses: notiz-dev/github-action-json-property@release
@@ -98,29 +52,6 @@ jobs:
           repository: "Flow-Launcher/Flow.Launcher.Plugin.Explorer"
           files: "Flow.Launcher.Plugin.Explorer.zip"
           tag_name: "v${{steps.updated-version-explorer.outputs.prop}}"
-          body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
-          token: ${{ secrets.PUBLISH_PLUGINS }}
-
-
-      - name: Get PluginIndicator Version
-        id: updated-version-pluginindicator
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: 'Plugins/Flow.Launcher.Plugin.PluginIndicator/plugin.json'
-          prop_path: 'Version'
-
-      - name: Build PluginIndicator
-        run: |
-          dotnet publish 'Plugins/Flow.Launcher.Plugin.PluginIndicator/Flow.Launcher.Plugin.PluginIndicator.csproj' --framework net9.0-windows  -c Release -o "Flow.Launcher.Plugin.PluginIndicator"
-          7z a -tzip "Flow.Launcher.Plugin.PluginIndicator.zip" "./Flow.Launcher.Plugin.PluginIndicator/*"
-          rm -r "Flow.Launcher.Plugin.PluginIndicator"
-
-      - name: Publish PluginIndicator
-        uses: softprops/action-gh-release@v3
-        with:
-          repository: "Flow-Launcher/Flow.Launcher.Plugin.PluginIndicator"
-          files: "Flow.Launcher.Plugin.PluginIndicator.zip"
-          tag_name: "v${{steps.updated-version-pluginindicator.outputs.prop}}"
           body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
           token: ${{ secrets.PUBLISH_PLUGINS }}
 
@@ -238,73 +169,3 @@ jobs:
           tag_name: "v${{steps.updated-version-sys.outputs.prop}}"
           body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
           token: ${{ secrets.PUBLISH_PLUGINS }}
-
-
-      - name: Get Url Version
-        id: updated-version-url
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: 'Plugins/Flow.Launcher.Plugin.Url/plugin.json'
-          prop_path: 'Version'
-
-      - name: Build Url
-        run: |
-          dotnet publish 'Plugins/Flow.Launcher.Plugin.Url/Flow.Launcher.Plugin.Url.csproj' --framework net9.0-windows  -c Release -o "Flow.Launcher.Plugin.Url"
-          7z a -tzip "Flow.Launcher.Plugin.Url.zip" "./Flow.Launcher.Plugin.Url/*"
-          rm -r "Flow.Launcher.Plugin.Url"
-
-      - name: Publish Url
-        uses: softprops/action-gh-release@v3
-        with:
-          repository: "Flow-Launcher/Flow.Launcher.Plugin.Url"
-          files: "Flow.Launcher.Plugin.Url.zip"
-          tag_name: "v${{steps.updated-version-url.outputs.prop}}"
-          body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
-          token: ${{ secrets.PUBLISH_PLUGINS }}
-
-
-      - name: Get WebSearch Version
-        id: updated-version-websearch
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: 'Plugins/Flow.Launcher.Plugin.WebSearch/plugin.json'
-          prop_path: 'Version'
-
-      - name: Build WebSearch
-        run: |
-          dotnet publish 'Plugins/Flow.Launcher.Plugin.WebSearch/Flow.Launcher.Plugin.WebSearch.csproj' --framework net9.0-windows  -c Release -o "Flow.Launcher.Plugin.WebSearch"
-          7z a -tzip "Flow.Launcher.Plugin.WebSearch.zip" "./Flow.Launcher.Plugin.WebSearch/*"
-          rm -r "Flow.Launcher.Plugin.WebSearch"
-
-      - name: Publish WebSearch
-        uses: softprops/action-gh-release@v3
-        with:
-          repository: "Flow-Launcher/Flow.Launcher.Plugin.WebSearch"
-          files: "Flow.Launcher.Plugin.WebSearch.zip"
-          tag_name: "v${{steps.updated-version-websearch.outputs.prop}}"
-          body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
-          token: ${{ secrets.PUBLISH_PLUGINS }}
-
-
-      - name: Get WindowsSettings Version
-        id: updated-version-windowssettings
-        uses: notiz-dev/github-action-json-property@release
-        with:
-          path: 'Plugins/Flow.Launcher.Plugin.WindowsSettings/plugin.json'
-          prop_path: 'Version'
-
-      - name: Build WindowsSettings
-        run: |
-          dotnet publish 'Plugins/Flow.Launcher.Plugin.WindowsSettings/Flow.Launcher.Plugin.WindowsSettings.csproj' --framework net9.0-windows  -c Release -o "Flow.Launcher.Plugin.WindowsSettings"
-          7z a -tzip "Flow.Launcher.Plugin.WindowsSettings.zip" "./Flow.Launcher.Plugin.WindowsSettings/*"
-          rm -r "Flow.Launcher.Plugin.WindowsSettings"
-
-      - name: Publish WindowsSettings
-        uses: softprops/action-gh-release@v3
-        with:
-          repository: "Flow-Launcher/Flow.Launcher.Plugin.WindowsSettings"
-          files: "Flow.Launcher.Plugin.WindowsSettings.zip"
-          tag_name: "v${{steps.updated-version-windowssettings.outputs.prop}}"
-          body: Visit Flow's [release notes](https://github.com/Flow-Launcher/Flow.Launcher/releases) for changes.
-          token: ${{ secrets.PUBLISH_PLUGINS }}
-

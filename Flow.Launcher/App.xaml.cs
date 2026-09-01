@@ -430,10 +430,6 @@ namespace Flow.Launcher
             };
         }
 
-        /// <summary>
-        /// Let exception throw as normal is better for Debug
-        /// </summary>
-        [Conditional("RELEASE")]
         private void RegisterDispatcherUnhandledException()
         {
             DispatcherUnhandledException += ErrorReporting.DispatcherUnhandledException;

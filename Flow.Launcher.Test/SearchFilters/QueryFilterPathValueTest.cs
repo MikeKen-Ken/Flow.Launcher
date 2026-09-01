@@ -18,10 +18,23 @@ public class QueryFilterPathValueTest
     }
 
     [Test]
-    public void FormatToken_AlwaysQuotesAndAddsTrailingSlash()
+    public void FormatCommand_UsesRecursivePathSearchSyntax()
     {
-        Assert.That(QueryFilterPathValue.FormatToken(@"C:\Photos"), Is.EqualTo(@"path:""C:\Photos\"""));
-        Assert.That(QueryFilterPathValue.FormatToken(@"C:\Program Files"), Is.EqualTo(@"path:""C:\Program Files\"""));
+        Assert.That(QueryFilterPathValue.FormatCommand(@"C:\Photos"), Is.EqualTo(@"C:\Photos\>"));
+        Assert.That(QueryFilterPathValue.FormatCommand(@"C:\Program Files"), Is.EqualTo(@"C:\Program Files\>"));
+        Assert.That(
+            QueryFilterPathValue.FormatCommand(@"D:\Downloads\Flow-Launcher-Portable (1)\FlowLauncher\app-2.1.16"),
+            Is.EqualTo(@"D:\Downloads\Flow-Launcher-Portable (1)\FlowLauncher\app-2.1.16\>"));
+    }
+
+    [Test]
+    public void TrySplitScope_ReadsRecursivePathCommand()
+    {
+        var query = @"D:\Downloads\Flow-Launcher-Portable (1)\FlowLauncher\app-2.1.16\>vacation type:image";
+
+        Assert.That(QueryFilterPathValue.TrySplitScope(query, out var path, out var remainder), Is.True);
+        Assert.That(path, Is.EqualTo(@"D:\Downloads\Flow-Launcher-Portable (1)\FlowLauncher\app-2.1.16"));
+        Assert.That(remainder, Is.EqualTo("vacation type:image"));
     }
 
     [Test]

@@ -396,6 +396,7 @@ namespace Flow.Launcher
         {
             if (!CanClose)
             {
+                App.API.LogInfo(ClassName, "Main window closing; shutting down the process");
                 CanClose = true;
                 _notifyIcon.Visible = false;
                 App.API.SaveAppAllSettings();

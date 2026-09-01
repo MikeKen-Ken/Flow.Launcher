@@ -4,18 +4,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    MinWidth="280"
+    MinWidth="288"
     Focusable="True"
     mc:Ignorable="d">
     <UserControl.Resources>
         <Style x:Key="SizePresetButtonStyle" TargetType="Button">
             <Setter Property="Focusable" Value="False" />
             <Setter Property="FontSize" Value="12" />
-            <Setter Property="Padding" Value="8 4" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="10 6" />
             <Setter Property="Margin" Value="0 0 6 6" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="#F5F5F5" />
-            <Setter Property="Background" Value="#59FFFFFF" />
+            <Setter Property="Foreground" Value="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            <Setter Property="Background" Value="{Binding ChipFill, RelativeSource={RelativeSource AncestorType=UserControl}}" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -23,14 +24,14 @@
                             x:Name="Bd"
                             Padding="{TemplateBinding Padding}"
                             Background="{TemplateBinding Background}"
-                            BorderBrush="#8FFFFFFF"
+                            BorderBrush="{Binding ChipStroke, RelativeSource={RelativeSource AncestorType=UserControl}}"
                             BorderThickness="1"
-                            CornerRadius="4">
+                            CornerRadius="14">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#80FFFFFF" />
+                                <Setter TargetName="Bd" Property="Background" Value="{Binding ChipFillHover, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -39,16 +40,17 @@
         </Style>
     </UserControl.Resources>
     <Border
-        Padding="12"
-        Background="#2F2F2F"
-        BorderBrush="#338A8A8A"
+        Padding="14 12"
+        Background="{Binding PanelFill, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        BorderBrush="{Binding PanelStroke, RelativeSource={RelativeSource AncestorType=UserControl}}"
         BorderThickness="1"
-        CornerRadius="6">
+        CornerRadius="10">
         <StackPanel>
             <TextBlock
-                Margin="0 0 0 6"
+                Margin="0 0 0 8"
                 FontSize="12"
-                Foreground="#D0D0D0"
+                FontWeight="SemiBold"
+                Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 Text="{DynamicResource searchFilter_size_greaterThan}" />
             <WrapPanel>
                 <Button
@@ -78,9 +80,10 @@
                     Tag=">1gb" />
             </WrapPanel>
             <TextBlock
-                Margin="0 4 0 6"
+                Margin="0 6 0 8"
                 FontSize="12"
-                Foreground="#D0D0D0"
+                FontWeight="SemiBold"
+                Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 Text="{DynamicResource searchFilter_size_lessThan}" />
             <WrapPanel>
                 <Button
@@ -105,15 +108,14 @@
                     Tag="&lt;1gb" />
             </WrapPanel>
             <TextBlock
-                Margin="0 4 0 6"
+                Margin="0 6 0 8"
                 FontSize="12"
-                Foreground="#D0D0D0"
+                FontWeight="SemiBold"
+                Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
                 Text="{DynamicResource searchFilter_size_custom}" />
             <DockPanel LastChildFill="True">
                 <Button
-                    x:Name="ApplyCustomButton"
-                    Margin="6 0 0 0"
-                    Padding="10 4"
+                    Margin="8 0 0 0"
                     VerticalAlignment="Center"
                     Click="OnApplyCustomClick"
                     Content="{DynamicResource searchFilter_size_apply}"
@@ -121,20 +123,21 @@
                     Style="{StaticResource SizePresetButtonStyle}" />
                 <TextBox
                     x:Name="CustomSizeBox"
-                    Height="28"
-                    Padding="6 2"
+                    Height="32"
+                    Padding="8 2"
                     VerticalContentAlignment="Center"
-                    Background="#1A1A1A"
-                    BorderBrush="#338A8A8A"
+                    Background="{Binding FieldFill, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    BorderBrush="{Binding ChipStroke, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     BorderThickness="1"
-                    CaretBrush="#E3E0E3"
-                    Foreground="#E3E0E3"
+                    CaretBrush="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
                     PreviewKeyDown="OnCustomSizePreviewKeyDown" />
             </DockPanel>
             <TextBlock
-                Margin="0 4 0 8"
+                Margin="0 6 0 10"
                 FontSize="11"
-                Foreground="#D0D0D0"
+                Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                Opacity="0.78"
                 Text="{DynamicResource searchFilter_size_customHint}" />
             <Button
                 HorizontalAlignment="Left"

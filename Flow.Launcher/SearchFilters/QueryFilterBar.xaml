@@ -12,17 +12,16 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
-        <converters:BrushOpacityConverter x:Key="BrushOpacityConverter" />
         <Style x:Key="SearchFilterChipStyle" TargetType="Button">
             <Setter Property="Focusable" Value="False" />
-            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontSize" Value="12" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="Padding" Value="9 5" />
-            <Setter Property="Margin" Value="0 0 6 6" />
+            <Setter Property="Padding" Value="11 6" />
+            <Setter Property="Margin" Value="0 0 8 8" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-            <Setter Property="Background" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.34}" />
-            <Setter Property="BorderBrush" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.7}" />
+            <Setter Property="Foreground" Value="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            <Setter Property="Background" Value="{Binding ChipFill, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            <Setter Property="BorderBrush" Value="{Binding ChipStroke, RelativeSource={RelativeSource AncestorType=UserControl}}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -33,18 +32,18 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4"
+                            CornerRadius="14"
                             SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.5}" />
+                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding ChipFillHover, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="{DynamicResource SystemAccentColorLight1Brush}" />
-                                <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight1Brush}" />
-                                <Setter Property="Foreground" Value="White" />
+                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding ChipSelectedFill, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{Binding ChipSelectedFill, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Setter Property="Foreground" Value="{Binding ChipSelectedText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -56,7 +55,7 @@
         <ItemsControl ItemsSource="{Binding Filters}">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <WrapPanel Margin="12 4 12 8" />
+                    <WrapPanel Margin="12 6 12 10" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
@@ -67,9 +66,9 @@
                         ToolTip="{Binding Tooltip}">
                         <StackPanel Orientation="Horizontal">
                             <ui:FontIcon
-                                Margin="0 0 5 0"
+                                Margin="0 0 6 0"
                                 VerticalAlignment="Center"
-                                FontSize="12"
+                                FontSize="13"
                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                 Glyph="{Binding Glyph}" />
                             <TextBlock
@@ -77,7 +76,7 @@
                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
                                 Text="{Binding DisplayText}" />
                             <ui:FontIcon
-                                Margin="4 0 0 0"
+                                Margin="5 0 0 0"
                                 VerticalAlignment="Center"
                                 FontSize="8"
                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"

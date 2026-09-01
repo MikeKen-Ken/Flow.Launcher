@@ -358,7 +358,7 @@
     <system:String x:Key="TypeIsDarkToolTip">该主题支持两种（浅色/深色）模式。</system:String>
     <system:String x:Key="TypeHasBlurToolTip">该主题支持模糊透明背景。</system:String>
     <system:String x:Key="ShowSearchFilterBar">搜索筛选选项</system:String>
-    <system:String x:Key="ShowSearchFilterBarTip">在搜索框下方显示 file、folder、type:image、size、dm、dc 等文件筛选选项</system:String>
+    <system:String x:Key="ShowSearchFilterBarTip">在搜索框下方显示目录、文件/文件夹、扩展名、大小、修改/创建时间等筛选选项</system:String>
     <system:String x:Key="searchFilter_file">文件</system:String>
     <system:String x:Key="searchFilter_folder">文件夹</system:String>
     <system:String x:Key="searchFilter_path">目录</system:String>

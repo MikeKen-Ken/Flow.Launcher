@@ -30,14 +30,6 @@ public class QueryFilterSyntaxTest
     }
 
     [Test]
-    public void ToggleImage_ReplacesVideo()
-    {
-        var result = QueryFilterSyntax.Apply("cat type:video", QueryFilterId.Image, string.Empty, QueryFilterApplyMode.Set);
-
-        Assert.That(result, Is.EqualTo("cat type:image"));
-    }
-
-    [Test]
     public void SetSize_ReplacesExistingSize()
     {
         var result = QueryFilterSyntax.Apply("report size:small", QueryFilterId.Size, "large", QueryFilterApplyMode.Set);
@@ -65,9 +57,8 @@ public class QueryFilterSyntaxTest
     [Test]
     public void Parse_RecognizesAliases()
     {
-        var snapshot = QueryFilterSyntax.Parse("budget pic: SIZE:Huge datemodified:yesterday files:");
+        var snapshot = QueryFilterSyntax.Parse("budget SIZE:Huge datemodified:yesterday files:");
 
-        Assert.That(snapshot.IsActive(QueryFilterId.Image), Is.True);
         Assert.That(snapshot.IsActive(QueryFilterId.Size), Is.True);
         Assert.That(snapshot.GetValue(QueryFilterId.Size), Is.EqualTo("Huge"));
         Assert.That(snapshot.IsActive(QueryFilterId.DateModified), Is.True);
@@ -85,27 +76,20 @@ public class QueryFilterSyntaxTest
     }
 
     [Test]
-    public void Parse_DoesNotTreatContentSearchKeywordAsDocumentFilter()
+    public void Parse_DoesNotTreatContentSearchKeywordAsExtension()
     {
         var snapshot = QueryFilterSyntax.Parse("doc: quarterly report");
 
-        Assert.That(snapshot.IsActive(QueryFilterId.Document), Is.False);
+        Assert.That(snapshot.IsActive(QueryFilterId.Extension), Is.False);
+        Assert.That(snapshot.IsActive(QueryFilterId.File), Is.False);
     }
 
     [Test]
     public void Apply_PreservesNonFilterSearchTerms()
     {
-        var result = QueryFilterSyntax.Apply("vacation 2024 folder:", QueryFilterId.Image, string.Empty, QueryFilterApplyMode.Set);
+        var result = QueryFilterSyntax.Apply("vacation 2024 folder:", QueryFilterId.Hidden, string.Empty, QueryFilterApplyMode.Set);
 
-        Assert.That(result, Is.EqualTo("vacation 2024 folder: type:image"));
-    }
-
-    [Test]
-    public void ToggleArchive_ReplacesImage()
-    {
-        var result = QueryFilterSyntax.Apply("backup type:image", QueryFilterId.Archive, string.Empty, QueryFilterApplyMode.Set);
-
-        Assert.That(result, Is.EqualTo("backup type:archive"));
+        Assert.That(result, Is.EqualTo("vacation 2024 folder: attrib:H"));
     }
 
     [Test]
@@ -117,55 +101,109 @@ public class QueryFilterSyntaxTest
     }
 
     [Test]
-    public void Parse_RecognizesArchiveExeHiddenAndAccessed()
+    public void ToggleExtension_AddsSecondType()
     {
-        var snapshot = QueryFilterSyntax.Parse("notes zip: attrib:H da:today");
+        var withPng = QueryFilterSyntax.Apply("photos", QueryFilterId.Extension, "png", QueryFilterApplyMode.Toggle);
+        var withBoth = QueryFilterSyntax.Apply(withPng, QueryFilterId.Extension, "jpg", QueryFilterApplyMode.Toggle);
 
-        Assert.That(snapshot.IsActive(QueryFilterId.Archive), Is.True);
+        Assert.That(withPng, Is.EqualTo("photos ext:png"));
+        Assert.That(withBoth, Is.EqualTo("photos ext:png;jpg"));
+    }
+
+    [Test]
+    public void ToggleExtension_RemovesOneTypeAndKeepsOthers()
+    {
+        var result = QueryFilterSyntax.Apply("photos ext:png;jpg;exe", QueryFilterId.Extension, "jpg", QueryFilterApplyMode.Toggle);
+
+        Assert.That(result, Is.EqualTo("photos ext:png;exe"));
+    }
+
+    [Test]
+    public void Parse_MergesSeparateExtTokens()
+    {
+        var snapshot = QueryFilterSyntax.Parse("notes ext:png ext:exe attrib:H da:today");
+
+        Assert.That(snapshot.IsActive(QueryFilterId.Extension), Is.True);
+        Assert.That(snapshot.GetValue(QueryFilterId.Extension), Is.EqualTo("png;exe"));
         Assert.That(snapshot.IsActive(QueryFilterId.Hidden), Is.True);
         Assert.That(snapshot.IsActive(QueryFilterId.DateAccessed), Is.True);
         Assert.That(snapshot.GetValue(QueryFilterId.DateAccessed), Is.EqualTo("today"));
     }
 
     [Test]
-    public void SetPath_InsertsQuotedDirectoryToken()
+    public void ClearExtension_RemovesAllExtTokens()
+    {
+        var result = QueryFilterSyntax.Apply("photos ext:png;jpg", QueryFilterId.Extension, string.Empty, QueryFilterApplyMode.Clear);
+
+        Assert.That(result, Is.EqualTo("photos"));
+    }
+
+    [Test]
+    public void SetPath_InsertsRecursivePathCommand()
     {
         var result = QueryFilterSyntax.Apply("vacation", QueryFilterId.Path, @"C:\Photos", QueryFilterApplyMode.Set);
 
-        Assert.That(result, Is.EqualTo(@"vacation path:""C:\Photos\"""));
+        Assert.That(result, Is.EqualTo(@"C:\Photos\>vacation"));
     }
 
     [Test]
-    public void SetPath_QuotesFoldersWithSpaces()
+    public void SetPath_KeepsSpacesInFolderPath()
     {
         var result = QueryFilterSyntax.Apply("report", QueryFilterId.Path, @"C:\Program Files", QueryFilterApplyMode.Set);
 
-        Assert.That(result, Is.EqualTo(@"report path:""C:\Program Files\"""));
+        Assert.That(result, Is.EqualTo(@"C:\Program Files\>report"));
     }
 
     [Test]
-    public void Parse_RecognizesQuotedPathWithSpaces()
+    public void Parse_RecognizesRecursivePathCommandWithSpaces()
     {
-        var snapshot = QueryFilterSyntax.Parse(@"notes path:""C:\Program Files"" type:image");
+        var snapshot = QueryFilterSyntax.Parse(@"D:\Downloads\Flow-Launcher-Portable (1)\FlowLauncher\app-2.1.16\>notes ext:png");
+
+        Assert.That(snapshot.IsActive(QueryFilterId.Path), Is.True);
+        Assert.That(snapshot.GetValue(QueryFilterId.Path), Is.EqualTo(@"D:\Downloads\Flow-Launcher-Portable (1)\FlowLauncher\app-2.1.16"));
+        Assert.That(snapshot.IsActive(QueryFilterId.Extension), Is.True);
+        Assert.That(snapshot.GetValue(QueryFilterId.Extension), Is.EqualTo("png"));
+    }
+
+    [Test]
+    public void Parse_StillRecognizesLegacyPathToken()
+    {
+        var snapshot = QueryFilterSyntax.Parse(@"notes path:""C:\Program Files"" ext:png");
 
         Assert.That(snapshot.IsActive(QueryFilterId.Path), Is.True);
         Assert.That(snapshot.GetValue(QueryFilterId.Path), Is.EqualTo(@"C:\Program Files"));
-        Assert.That(snapshot.IsActive(QueryFilterId.Image), Is.True);
+        Assert.That(snapshot.IsActive(QueryFilterId.Extension), Is.True);
     }
 
     [Test]
-    public void SetPath_ReplacesExistingPath()
+    public void SetPath_ReplacesExistingPathCommand()
+    {
+        var result = QueryFilterSyntax.Apply(@"C:\Old\>notes", QueryFilterId.Path, @"D:\New", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo(@"D:\New\>notes"));
+    }
+
+    [Test]
+    public void SetPath_RewritesLegacyPathTokenToCommand()
     {
         var result = QueryFilterSyntax.Apply(@"notes path:""C:\Old\""", QueryFilterId.Path, @"D:\New", QueryFilterApplyMode.Set);
 
-        Assert.That(result, Is.EqualTo(@"notes path:""D:\New\"""));
+        Assert.That(result, Is.EqualTo(@"D:\New\>notes"));
     }
 
     [Test]
-    public void ClearPath_RemovesPathToken()
+    public void ClearPath_RemovesPathCommandAndKeepsFilters()
     {
-        var result = QueryFilterSyntax.Apply(@"vacation path:""C:\Photos\"" type:image", QueryFilterId.Path, string.Empty, QueryFilterApplyMode.Clear);
+        var result = QueryFilterSyntax.Apply(@"C:\Photos\>vacation ext:png", QueryFilterId.Path, string.Empty, QueryFilterApplyMode.Clear);
 
-        Assert.That(result, Is.EqualTo("vacation type:image"));
+        Assert.That(result, Is.EqualTo("vacation ext:png"));
+    }
+
+    [Test]
+    public void ApplyExtension_PreservesRecursivePathCommand()
+    {
+        var result = QueryFilterSyntax.Apply(@"C:\Program Files\>vacation", QueryFilterId.Extension, "jpg", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo(@"C:\Program Files\>vacation ext:jpg"));
     }
 }

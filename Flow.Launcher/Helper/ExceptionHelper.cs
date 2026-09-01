@@ -19,6 +19,31 @@ internal static class ExceptionHelper
     /// </summary>
     internal static bool IsRecoverableDwmCompositionException(Exception exception)
     {
+        for (var current = exception; current != null; current = current.InnerException)
+        {
+            if (IsDwmComException(current))
+            {
+                return true;
+            }
+
+            if (current is AggregateException aggregate)
+            {
+                foreach (var inner in aggregate.InnerExceptions)
+                {
+                    if (!ReferenceEquals(inner, current.InnerException) &&
+                        IsRecoverableDwmCompositionException(inner))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static bool IsDwmComException(Exception exception)
+    {
         if (exception is not COMException comException)
         {
             return false;
@@ -29,12 +54,12 @@ internal static class ExceptionHelper
             return true;
         }
 
-        if (comException.HResult is STATUS_MESSAGE_LOST_HR && comException.Source == PresentationFrameworkExceptionSource)
+        if (comException.HResult is STATUS_MESSAGE_LOST_HR &&
+            comException.Source == PresentationFrameworkExceptionSource)
         {
             return true;
         }
 
-        // Check for common DWM composition changed patterns in the stack trace
         var stackTrace = comException.StackTrace;
         return !string.IsNullOrEmpty(stackTrace) &&
                stackTrace.Contains("DwmCompositionChanged", StringComparison.OrdinalIgnoreCase);

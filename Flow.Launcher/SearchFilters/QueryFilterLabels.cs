@@ -7,12 +7,6 @@ internal static class QueryFilterLabels
         QueryFilterId.File => Localize.searchFilter_file(),
         QueryFilterId.Folder => Localize.searchFilter_folder(),
         QueryFilterId.Path => Localize.searchFilter_path(),
-        QueryFilterId.Image => Localize.searchFilter_image(),
-        QueryFilterId.Video => Localize.searchFilter_video(),
-        QueryFilterId.Audio => Localize.searchFilter_audio(),
-        QueryFilterId.Document => Localize.searchFilter_document(),
-        QueryFilterId.Archive => Localize.searchFilter_archive(),
-        QueryFilterId.Executable => Localize.searchFilter_exe(),
         QueryFilterId.Extension => Localize.searchFilter_ext(),
         QueryFilterId.Size => Localize.searchFilter_size(),
         QueryFilterId.DateModified => Localize.searchFilter_modified(),
@@ -36,7 +30,12 @@ internal static class QueryFilterLabels
     {
         if (id == QueryFilterId.Path && string.IsNullOrEmpty(value))
         {
-            return Localize.searchFilter_tooltip("path:\"…\"");
+            return Localize.searchFilter_tooltip(@"C:\folder\>");
+        }
+
+        if (id == QueryFilterId.Extension && string.IsNullOrEmpty(value))
+        {
+            return Localize.searchFilter_tooltip("ext:png;jpg");
         }
 
         var syntax = QueryFilterCatalog.RequiresValue(id) && !string.IsNullOrEmpty(value)
@@ -60,7 +59,7 @@ internal static class QueryFilterLabels
 
         if (id == QueryFilterId.Extension)
         {
-            return value.TrimStart('.').ToLowerInvariant();
+            return QueryFilterExtensionValue.ToDisplay(value);
         }
 
         if (id == QueryFilterId.Path)
@@ -94,5 +93,16 @@ internal static class QueryFilterLabels
         "thisyear" => Localize.searchFilter_date_thisyear(),
         "lastyear" => Localize.searchFilter_date_lastyear(),
         _ => value
+    };
+
+    internal static string ExtensionGroup(string key) => key switch
+    {
+        "image" => Localize.searchFilter_image(),
+        "video" => Localize.searchFilter_video(),
+        "audio" => Localize.searchFilter_audio(),
+        "document" => Localize.searchFilter_document(),
+        "archive" => Localize.searchFilter_archive(),
+        "exe" => Localize.searchFilter_exe(),
+        _ => key
     };
 }

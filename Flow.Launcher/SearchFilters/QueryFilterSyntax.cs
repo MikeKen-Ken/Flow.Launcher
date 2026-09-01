@@ -32,10 +32,34 @@ internal static class QueryFilterSyntax
     internal static QueryFilterSnapshot Parse(string queryText)
     {
         var snapshot = new QueryFilterSnapshot();
-        foreach (var token in Tokenize(queryText))
+        var body = queryText;
+        if (QueryFilterPathValue.TrySplitScope(queryText, out var scopedPath, out var remainder))
+        {
+            snapshot.Set(QueryFilterId.Path, scopedPath);
+            body = remainder;
+        }
+
+        foreach (var token in Tokenize(body))
         {
             if (QueryFilterCatalog.TryMatch(token, out var id, out var value) && id is not null)
             {
+                if (snapshot.IsActive(QueryFilterId.Path) && QueryFilterCatalog.GroupOf(id.Value) == QueryFilterGroup.Path)
+                {
+                    continue;
+                }
+
+                if (id.Value == QueryFilterId.Extension && snapshot.IsActive(QueryFilterId.Extension))
+                {
+                    snapshot.Set(
+                        QueryFilterId.Extension,
+                        QueryFilterExtensionValue.Join(
+                        [
+                            snapshot.GetValue(QueryFilterId.Extension),
+                            value
+                        ]));
+                    continue;
+                }
+
                 snapshot.Set(id.Value, value);
             }
         }
@@ -45,10 +69,13 @@ internal static class QueryFilterSyntax
 
     internal static string Apply(string queryText, QueryFilterId id, string value, QueryFilterApplyMode mode)
     {
+        var hasScope = QueryFilterPathValue.TrySplitScope(queryText, out var existingPath, out var remainder);
+        var body = hasScope ? remainder : queryText;
+
         var searchTokens = new List<string>();
         var filterTokens = new List<(QueryFilterId Id, string Value, string Token)>();
 
-        foreach (var token in Tokenize(queryText))
+        foreach (var token in Tokenize(body))
         {
             if (QueryFilterCatalog.TryMatch(token, out var existingId, out var existingValue) && existingId is not null)
             {
@@ -57,15 +84,6 @@ internal static class QueryFilterSyntax
             else
             {
                 searchTokens.Add(token);
-            }
-        }
-
-        if (id == QueryFilterId.Extension && !string.IsNullOrEmpty(value))
-        {
-            value = value.Trim().TrimStart('.').ToLowerInvariant();
-            if (string.IsNullOrEmpty(value))
-            {
-                return queryText;
             }
         }
 
@@ -98,6 +116,11 @@ internal static class QueryFilterSyntax
         var current = filterTokens.FirstOrDefault(filter => filter.Id == id);
         var isActive = current.Token is not null;
         var sameValue = isActive && ValuesEqual(id, current.Value, value);
+        if (id == QueryFilterId.Path)
+        {
+            isActive = hasScope || isActive;
+            sameValue = isActive && ValuesEqual(id, hasScope ? existingPath : current.Value, value);
+        }
 
         var shouldAdd = mode switch
         {
@@ -111,12 +134,47 @@ internal static class QueryFilterSyntax
             shouldAdd = false;
         }
 
+        if (id == QueryFilterId.Extension)
+        {
+            var existingExtensions = QueryFilterExtensionValue.Union(
+                filterTokens.Where(filter => filter.Id == QueryFilterId.Extension).Select(filter => filter.Value));
+            IReadOnlyList<string> nextExtensions;
+            if (mode == QueryFilterApplyMode.Clear || string.IsNullOrEmpty(value))
+            {
+                nextExtensions = [];
+            }
+            else if (mode == QueryFilterApplyMode.Toggle)
+            {
+                nextExtensions = QueryFilterExtensionValue.Toggle(existingExtensions, value);
+            }
+            else
+            {
+                nextExtensions = QueryFilterExtensionValue.Parse(value);
+            }
+
+            if (nextExtensions.Count > 0)
+            {
+                remainingFilters.Add(
+                    QueryFilterCatalog.Format(QueryFilterId.Extension, QueryFilterExtensionValue.Join(nextExtensions)));
+            }
+
+            var extensionBody = string.Join(' ', searchTokens.Concat(remainingFilters));
+            return hasScope ? QueryFilterPathValue.Combine(existingPath, extensionBody) : extensionBody;
+        }
+
+        if (id == QueryFilterId.Path)
+        {
+            var pathBody = string.Join(' ', searchTokens.Concat(remainingFilters));
+            return shouldAdd ? QueryFilterPathValue.Combine(value, pathBody) : pathBody;
+        }
+
         if (shouldAdd)
         {
             remainingFilters.Add(QueryFilterCatalog.Format(id, value));
         }
 
-        return string.Join(' ', searchTokens.Concat(remainingFilters));
+        var rest = string.Join(' ', searchTokens.Concat(remainingFilters));
+        return hasScope ? QueryFilterPathValue.Combine(existingPath, rest) : rest;
     }
 
     private static IEnumerable<string> Tokenize(string queryText)
@@ -174,6 +232,11 @@ internal static class QueryFilterSyntax
         if (id == QueryFilterId.Path)
         {
             return QueryFilterPathValue.Equals(left, right);
+        }
+
+        if (id == QueryFilterId.Extension)
+        {
+            return QueryFilterExtensionValue.Equals(left, right);
         }
 
         return string.Equals(left ?? string.Empty, right ?? string.Empty, StringComparison.OrdinalIgnoreCase);

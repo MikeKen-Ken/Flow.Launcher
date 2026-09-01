@@ -21,6 +21,7 @@ public partial class QueryFilterItemViewModel : BaseModel
         HasPresets = presets.Count > 0;
         UsesSizePicker = id == QueryFilterId.Size;
         UsesFolderPicker = id == QueryFilterId.Path;
+        UsesMultiSelect = id == QueryFilterId.Extension;
         ShowsMenu = HasPresets || UsesSizePicker || UsesFolderPicker;
         // Labels are applied after language init. Localize uses PublicApi.Instance,
         // which deadlocks if called while IPublicAPI is still being resolved.
@@ -35,6 +36,8 @@ public partial class QueryFilterItemViewModel : BaseModel
     public bool UsesSizePicker { get; }
 
     public bool UsesFolderPicker { get; }
+
+    public bool UsesMultiSelect { get; }
 
     public bool ShowsMenu { get; }
 
@@ -70,8 +73,17 @@ public partial class QueryFilterItemViewModel : BaseModel
 
         foreach (var preset in Presets)
         {
-            preset.IsSelected = IsSelected &&
-                string.Equals(preset.Value, CurrentValue, System.StringComparison.OrdinalIgnoreCase);
+            if (Id == QueryFilterId.Extension)
+            {
+                preset.IsSelected = string.IsNullOrEmpty(preset.Value)
+                    ? !IsSelected
+                    : QueryFilterExtensionValue.Contains(CurrentValue, preset.Value);
+            }
+            else
+            {
+                preset.IsSelected = IsSelected &&
+                    string.Equals(preset.Value, CurrentValue, System.StringComparison.OrdinalIgnoreCase);
+            }
         }
     }
 
