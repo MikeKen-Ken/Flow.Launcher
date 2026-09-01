@@ -19,7 +19,8 @@ public partial class QueryFilterItemViewModel : BaseModel
         Glyph = glyph;
         Presets = presets;
         HasPresets = presets.Count > 0;
-        RefreshLabels();
+        // Labels are applied after language init. Localize uses PublicApi.Instance,
+        // which deadlocks if called while IPublicAPI is still being resolved.
     }
 
     internal QueryFilterId Id { get; }
@@ -90,7 +91,6 @@ public class QueryFilterPresetViewModel : BaseModel
     {
         FilterId = filterId;
         Value = value;
-        RefreshLabel();
     }
 
     internal QueryFilterId FilterId { get; }

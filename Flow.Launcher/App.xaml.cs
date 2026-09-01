@@ -221,6 +221,7 @@ namespace Flow.Launcher
 
                 // Initialize language before portable clean up since it needs translations
                 await _internationalization.InitializeLanguageAsync();
+                _mainVM.QueryFilters.RefreshLabels();
 
                 // Clean up after portability update
                 Ioc.Default.GetRequiredService<Portable>().PreStartCleanUpAfterPortabilityUpdate();

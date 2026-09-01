@@ -56,6 +56,10 @@ public class QueryFilterBarViewModel : BaseModel
         {
             OnPropertyChanged(nameof(IsVisible));
         }
+        else if (e.PropertyName == nameof(Settings.Language))
+        {
+            RefreshLabels();
+        }
     }
 
     private QueryFilterItemViewModel[] CreateFilters() =>
