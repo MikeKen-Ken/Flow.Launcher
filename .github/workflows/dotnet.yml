@@ -42,6 +42,9 @@ jobs:
 
           "flow_version=$buildVersion" >> $env:GITHUB_OUTPUT
           "flowVersion=$buildVersion" >> $env:GITHUB_ENV
+      - name: Update bundled plugin versions
+        shell: pwsh
+        run: .\Scripts\update_plugin_versions.ps1
       - name: Set Flow.Launcher.csproj version
         id: update
         uses: vers-one/dotnet-project-version-updater@v1.8

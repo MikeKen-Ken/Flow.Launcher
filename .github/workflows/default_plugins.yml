@@ -17,21 +17,8 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Update Plugins To Production Version
-        run: |
-             $version = "1.0.0"
-             Get-Content appveyor.yml | ForEach-Object {
-                 if ($_ -match "version:\s*'(\d+\.\d+\.\d+)\.") {
-                     $version = $matches[1]
-                 }
-             }
-
-             $jsonFiles = Get-ChildItem -Path ".\Plugins\*\plugin.json"
-             foreach ($file in $jsonFiles) {
-                 $plugin_old_ver = Get-Content $file.FullName -Raw | ConvertFrom-Json
-                 (Get-Content $file) -replace '"Version"\s*:\s*".*?"', "`"Version`": `"$version`"" | Set-Content $file
-                 $plugin_new_ver = Get-Content $file.FullName -Raw | ConvertFrom-Json
-                 Write-Host "Updated" $plugin_old_ver.Name "version from" $plugin_old_ver.Version "to" $plugin_new_ver.Version
-             }
+        shell: pwsh
+        run: .\Scripts\update_plugin_versions.ps1
 
       - name: Get Explorer Version
         id: updated-version-explorer
