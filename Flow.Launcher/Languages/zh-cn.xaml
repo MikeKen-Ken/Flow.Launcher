@@ -694,7 +694,7 @@
     <system:String x:Key="update_flowlauncher_update">更新</system:String>
     <system:String x:Key="update_flowlauncher_update_cancel">取消</system:String>
     <system:String x:Key="update_flowlauncher_fail">更新失败</system:String>
-    <system:String x:Key="update_flowlauncher_check_connection">检查网络是否可以连接至github-cloud.s3.amazonaws.com.</system:String>
+    <system:String x:Key="update_flowlauncher_check_connection">无法连接 GitHub 更新服务器（api.github.com / github.com / release-assets.githubusercontent.com），请检查网络和代理。也可到 Releases 页面下载 Setup.exe 手动安装。</system:String>
     <system:String x:Key="update_flowlauncher_update_restart_flowlauncher_tip">此次更新需要重启 Flow Launcher</system:String>
     <system:String x:Key="update_flowlauncher_update_update_files">下列文件会被更新</system:String>
     <system:String x:Key="update_flowlauncher_update_files">更新文件</system:String>

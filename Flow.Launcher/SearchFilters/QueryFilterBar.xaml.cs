@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -40,8 +39,10 @@ public partial class QueryFilterBar : UserControl
     public QueryFilterBar()
     {
         InitializeComponent();
-        SizePickerControl.CloseRequested += OnSizePickerCloseRequested;
+        SizePickerControl.CloseRequested += OnPickerCloseRequested;
+        ExtensionPickerControl.CloseRequested += OnPickerCloseRequested;
         SizePickerPopup.Closed += (_, _) => RestoreQueryBoxFocus();
+        ExtensionPickerPopup.Closed += (_, _) => OnExtensionPickerClosed();
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
         RefreshPalette();
@@ -100,6 +101,7 @@ public partial class QueryFilterBar : UserControl
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
         ThemeManager.Current.ActualApplicationThemeChanged -= OnThemeChanged;
+        HookExtensionOutsideClick(false);
     }
 
     private void OnThemeChanged(ThemeManager sender, object args)
@@ -139,6 +141,7 @@ public partial class QueryFilterBar : UserControl
         ChipSelectedFill = _palette.SelectedFill;
         ChipSelectedText = _palette.SelectedText;
         SizePickerControl?.ApplyPalette(_palette);
+        ExtensionPickerControl?.ApplyPalette(_palette);
     }
 
     private Color FindSurfaceColor()
@@ -194,7 +197,7 @@ public partial class QueryFilterBar : UserControl
 
         if (item.UsesMultiSelect)
         {
-            ShowExtensionMenu(button, item);
+            OpenExtensionPicker(button, item);
             return;
         }
 
@@ -226,73 +229,79 @@ public partial class QueryFilterBar : UserControl
         menu.IsOpen = true;
     }
 
-    private void ShowExtensionMenu(Button button, QueryFilterItemViewModel item)
-    {
-        var menu = new ContextMenu
-        {
-            PlacementTarget = button,
-            Placement = PlacementMode.Bottom
-        };
-
-        var anyItem = new MenuItem
-        {
-            Header = Localize.searchFilter_any(),
-            IsChecked = !item.IsSelected,
-            Command = item.SelectPresetCommand,
-            CommandParameter = string.Empty
-        };
-        menu.Items.Add(anyItem);
-
-        foreach (var (key, extensions) in QueryFilterCatalog.ExtensionGroups)
-        {
-            menu.Items.Add(new Separator());
-            menu.Items.Add(new MenuItem
-            {
-                Header = QueryFilterLabels.ExtensionGroup(key),
-                IsEnabled = false
-            });
-
-            foreach (var extension in extensions)
-            {
-                var preset = new MenuItem
-                {
-                    Header = extension,
-                    IsCheckable = true,
-                    StaysOpenOnClick = true,
-                    IsChecked = QueryFilterExtensionValue.Contains(item.CurrentValue, extension),
-                    Command = item.SelectPresetCommand,
-                    CommandParameter = extension
-                };
-                preset.Click += (_, _) => RefreshExtensionMenu(menu, item);
-                menu.Items.Add(preset);
-            }
-        }
-
-        menu.Closed += (_, _) => RestoreQueryBoxFocus();
-        menu.IsOpen = true;
-    }
-
-    private static void RefreshExtensionMenu(ContextMenu menu, QueryFilterItemViewModel item)
-    {
-        foreach (var menuItem in menu.Items.OfType<MenuItem>())
-        {
-            if (menuItem.CommandParameter is not string value)
-            {
-                continue;
-            }
-
-            menuItem.IsChecked = string.IsNullOrEmpty(value)
-                ? !item.IsSelected
-                : QueryFilterExtensionValue.Contains(item.CurrentValue, value);
-        }
-    }
-
     private void OpenSizePicker(Button button, QueryFilterItemViewModel item)
     {
+        SizePickerPopup.IsOpen = false;
+        ExtensionPickerPopup.IsOpen = false;
         SizePickerControl.ApplyPalette(_palette);
         SizePickerControl.Bind(item);
         SizePickerPopup.PlacementTarget = button;
         SizePickerPopup.IsOpen = true;
+    }
+
+    private void OpenExtensionPicker(Button button, QueryFilterItemViewModel item)
+    {
+        SizePickerPopup.IsOpen = false;
+        if (ExtensionPickerPopup.IsOpen)
+        {
+            ExtensionPickerPopup.IsOpen = false;
+        }
+
+        ExtensionPickerControl.ApplyPalette(_palette);
+        ExtensionPickerControl.Bind(item);
+        ExtensionPickerPopup.PlacementTarget = button;
+        ExtensionPickerPopup.IsOpen = true;
+        HookExtensionOutsideClick(true);
+    }
+
+    private void HookExtensionOutsideClick(bool enable)
+    {
+        if (Window.GetWindow(this) is not Window window)
+        {
+            return;
+        }
+
+        window.PreviewMouseDown -= OnWindowPreviewMouseDownForExtension;
+        if (enable)
+        {
+            window.PreviewMouseDown += OnWindowPreviewMouseDownForExtension;
+        }
+    }
+
+    private void OnWindowPreviewMouseDownForExtension(object sender, MouseButtonEventArgs e)
+    {
+        if (!ExtensionPickerPopup.IsOpen || e.OriginalSource is not DependencyObject source)
+        {
+            return;
+        }
+
+        if (IsInside(ExtensionPickerControl, source))
+        {
+            return;
+        }
+
+        ExtensionPickerPopup.IsOpen = false;
+    }
+
+    private void OnExtensionPickerClosed()
+    {
+        HookExtensionOutsideClick(false);
+        RestoreQueryBoxFocus();
+    }
+
+    private static bool IsInside(DependencyObject root, DependencyObject source)
+    {
+        while (source is not null)
+        {
+            if (ReferenceEquals(source, root))
+            {
+                return true;
+            }
+
+            source = VisualTreeHelper.GetParent(source) ?? LogicalTreeHelper.GetParent(source);
+        }
+
+        return false;
     }
 
     private void ShowPathMenu(Button button, QueryFilterItemViewModel item)
@@ -370,9 +379,10 @@ public partial class QueryFilterBar : UserControl
         }
     }
 
-    private void OnSizePickerCloseRequested(object sender, EventArgs e)
+    private void OnPickerCloseRequested(object sender, EventArgs e)
     {
         SizePickerPopup.IsOpen = false;
+        ExtensionPickerPopup.IsOpen = false;
         RestoreQueryBoxFocus();
     }
 

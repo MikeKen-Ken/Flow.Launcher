@@ -741,7 +741,7 @@
     <system:String x:Key="update_flowlauncher_update">Update</system:String>
     <system:String x:Key="update_flowlauncher_update_cancel">Cancel</system:String>
     <system:String x:Key="update_flowlauncher_fail">Update Failed</system:String>
-    <system:String x:Key="update_flowlauncher_check_connection">Check your connection and try updating proxy settings to github-cloud.s3.amazonaws.com.</system:String>
+    <system:String x:Key="update_flowlauncher_check_connection">Check your connection and proxy settings for GitHub (api.github.com, github.com, release-assets.githubusercontent.com). You can also download Setup.exe from the Releases page.</system:String>
     <system:String x:Key="update_flowlauncher_update_restart_flowlauncher_tip">This upgrade will restart Flow Launcher</system:String>
     <system:String x:Key="update_flowlauncher_update_update_files">Following files will be updated</system:String>
     <system:String x:Key="update_flowlauncher_update_files">Update files</system:String>

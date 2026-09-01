@@ -94,5 +94,12 @@
             StaysOpen="False">
             <filters:QueryFilterSizePicker x:Name="SizePickerControl" />
         </Popup>
+        <Popup
+            x:Name="ExtensionPickerPopup"
+            AllowsTransparency="True"
+            Placement="Bottom"
+            StaysOpen="True">
+            <filters:QueryFilterExtensionPicker x:Name="ExtensionPickerControl" />
+        </Popup>
     </Grid>
 </UserControl>

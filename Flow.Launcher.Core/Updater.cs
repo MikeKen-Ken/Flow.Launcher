@@ -1,20 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
-using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using Flow.Launcher.Plugin.SharedCommands;
 using Flow.Launcher.Infrastructure;
-using Flow.Launcher.Infrastructure.Http;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
-using JetBrains.Annotations;
 using Squirrel;
 
 namespace Flow.Launcher.Core
@@ -192,11 +187,10 @@ namespace Flow.Launcher.Core
 
         private void PresentUpdateFailure(Exception e, bool silentUpdate)
         {
-            if (e is OperationCanceledException)
+            if (IsUserCancellation(e))
                 return;
 
-            if (e is HttpRequestException or WebException or SocketException ||
-                e.InnerException is TimeoutException)
+            if (IsNetworkError(e))
             {
                 _api.LogException(ClassName,
                     "Check your connection and proxy settings for GitHub releases (api.github.com, github.com, release-assets.githubusercontent.com).", e);
@@ -209,9 +203,8 @@ namespace Flow.Launcher.Core
             if (silentUpdate)
                 return;
 
-            var detail = e is HttpRequestException or WebException or SocketException ||
-                         e.InnerException is TimeoutException
-                ? Localize.update_flowlauncher_check_connection()
+            var detail = IsNetworkError(e)
+                ? $"{Localize.update_flowlauncher_check_connection()}\n\n{e.Message}\n{GitHubRepository}/releases"
                 : string.IsNullOrWhiteSpace(e.Message)
                     ? Localize.update_flowlauncher_update_error()
                     : e.Message;
@@ -219,42 +212,23 @@ namespace Flow.Launcher.Core
             _api.ShowMsgBox(detail, Localize.update_flowlauncher_fail());
         }
 
-        [UsedImplicitly]
-        private class GithubRelease
-        {
-            [JsonPropertyName("prerelease")] public bool Prerelease { get; [UsedImplicitly] set; }
+        private static bool IsUserCancellation(Exception e) =>
+            e is OperationCanceledException && e.InnerException is not TimeoutException;
 
-            [JsonPropertyName("published_at")] public DateTime PublishedAt { get; [UsedImplicitly] set; }
+        private static bool IsNetworkError(Exception e) =>
+            e is HttpRequestException or WebException or SocketException ||
+            e.InnerException is TimeoutException;
 
-            [JsonPropertyName("html_url")] public string HtmlUrl { get; [UsedImplicitly] set; }
-        }
-
-        // https://github.com/Squirrel/Squirrel.Windows/blob/master/src/Squirrel/UpdateManager.Factory.cs
-        private static async Task<UpdateManager> GitHubUpdateManagerAsync(
+        // Skip api.github.com: it is a separate host, has no mirror fallback, and a missing
+        // User-Agent returns 403 immediately. GitHub's /releases/latest/download already
+        // resolves the latest stable asset; HttpFileDownloader then retries via mirrors.
+        private static Task<UpdateManager> GitHubUpdateManagerAsync(
             string repository,
             CancellationToken token = default)
         {
-            var uri = new Uri(repository);
-            var api = $"https://api.github.com/repos{uri.AbsolutePath}/releases";
-
-            await using var jsonStream = await Http.GetStreamAsync(api, token).ConfigureAwait(false);
-
-            var releases = await JsonSerializer
-                .DeserializeAsync<List<GithubRelease>>(jsonStream, cancellationToken: token)
-                .ConfigureAwait(false);
-            var latest = releases?
-                .Where(r => !r.Prerelease)
-                .OrderByDescending(r => r.PublishedAt)
-                .FirstOrDefault();
-
-            if (latest == null || string.IsNullOrEmpty(latest.HtmlUrl))
-                throw new InvalidOperationException("No stable GitHub releases were found.");
-
-            var latestUrl = latest.HtmlUrl.Replace("/tag/", "/download/");
-
-            var manager = new UpdateManager(latestUrl, urlDownloader: new HttpFileDownloader());
-
-            return manager;
+            token.ThrowIfCancellationRequested();
+            var latestUrl = $"{repository.TrimEnd('/')}/releases/latest/download";
+            return Task.FromResult(new UpdateManager(latestUrl, urlDownloader: new HttpFileDownloader()));
         }
 
         private static string NewVersionTips(string version)
@@ -305,7 +279,7 @@ namespace Flow.Launcher.Core
             public static UpdateAttemptResult NotAvailable() => new() { Status = UpdateStatus.NotAvailable };
 
             public static UpdateAttemptResult Failed(Exception error) =>
-                error is OperationCanceledException
+                error is OperationCanceledException && error.InnerException is not TimeoutException
                     ? new UpdateAttemptResult { Status = UpdateStatus.Cancelled }
                     : new UpdateAttemptResult { Status = UpdateStatus.Failed, Error = error };
         }

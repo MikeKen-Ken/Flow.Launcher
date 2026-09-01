@@ -1,0 +1,52 @@
+<UserControl
+    x:Class="Flow.Launcher.SearchFilters.QueryFilterExtensionPicker"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="468"
+    Focusable="True"
+    PreviewKeyDown="OnPreviewKeyDown"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <Style x:Key="ExtensionTileStyle" TargetType="Button">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="10 7" />
+            <Setter Property="Margin" Value="0 0 8 8" />
+            <Setter Property="MinWidth" Value="64" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Padding="{TemplateBinding Padding}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="14">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    <Border
+        Padding="14 12"
+        Background="{Binding PanelFill, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        BorderBrush="{Binding PanelStroke, RelativeSource={RelativeSource AncestorType=UserControl}}"
+        BorderThickness="1"
+        CornerRadius="10">
+        <StackPanel>
+            <Button
+                x:Name="AnyButton"
+                HorizontalAlignment="Left"
+                Click="OnAnyClick"
+                Style="{StaticResource ExtensionTileStyle}" />
+            <StackPanel x:Name="GroupsHost" Margin="0 8 0 0" />
+        </StackPanel>
+    </Border>
+</UserControl>

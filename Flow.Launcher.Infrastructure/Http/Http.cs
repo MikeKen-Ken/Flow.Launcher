@@ -16,14 +16,27 @@ namespace Flow.Launcher.Infrastructure.Http
 
         private const string UserAgent = @"Mozilla/5.0 (Trident/7.0; rv:11.0) like Gecko";
 
-        private static readonly HttpClient client = new();
-
         /// <summary>
         /// Captured before any in-app proxy override. An empty <see cref="WebProxy"/>
         /// bypasses the OS proxy, which breaks GitHub/S3 downloads for users who only
         /// configure a system proxy.
         /// </summary>
         private static readonly IWebProxy SystemProxy = HttpClient.DefaultProxy;
+
+        private static readonly SocketsHttpHandler handler = new()
+        {
+            UseProxy = true,
+            AutomaticDecompression = DecompressionMethods.All,
+            PooledConnectionLifetime = TimeSpan.FromMinutes(2),
+            ConnectTimeout = TimeSpan.FromSeconds(8)
+        };
+
+        // Squirrel nupkgs are ~80MB+. The HttpClient default of 100s aborts GitHub/S3 downloads
+        // on slow or proxied links and surfaces as a generic "Update Failed" connection error.
+        private static readonly HttpClient client = new(handler)
+        {
+            Timeout = TimeSpan.FromMinutes(30)
+        };
 
         static Http()
         {
@@ -114,7 +127,7 @@ namespace Flow.Launcher.Infrastructure.Http
                     if (canReportProgress && reportProgress != null)
                     {
                         await using var contentStream = await response.Content.ReadAsStreamAsync(token);
-                        await using var fileStream = new FileStream(filePath, FileMode.CreateNew, FileAccess.Write, FileShare.None, 8192, true);
+                        await using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
 
                         var buffer = new byte[8192];
                         long totalRead = 0;
@@ -141,7 +154,7 @@ namespace Flow.Launcher.Infrastructure.Http
                     }
                     else
                     {
-                        await using var fileStream = new FileStream(filePath, FileMode.CreateNew);
+                        await using var fileStream = new FileStream(filePath, FileMode.Create);
                         await response.Content.CopyToAsync(fileStream, token);
                     }
                 }
