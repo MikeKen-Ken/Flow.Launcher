@@ -8,6 +8,7 @@
     xmlns:flowlauncher="clr-namespace:Flow.Launcher"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:filters="clr-namespace:Flow.Launcher.SearchFilters"
     xmlns:vm="clr-namespace:Flow.Launcher.ViewModel"
     Name="FlowMainWindow"
     Title="Flow Launcher"
@@ -352,6 +353,10 @@
                     Y1="0"
                     Y2="0" />
             </Grid>
+
+            <filters:QueryFilterBar
+                DataContext="{Binding QueryFilters}"
+                Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 
             <Grid x:Name="MiddleSeparatorArea" ClipToBounds="True">
                 <ContentControl>

@@ -612,6 +612,19 @@
                 </StackPanel>
             </ui:SettingsCard>
 
+            <ui:SettingsCard
+                Margin="0 4 0 0"
+                Description="{DynamicResource ShowSearchFilterBarTip}"
+                Header="{DynamicResource ShowSearchFilterBar}">
+                <ui:SettingsCard.HeaderIcon>
+                    <ui:FontIcon Glyph="&#xe71c;" />
+                </ui:SettingsCard.HeaderIcon>
+                <ui:ToggleSwitch
+                    IsOn="{Binding ShowSearchFilterBar}"
+                    OffContent="{DynamicResource disable}"
+                    OnContent="{DynamicResource enable}" />
+            </ui:SettingsCard>
+
             <!--  Placeholder text  -->
             <ui:SettingsExpander
                 Margin="0 4 0 0"

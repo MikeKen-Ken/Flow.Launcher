@@ -25,6 +25,7 @@ using Flow.Launcher.Infrastructure.Storage;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.Plugin.SharedCommands;
+using Flow.Launcher.SearchFilters;
 using Flow.Launcher.Storage;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.VisualStudio.Threading;
@@ -181,6 +182,8 @@ namespace Flow.Launcher.ViewModel
                 IsPreviewOn = Settings.AlwaysPreview
             };
             _selectedResults = Results;
+
+            QueryFilters = new QueryFilterBarViewModel(Settings, () => QueryText, query => ChangeQueryText(query));
 
             ResultAreaColumn = Settings.AlwaysPreview ? ResultAreaColumnPreviewShown : ResultAreaColumnPreviewHidden;
 
@@ -693,6 +696,8 @@ namespace Flow.Launcher.ViewModel
 
         public ResultsViewModel History { get; private set; }
 
+        public QueryFilterBarViewModel QueryFilters { get; }
+
         public bool GameModeStatus { get; set; } = false;
 
         private string _queryText;
@@ -702,6 +707,7 @@ namespace Flow.Launcher.ViewModel
             set
             {
                 _queryText = value;
+                QueryFilters?.SyncFromQuery(value);
                 OnPropertyChanged();
             }
         }

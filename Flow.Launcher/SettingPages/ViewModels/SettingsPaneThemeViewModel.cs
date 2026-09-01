@@ -312,6 +312,12 @@ public partial class SettingsPaneThemeViewModel : BaseModel
         set => Settings.UseDate = value;
     }
 
+    public bool ShowSearchFilterBar
+    {
+        get => Settings.ShowSearchFilterBar;
+        set => Settings.ShowSearchFilterBar = value;
+    }
+
     public FontFamily ClockPanelFont { get; }
 
     public Brush PreviewBackground
