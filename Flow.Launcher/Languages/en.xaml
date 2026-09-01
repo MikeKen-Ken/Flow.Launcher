@@ -379,6 +379,11 @@
     <system:String x:Key="searchFilter_size_large">Large</system:String>
     <system:String x:Key="searchFilter_size_huge">Huge</system:String>
     <system:String x:Key="searchFilter_size_gigantic">Gigantic</system:String>
+    <system:String x:Key="searchFilter_size_greaterThan">Greater than</system:String>
+    <system:String x:Key="searchFilter_size_lessThan">Less than</system:String>
+    <system:String x:Key="searchFilter_size_custom">Custom</system:String>
+    <system:String x:Key="searchFilter_size_customHint">Examples: 1m, 5m, 1gb, &gt;2gb, 10mb..100mb</system:String>
+    <system:String x:Key="searchFilter_size_apply">Apply</system:String>
     <system:String x:Key="searchFilter_date_today">Today</system:String>
     <system:String x:Key="searchFilter_date_yesterday">Yesterday</system:String>
     <system:String x:Key="searchFilter_date_thisweek">This week</system:String>

@@ -70,7 +70,7 @@ public class QueryFilterBarViewModel : BaseModel
         Create(QueryFilterId.Video, "\uE714"),
         Create(QueryFilterId.Audio, "\uE8D6"),
         Create(QueryFilterId.Document, "\uE8C8"),
-        Create(QueryFilterId.Size, "\uE9E9", QueryFilterCatalog.SizePresets),
+        Create(QueryFilterId.Size, "\uE9E9"),
         Create(QueryFilterId.DateModified, "\uE823", QueryFilterCatalog.DatePresets),
         Create(QueryFilterId.DateCreated, "\uE787", QueryFilterCatalog.DatePresets)
     ];

@@ -19,6 +19,8 @@ public partial class QueryFilterItemViewModel : BaseModel
         Glyph = glyph;
         Presets = presets;
         HasPresets = presets.Count > 0;
+        UsesSizePicker = id == QueryFilterId.Size;
+        ShowsMenu = HasPresets || UsesSizePicker;
         // Labels are applied after language init. Localize uses PublicApi.Instance,
         // which deadlocks if called while IPublicAPI is still being resolved.
     }
@@ -28,6 +30,10 @@ public partial class QueryFilterItemViewModel : BaseModel
     public string Glyph { get; }
 
     public bool HasPresets { get; }
+
+    public bool UsesSizePicker { get; }
+
+    public bool ShowsMenu { get; }
 
     public ObservableCollection<QueryFilterPresetViewModel> Presets { get; }
 
@@ -82,6 +88,18 @@ public partial class QueryFilterItemViewModel : BaseModel
         }
 
         _owner.Apply(Id, value, QueryFilterApplyMode.Toggle);
+    }
+
+    [RelayCommand]
+    private void SetSize(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            _owner.Apply(Id, string.Empty, QueryFilterApplyMode.Clear);
+            return;
+        }
+
+        _owner.Apply(Id, value, QueryFilterApplyMode.Set);
     }
 }
 

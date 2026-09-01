@@ -377,6 +377,11 @@
     <system:String x:Key="searchFilter_size_large">大</system:String>
     <system:String x:Key="searchFilter_size_huge">很大</system:String>
     <system:String x:Key="searchFilter_size_gigantic">巨大</system:String>
+    <system:String x:Key="searchFilter_size_greaterThan">大于</system:String>
+    <system:String x:Key="searchFilter_size_lessThan">小于</system:String>
+    <system:String x:Key="searchFilter_size_custom">自定义</system:String>
+    <system:String x:Key="searchFilter_size_customHint">例如：1m、5m、1gb、&gt;2gb、10mb..100mb</system:String>
+    <system:String x:Key="searchFilter_size_apply">应用</system:String>
     <system:String x:Key="searchFilter_date_today">今天</system:String>
     <system:String x:Key="searchFilter_date_yesterday">昨天</system:String>
     <system:String x:Key="searchFilter_date_thisweek">本周</system:String>

@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -10,12 +11,20 @@ public partial class QueryFilterBar : UserControl
     public QueryFilterBar()
     {
         InitializeComponent();
+        SizePickerControl.CloseRequested += OnSizePickerCloseRequested;
+        SizePickerPopup.Closed += (_, _) => RestoreQueryBoxFocus();
     }
 
     private void OnFilterChipClick(object sender, RoutedEventArgs e)
     {
         if (sender is not Button button || button.DataContext is not QueryFilterItemViewModel item)
         {
+            return;
+        }
+
+        if (item.UsesSizePicker)
+        {
+            OpenSizePicker(button, item);
             return;
         }
 
@@ -45,6 +54,19 @@ public partial class QueryFilterBar : UserControl
 
         menu.Closed += (_, _) => RestoreQueryBoxFocus();
         menu.IsOpen = true;
+    }
+
+    private void OpenSizePicker(Button button, QueryFilterItemViewModel item)
+    {
+        SizePickerControl.Bind(item);
+        SizePickerPopup.PlacementTarget = button;
+        SizePickerPopup.IsOpen = true;
+    }
+
+    private void OnSizePickerCloseRequested(object sender, EventArgs e)
+    {
+        SizePickerPopup.IsOpen = false;
+        RestoreQueryBoxFocus();
     }
 
     private void RestoreQueryBoxFocus()

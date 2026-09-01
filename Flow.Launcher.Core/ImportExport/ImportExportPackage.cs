@@ -152,10 +152,9 @@ public static class ImportExportPackage
 
         if (applyPlugins && HasPlugins(packageDirectory))
         {
-            ImportExportFileCopy.CopyDirectory(
+            ImportExportFileCopy.ReplaceDirectory(
                 Path.Combine(packageDirectory, Constant.Plugins),
-                paths.PluginsDirectory,
-                overwrite: true);
+                paths.PluginsDirectory);
         }
     }
 

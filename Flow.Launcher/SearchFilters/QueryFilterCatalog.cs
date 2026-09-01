@@ -6,17 +6,6 @@ namespace Flow.Launcher.SearchFilters;
 
 internal static class QueryFilterCatalog
 {
-    internal static readonly IReadOnlyList<string> SizePresets =
-    [
-        "empty",
-        "tiny",
-        "small",
-        "medium",
-        "large",
-        "huge",
-        "gigantic"
-    ];
-
     internal static readonly IReadOnlyList<string> DatePresets =
     [
         "today",

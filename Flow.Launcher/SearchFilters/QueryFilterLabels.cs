@@ -59,7 +59,7 @@ internal static class QueryFilterLabels
         "large" => Localize.searchFilter_size_large(),
         "huge" => Localize.searchFilter_size_huge(),
         "gigantic" => Localize.searchFilter_size_gigantic(),
-        _ => value
+        _ => QueryFilterSizeValue.ToDisplay(value)
     };
 
     private static string DateLabel(string value) => value.ToLowerInvariant() switch

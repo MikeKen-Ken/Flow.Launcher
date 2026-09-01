@@ -37,6 +37,24 @@ internal static class ImportExportFileCopy
         }
     }
 
+    public static void ReplaceDirectory(
+        string source,
+        string destination,
+        CancellationToken token = default)
+    {
+        if (!Directory.Exists(source))
+        {
+            return;
+        }
+
+        if (Directory.Exists(destination))
+        {
+            Directory.Delete(destination, recursive: true);
+        }
+
+        CopyDirectory(source, destination, overwrite: true, token);
+    }
+
     public static void CopyFile(string source, string destination, bool overwrite)
     {
         using var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);

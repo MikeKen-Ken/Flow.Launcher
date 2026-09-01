@@ -47,39 +47,48 @@
             </Style.Triggers>
         </Style>
     </UserControl.Resources>
-    <ItemsControl ItemsSource="{Binding Filters}">
-        <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-                <WrapPanel Margin="12 4 12 8" />
-            </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-            <DataTemplate DataType="{x:Type filters:QueryFilterItemViewModel}">
-                <Button
-                    Click="OnFilterChipClick"
-                    Style="{StaticResource SearchFilterChipStyle}"
-                    ToolTip="{Binding Tooltip}">
-                    <StackPanel Orientation="Horizontal">
-                        <ui:FontIcon
-                            Margin="0 0 5 0"
-                            VerticalAlignment="Center"
-                            FontSize="12"
-                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Glyph="{Binding Glyph}" />
-                        <TextBlock
-                            VerticalAlignment="Center"
-                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Text="{Binding DisplayText}" />
-                        <ui:FontIcon
-                            Margin="4 0 0 0"
-                            VerticalAlignment="Center"
-                            FontSize="8"
-                            Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                            Glyph="&#xE70D;"
-                            Visibility="{Binding HasPresets, Converter={StaticResource BoolToVisibilityConverter}}" />
-                    </StackPanel>
-                </Button>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+    <Grid>
+        <ItemsControl ItemsSource="{Binding Filters}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Margin="12 4 12 8" />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="{x:Type filters:QueryFilterItemViewModel}">
+                    <Button
+                        Click="OnFilterChipClick"
+                        Style="{StaticResource SearchFilterChipStyle}"
+                        ToolTip="{Binding Tooltip}">
+                        <StackPanel Orientation="Horizontal">
+                            <ui:FontIcon
+                                Margin="0 0 5 0"
+                                VerticalAlignment="Center"
+                                FontSize="12"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Glyph="{Binding Glyph}" />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Text="{Binding DisplayText}" />
+                            <ui:FontIcon
+                                Margin="4 0 0 0"
+                                VerticalAlignment="Center"
+                                FontSize="8"
+                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                Glyph="&#xE70D;"
+                                Visibility="{Binding ShowsMenu, Converter={StaticResource BoolToVisibilityConverter}}" />
+                        </StackPanel>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Popup
+            x:Name="SizePickerPopup"
+            AllowsTransparency="True"
+            Placement="Bottom"
+            StaysOpen="False">
+            <filters:QueryFilterSizePicker x:Name="SizePickerControl" />
+        </Popup>
+    </Grid>
 </UserControl>

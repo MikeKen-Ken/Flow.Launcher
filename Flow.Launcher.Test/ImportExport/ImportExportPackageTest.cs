@@ -77,6 +77,65 @@ namespace Flow.Launcher.Test.ImportExport
         }
 
         [Test]
+        public void ApplyFromZip_ReplacesExistingPluginsInsteadOfMerging()
+        {
+            var source = CreateDataTree("replace-zip-source");
+            var destination = CreateDataTree("replace-zip-destination");
+
+            try
+            {
+                SeedSampleData(source, theme: "dark");
+                Directory.CreateDirectory(Path.Combine(destination.PluginsDirectory, "ExtraPlugin"));
+                File.WriteAllText(
+                    Path.Combine(destination.PluginsDirectory, "ExtraPlugin", "plugin.json"),
+                    "{\"Name\":\"Extra\"}");
+
+                var zipPath = Path.Combine(source.DataDirectory, "pack.zip");
+                ImportExportPackage.CreateZip(zipPath, source, includeSettings: true, includePlugins: true);
+                ImportExportPackage.ApplyFromZip(zipPath, destination, applySettings: true, applyPlugins: true);
+
+                Assert.That(File.Exists(Path.Combine(destination.PluginsDirectory, "SamplePlugin", "plugin.json")), Is.True);
+                Assert.That(Directory.Exists(Path.Combine(destination.PluginsDirectory, "ExtraPlugin")), Is.False);
+            }
+            finally
+            {
+                Cleanup(source.DataDirectory);
+                Cleanup(destination.DataDirectory);
+            }
+        }
+
+        [Test]
+        public void ApplyFromDirectory_ReplacesExistingPluginsInsteadOfMerging()
+        {
+            var source = CreateDataTree("replace-folder-source");
+            var destination = CreateDataTree("replace-folder-destination");
+            var packageDirectory = Path.Combine(Path.GetTempPath(), "FlowLauncherImportExportReplace-" + System.Guid.NewGuid().ToString("N"));
+
+            try
+            {
+                SeedSampleData(source, theme: "light");
+                Directory.CreateDirectory(Path.Combine(destination.PluginsDirectory, "ExtraPlugin"));
+                File.WriteAllText(
+                    Path.Combine(destination.PluginsDirectory, "ExtraPlugin", "plugin.json"),
+                    "{\"Name\":\"Extra\"}");
+
+                ImportExportPackage.WriteToDirectory(
+                    packageDirectory, source, includeSettings: true, includePlugins: true);
+                ImportExportPackage.ApplyFromDirectory(
+                    packageDirectory, destination, applySettings: true, applyPlugins: true);
+
+                Assert.That(File.Exists(Path.Combine(destination.PluginsDirectory, "SamplePlugin", "plugin.json")), Is.True);
+                Assert.That(Directory.Exists(Path.Combine(destination.PluginsDirectory, "ExtraPlugin")), Is.False);
+            }
+            finally
+            {
+                Cleanup(source.DataDirectory);
+                Cleanup(destination.DataDirectory);
+                Cleanup(packageDirectory);
+            }
+        }
+
+        [Test]
         public void ApplyFromZip_CanSkipPlugins()
         {
             var source = CreateDataTree("skip-source");

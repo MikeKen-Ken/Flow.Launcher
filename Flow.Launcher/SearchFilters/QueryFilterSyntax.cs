@@ -60,6 +60,16 @@ internal static class QueryFilterSyntax
             }
         }
 
+        if (id == QueryFilterId.Size && !string.IsNullOrEmpty(value))
+        {
+            if (!QueryFilterSizeValue.TryNormalize(value, out var normalizedSize))
+            {
+                return queryText;
+            }
+
+            value = normalizedSize;
+        }
+
         var group = QueryFilterCatalog.GroupOf(id);
         var remainingFilters = filterTokens
             .Where(filter => QueryFilterCatalog.GroupOf(filter.Id) != group)
@@ -68,7 +78,7 @@ internal static class QueryFilterSyntax
 
         var current = filterTokens.FirstOrDefault(filter => filter.Id == id);
         var isActive = current.Token is not null;
-        var sameValue = isActive && string.Equals(current.Value ?? string.Empty, value ?? string.Empty, StringComparison.OrdinalIgnoreCase);
+        var sameValue = isActive && ValuesEqual(id, current.Value, value);
 
         var shouldAdd = mode switch
         {
@@ -93,5 +103,15 @@ internal static class QueryFilterSyntax
         }
 
         return queryText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
+
+    private static bool ValuesEqual(QueryFilterId id, string left, string right)
+    {
+        if (id == QueryFilterId.Size)
+        {
+            return QueryFilterSizeValue.Equals(left, right);
+        }
+
+        return string.Equals(left ?? string.Empty, right ?? string.Empty, StringComparison.OrdinalIgnoreCase);
     }
 }
