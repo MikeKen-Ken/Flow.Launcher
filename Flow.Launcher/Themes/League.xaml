@@ -11,7 +11,7 @@
         TargetType="{x:Type TextBox}">
         <Setter Property="Foreground" Value="#b88f3a" />
         <Setter Property="CaretBrush" Value="#b88f3a" />
-        <Setter Property="Padding" Value="0 0 66 0" />
+        <Setter Property="Padding" Value="0 0 102 0" />
         <Setter Property="Height" Value="42" />
     </Style>
     <Style
@@ -25,7 +25,7 @@
         BasedOn="{StaticResource BaseQuerySuggestionBoxStyle}"
         TargetType="{x:Type TextBox}">
         <Setter Property="Foreground" Value="#a09b8c" />
-        <Setter Property="Padding" Value="0 0 66 0" />
+        <Setter Property="Padding" Value="0 0 102 0" />
         <Setter Property="Height" Value="42" />
     </Style>
 

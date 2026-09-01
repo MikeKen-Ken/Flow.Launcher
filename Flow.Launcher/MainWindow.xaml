@@ -314,8 +314,13 @@
                         Text="{Binding DateText}"
                         Visibility="{Binding Settings.UseDate, Converter={StaticResource BoolToVisibilityConverter}}" />
                 </StackPanel>
-                <Border>
-                    <Grid WindowChrome.IsHitTestVisibleInChrome="True">
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal"
+                    Panel.ZIndex="3"
+                    WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Grid>
                         <Image
                             x:Name="PluginActivationIcon"
                             HorizontalAlignment="Right"
@@ -336,7 +341,20 @@
                                 Visibility="{Binding SearchIconVisibility}" />
                         </Canvas>
                     </Grid>
-                </Border>
+                    <Button
+                        x:Name="CloseSearchPanelButton"
+                        AutomationProperties.Name="{DynamicResource closeWindow}"
+                        Command="{Binding EscCommand}"
+                        Focusable="False"
+                        Style="{DynamicResource SearchPanelCloseButtonStyle}"
+                        ToolTip="{DynamicResource closeWindow}">
+                        <ui:FontIcon
+                            FontSize="12"
+                            Foreground="{Binding Foreground, ElementName=QueryTextBox}"
+                            Glyph="&#xe711;"
+                            Opacity="0.55" />
+                    </Button>
+                </StackPanel>
                 <Line
                     x:Name="ProgressBar"
                     Style="{DynamicResource PendingLineStyle}"

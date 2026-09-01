@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -29,9 +30,16 @@ public partial class QueryFilterSizePicker : UserControl
     public static readonly DependencyProperty FieldFillProperty = DependencyProperty.Register(
         nameof(FieldFill), typeof(Brush), typeof(QueryFilterSizePicker));
 
+    private bool _dragging;
+    private bool _suppress;
+
     public QueryFilterSizePicker()
     {
+        _suppress = true;
         InitializeComponent();
+        MinSlider.Maximum = QueryFilterSizeSteps.LastIndex;
+        MaxSlider.Maximum = QueryFilterSizeSteps.LastIndex;
+        _suppress = false;
     }
 
     public Brush ChipFill
@@ -97,23 +105,57 @@ public partial class QueryFilterSizePicker : UserControl
     public void Bind(QueryFilterItemViewModel item)
     {
         DataContext = item;
-        CustomSizeBox.Text = item.CurrentValue ?? string.Empty;
-        Dispatcher.BeginInvoke(() =>
+        _suppress = true;
+        try
         {
-            CustomSizeBox.Focus();
-            CustomSizeBox.SelectAll();
-        }, System.Windows.Threading.DispatcherPriority.Input);
+            CustomSizeBox.Text = item.CurrentValue ?? string.Empty;
+            if (QueryFilterSizeValue.TryParseBounds(item.CurrentValue, out var min, out var max))
+            {
+                MinSlider.Value = QueryFilterSizeSteps.IndexOf(min);
+                MaxSlider.Value = QueryFilterSizeSteps.IndexOf(max);
+            }
+            else
+            {
+                MinSlider.Value = QueryFilterSizeSteps.AnyIndex;
+                MaxSlider.Value = QueryFilterSizeSteps.AnyIndex;
+            }
+
+            UpdateBoundLabels();
+        }
+        finally
+        {
+            _suppress = false;
+        }
     }
 
-    private void OnPresetClick(object sender, RoutedEventArgs e)
+    private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
-        if (sender is not Button { Tag: string value } || DataContext is not QueryFilterItemViewModel item)
+        if (e.Key == Key.Escape)
         {
-            return;
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+            e.Handled = true;
         }
+    }
 
-        item.SelectPresetCommand.Execute(value);
-        CloseRequested?.Invoke(this, EventArgs.Empty);
+    private void OnSliderDragStarted(object sender, DragStartedEventArgs e)
+    {
+        _dragging = true;
+    }
+
+    private void OnSliderDragCompleted(object sender, DragCompletedEventArgs e)
+    {
+        _dragging = false;
+        ApplyFromSliders();
+    }
+
+    private void OnMinSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        OnBoundSliderChanged(changingMin: true);
+    }
+
+    private void OnMaxSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        OnBoundSliderChanged(changingMin: false);
     }
 
     private void OnApplyCustomClick(object sender, RoutedEventArgs e)
@@ -128,11 +170,6 @@ public partial class QueryFilterSizePicker : UserControl
             ApplyCustom();
             e.Handled = true;
         }
-        else if (e.Key == Key.Escape)
-        {
-            CloseRequested?.Invoke(this, EventArgs.Empty);
-            e.Handled = true;
-        }
     }
 
     private void OnClearClick(object sender, RoutedEventArgs e)
@@ -143,6 +180,84 @@ public partial class QueryFilterSizePicker : UserControl
         }
 
         CloseRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnBoundSliderChanged(bool changingMin)
+    {
+        if (_suppress)
+        {
+            return;
+        }
+
+        EnsureOrder(changingMin);
+        UpdateBoundLabels();
+        if (!_dragging)
+        {
+            ApplyFromSliders();
+        }
+    }
+
+    private void EnsureOrder(bool changingMin)
+    {
+        var minIndex = (int)MinSlider.Value;
+        var maxIndex = (int)MaxSlider.Value;
+        if (minIndex <= QueryFilterSizeSteps.AnyIndex || maxIndex <= QueryFilterSizeSteps.AnyIndex || minIndex < maxIndex)
+        {
+            return;
+        }
+
+        _suppress = true;
+        try
+        {
+            if (changingMin)
+            {
+                MaxSlider.Value = minIndex >= QueryFilterSizeSteps.LastIndex
+                    ? QueryFilterSizeSteps.AnyIndex
+                    : minIndex + 1;
+            }
+            else
+            {
+                MinSlider.Value = maxIndex <= 1
+                    ? QueryFilterSizeSteps.AnyIndex
+                    : maxIndex - 1;
+            }
+        }
+        finally
+        {
+            _suppress = false;
+        }
+    }
+
+    private void UpdateBoundLabels()
+    {
+        MinValueText.Text = BoundLabel((int)MinSlider.Value, greaterThan: true);
+        MaxValueText.Text = BoundLabel((int)MaxSlider.Value, greaterThan: false);
+    }
+
+    private static string BoundLabel(int index, bool greaterThan)
+    {
+        var token = QueryFilterSizeSteps.TokenAt(index);
+        if (string.IsNullOrEmpty(token))
+        {
+            return Localize.searchFilter_any();
+        }
+
+        var pretty = QueryFilterSizeValue.ToDisplay(token);
+        return greaterThan ? ">" + pretty : "<" + pretty;
+    }
+
+    private void ApplyFromSliders()
+    {
+        if (DataContext is not QueryFilterItemViewModel item)
+        {
+            return;
+        }
+
+        var value = QueryFilterSizeValue.FormatBounds(
+            QueryFilterSizeSteps.TokenAt((int)MinSlider.Value),
+            QueryFilterSizeSteps.TokenAt((int)MaxSlider.Value));
+        CustomSizeBox.Text = string.IsNullOrEmpty(value) ? string.Empty : QueryFilterSizeValue.ToDisplay(value);
+        item.SetSizeCommand.Execute(value);
     }
 
     private void ApplyCustom()

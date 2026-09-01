@@ -999,7 +999,6 @@ namespace Flow.Launcher.Core.Plugin
                 var defaultPluginIDs = new List<string>
                     {
                         "572be03c74c642baae319fc283e561a8", // Explorer
-                        "9f8f9b14-2518-4907-b211-35ab6290dee7", // PluginsManager
                         "b64d0a79-329a-48b0-b53f-d658318a1bf6", // ProcessKiller
                         "791FC278BA414111B8D1886DFE447410", // Program
                         "D409510CD0D2481F853690A07E6DC426", // Shell

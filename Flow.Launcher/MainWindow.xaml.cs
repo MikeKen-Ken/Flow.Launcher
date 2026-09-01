@@ -74,7 +74,7 @@ namespace Flow.Launcher
         private int _initialHeight;
 
         // Window Animation
-        private const double DefaultRightMargin = 66; //* this value from base.xaml
+        private const double DefaultRightMargin = 102; //* this value from base.xaml
         private bool _isClockPanelAnimating = false;
         private Storyboard _progressBarStoryboard;
 

@@ -42,4 +42,55 @@ public class QueryFilterSizeValueTest
 
         Assert.That(result, Is.EqualTo("report size:1gb"));
     }
+
+    [Test]
+    public void TryParseBounds_SplitsOperatorsAndRanges()
+    {
+        Assert.That(QueryFilterSizeValue.TryParseBounds(">20mb", out var min, out var max), Is.True);
+        Assert.That(min, Is.EqualTo("20mb"));
+        Assert.That(max, Is.EqualTo(string.Empty));
+
+        Assert.That(QueryFilterSizeValue.TryParseBounds("<1gb", out min, out max), Is.True);
+        Assert.That(min, Is.EqualTo(string.Empty));
+        Assert.That(max, Is.EqualTo("1gb"));
+
+        Assert.That(QueryFilterSizeValue.TryParseBounds("20mb..1gb", out min, out max), Is.True);
+        Assert.That(min, Is.EqualTo("20mb"));
+        Assert.That(max, Is.EqualTo("1gb"));
+    }
+
+    [Test]
+    public void TryParseBounds_RejectsExactAndNamedSizes()
+    {
+        Assert.That(QueryFilterSizeValue.TryParseBounds("1gb", out _, out _), Is.False);
+        Assert.That(QueryFilterSizeValue.TryParseBounds("small", out _, out _), Is.False);
+    }
+
+    [TestCase("20mb", "", ">20mb")]
+    [TestCase("", "1gb", "<1gb")]
+    [TestCase("20mb", "1gb", "20mb..1gb")]
+    [TestCase("1gb", "20mb", "20mb..1gb")]
+    [TestCase("20m", "1g", "20mb..1gb")]
+    [TestCase("", "", "")]
+    public void FormatBounds_CombinesMinAndMax(string min, string max, string expected)
+    {
+        Assert.That(QueryFilterSizeValue.FormatBounds(min, max), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void Apply_CombinesGreaterAndLessIntoRange()
+    {
+        var result = QueryFilterSyntax.Apply("vacation", QueryFilterId.Size, "20mb..1gb", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo("vacation size:20mb..1gb"));
+    }
+
+    [Test]
+    public void SizeSteps_IndexOf_FindsExactAndNearest()
+    {
+        Assert.That(QueryFilterSizeSteps.IndexOf(""), Is.EqualTo(QueryFilterSizeSteps.AnyIndex));
+        Assert.That(QueryFilterSizeSteps.TokenAt(QueryFilterSizeSteps.IndexOf("20mb")), Is.EqualTo("20mb"));
+        Assert.That(QueryFilterSizeSteps.TokenAt(QueryFilterSizeSteps.IndexOf("1gb")), Is.EqualTo("1gb"));
+        Assert.That(QueryFilterSizeSteps.TokenAt(QueryFilterSizeSteps.IndexOf("23mb")), Is.EqualTo("20mb"));
+    }
 }

@@ -21,7 +21,7 @@
         <Setter Property="SelectionBrush" Value="#0a68d8" />
         <Setter Property="Height" Value="42" />
         <Setter Property="FontSize" Value="24" />
-        <Setter Property="Padding" Value="0 0 66 0" />
+        <Setter Property="Padding" Value="0 0 102 0" />
     </Style>
     <Style
         x:Key="QuerySuggestionBoxStyle"
@@ -30,7 +30,7 @@
         <Setter Property="Foreground" Value="#72767d" />
         <Setter Property="Height" Value="42" />
         <Setter Property="FontSize" Value="24" />
-        <Setter Property="Padding" Value="0 0 66 0" />
+        <Setter Property="Padding" Value="0 0 102 0" />
     </Style>
     <Style
         x:Key="WindowBorderStyle"

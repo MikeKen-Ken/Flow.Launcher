@@ -4,8 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    MinWidth="288"
+    MinWidth="320"
     Focusable="True"
+    PreviewKeyDown="OnPreviewKeyDown"
     mc:Ignorable="d">
     <UserControl.Resources>
         <Style x:Key="SizePresetButtonStyle" TargetType="Button">
@@ -38,6 +39,15 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <Style x:Key="SizeBoundSliderStyle" TargetType="Slider">
+            <Setter Property="Focusable" Value="True" />
+            <Setter Property="IsMoveToPointEnabled" Value="True" />
+            <Setter Property="IsSnapToTickEnabled" Value="True" />
+            <Setter Property="Minimum" Value="0" />
+            <Setter Property="TickFrequency" Value="1" />
+            <Setter Property="TickPlacement" Value="BottomRight" />
+            <Setter Property="Foreground" Value="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+        </Style>
     </UserControl.Resources>
     <Border
         Padding="14 12"
@@ -46,69 +56,48 @@
         BorderThickness="1"
         CornerRadius="10">
         <StackPanel>
+            <DockPanel Margin="0 0 0 2">
+                <TextBlock
+                    x:Name="MinValueText"
+                    DockPanel.Dock="Right"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <TextBlock
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Text="{DynamicResource searchFilter_size_greaterThan}" />
+            </DockPanel>
+            <Slider
+                x:Name="MinSlider"
+                Margin="0 0 0 10"
+                Style="{StaticResource SizeBoundSliderStyle}"
+                Thumb.DragCompleted="OnSliderDragCompleted"
+                Thumb.DragStarted="OnSliderDragStarted"
+                ValueChanged="OnMinSliderValueChanged" />
+            <DockPanel Margin="0 0 0 2">
+                <TextBlock
+                    x:Name="MaxValueText"
+                    DockPanel.Dock="Right"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <TextBlock
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                    Text="{DynamicResource searchFilter_size_lessThan}" />
+            </DockPanel>
+            <Slider
+                x:Name="MaxSlider"
+                Margin="0 0 0 12"
+                Style="{StaticResource SizeBoundSliderStyle}"
+                Thumb.DragCompleted="OnSliderDragCompleted"
+                Thumb.DragStarted="OnSliderDragStarted"
+                ValueChanged="OnMaxSliderValueChanged" />
             <TextBlock
                 Margin="0 0 0 8"
-                FontSize="12"
-                FontWeight="SemiBold"
-                Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                Text="{DynamicResource searchFilter_size_greaterThan}" />
-            <WrapPanel>
-                <Button
-                    Click="OnPresetClick"
-                    Content="&gt;1MB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag=">1mb" />
-                <Button
-                    Click="OnPresetClick"
-                    Content="&gt;5MB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag=">5mb" />
-                <Button
-                    Click="OnPresetClick"
-                    Content="&gt;10MB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag=">10mb" />
-                <Button
-                    Click="OnPresetClick"
-                    Content="&gt;100MB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag=">100mb" />
-                <Button
-                    Click="OnPresetClick"
-                    Content="&gt;1GB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag=">1gb" />
-            </WrapPanel>
-            <TextBlock
-                Margin="0 6 0 8"
-                FontSize="12"
-                FontWeight="SemiBold"
-                Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                Text="{DynamicResource searchFilter_size_lessThan}" />
-            <WrapPanel>
-                <Button
-                    Click="OnPresetClick"
-                    Content="&lt;1MB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag="&lt;1mb" />
-                <Button
-                    Click="OnPresetClick"
-                    Content="&lt;10MB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag="&lt;10mb" />
-                <Button
-                    Click="OnPresetClick"
-                    Content="&lt;100MB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag="&lt;100mb" />
-                <Button
-                    Click="OnPresetClick"
-                    Content="&lt;1GB"
-                    Style="{StaticResource SizePresetButtonStyle}"
-                    Tag="&lt;1gb" />
-            </WrapPanel>
-            <TextBlock
-                Margin="0 6 0 8"
                 FontSize="12"
                 FontWeight="SemiBold"
                 Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}"

@@ -41,8 +41,8 @@ public partial class QueryFilterBar : UserControl
         InitializeComponent();
         SizePickerControl.CloseRequested += OnPickerCloseRequested;
         ExtensionPickerControl.CloseRequested += OnPickerCloseRequested;
-        SizePickerPopup.Closed += (_, _) => RestoreQueryBoxFocus();
-        ExtensionPickerPopup.Closed += (_, _) => OnExtensionPickerClosed();
+        SizePickerPopup.Closed += (_, _) => OnPickerClosed();
+        ExtensionPickerPopup.Closed += (_, _) => OnPickerClosed();
         Loaded += OnLoaded;
         Unloaded += OnUnloaded;
         RefreshPalette();
@@ -101,7 +101,7 @@ public partial class QueryFilterBar : UserControl
     private void OnUnloaded(object sender, RoutedEventArgs e)
     {
         ThemeManager.Current.ActualApplicationThemeChanged -= OnThemeChanged;
-        HookExtensionOutsideClick(false);
+        HookPickerOutsideClick(false);
     }
 
     private void OnThemeChanged(ThemeManager sender, object args)
@@ -237,6 +237,7 @@ public partial class QueryFilterBar : UserControl
         SizePickerControl.Bind(item);
         SizePickerPopup.PlacementTarget = button;
         SizePickerPopup.IsOpen = true;
+        HookPickerOutsideClick(true);
     }
 
     private void OpenExtensionPicker(Button button, QueryFilterItemViewModel item)
@@ -251,41 +252,51 @@ public partial class QueryFilterBar : UserControl
         ExtensionPickerControl.Bind(item);
         ExtensionPickerPopup.PlacementTarget = button;
         ExtensionPickerPopup.IsOpen = true;
-        HookExtensionOutsideClick(true);
+        HookPickerOutsideClick(true);
     }
 
-    private void HookExtensionOutsideClick(bool enable)
+    private void HookPickerOutsideClick(bool enable)
     {
         if (Window.GetWindow(this) is not Window window)
         {
             return;
         }
 
-        window.PreviewMouseDown -= OnWindowPreviewMouseDownForExtension;
+        window.PreviewMouseDown -= OnWindowPreviewMouseDownForPicker;
         if (enable)
         {
-            window.PreviewMouseDown += OnWindowPreviewMouseDownForExtension;
+            window.PreviewMouseDown += OnWindowPreviewMouseDownForPicker;
         }
     }
 
-    private void OnWindowPreviewMouseDownForExtension(object sender, MouseButtonEventArgs e)
+    private void OnWindowPreviewMouseDownForPicker(object sender, MouseButtonEventArgs e)
     {
-        if (!ExtensionPickerPopup.IsOpen || e.OriginalSource is not DependencyObject source)
+        if ((!SizePickerPopup.IsOpen && !ExtensionPickerPopup.IsOpen) || e.OriginalSource is not DependencyObject source)
         {
             return;
         }
 
-        if (IsInside(ExtensionPickerControl, source))
+        if (SizePickerPopup.IsOpen && IsInside(SizePickerControl, source))
         {
             return;
         }
 
+        if (ExtensionPickerPopup.IsOpen && IsInside(ExtensionPickerControl, source))
+        {
+            return;
+        }
+
+        SizePickerPopup.IsOpen = false;
         ExtensionPickerPopup.IsOpen = false;
     }
 
-    private void OnExtensionPickerClosed()
+    private void OnPickerClosed()
     {
-        HookExtensionOutsideClick(false);
+        if (!SizePickerPopup.IsOpen && !ExtensionPickerPopup.IsOpen)
+        {
+            HookPickerOutsideClick(false);
+        }
+
         RestoreQueryBoxFocus();
     }
 

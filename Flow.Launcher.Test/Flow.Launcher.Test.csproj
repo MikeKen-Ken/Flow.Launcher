@@ -40,7 +40,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Flow.Launcher\Flow.Launcher.csproj" />
     <ProjectReference Include="..\Plugins\Flow.Launcher.Plugin.Explorer\Flow.Launcher.Plugin.Explorer.csproj" />
-    <ProjectReference Include="..\Plugins\Flow.Launcher.Plugin.PluginsManager\Flow.Launcher.Plugin.PluginsManager.csproj" />
     <ProjectReference Include="..\Plugins\Flow.Launcher.Plugin.Program\Flow.Launcher.Plugin.Program.csproj" />
     <ProjectReference Include="..\Plugins\Flow.Launcher.Plugin.Shell\Flow.Launcher.Plugin.Shell.csproj" />
     <ProjectReference Include="..\Flow.Launcher.Core\Flow.Launcher.Core.csproj" />

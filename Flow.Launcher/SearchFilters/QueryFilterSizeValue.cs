@@ -55,6 +55,101 @@ internal static class QueryFilterSizeValue
         return true;
     }
 
+    internal static bool TryParseBounds(string input, out string min, out string max)
+    {
+        min = string.Empty;
+        max = string.Empty;
+        if (string.IsNullOrWhiteSpace(input)
+            || !TryNormalize(input, out var normalized)
+            || IsNamedSize(normalized))
+        {
+            return false;
+        }
+
+        var dots = normalized.IndexOf("..", StringComparison.Ordinal);
+        if (dots >= 0)
+        {
+            min = normalized[..dots];
+            max = normalized[(dots + 2)..];
+            return min.Length > 0 && max.Length > 0;
+        }
+
+        if (normalized.StartsWith(">=", StringComparison.Ordinal) || normalized.StartsWith('>'))
+        {
+            min = normalized.StartsWith(">=", StringComparison.Ordinal) ? normalized[2..] : normalized[1..];
+            return min.Length > 0;
+        }
+
+        if (normalized.StartsWith("<=", StringComparison.Ordinal) || normalized.StartsWith('<'))
+        {
+            max = normalized.StartsWith("<=", StringComparison.Ordinal) ? normalized[2..] : normalized[1..];
+            return max.Length > 0;
+        }
+
+        return false;
+    }
+
+    internal static string FormatBounds(string min, string max)
+    {
+        var hasMin = TryNormalizeBoundPart(min, out var minPart);
+        var hasMax = TryNormalizeBoundPart(max, out var maxPart);
+        if (!hasMin && !hasMax)
+        {
+            return string.Empty;
+        }
+
+        if (hasMin && hasMax)
+        {
+            if (TryGetBytes(minPart, out var minBytes)
+                && TryGetBytes(maxPart, out var maxBytes)
+                && minBytes > maxBytes)
+            {
+                (minPart, maxPart) = (maxPart, minPart);
+            }
+
+            return $"{minPart}..{maxPart}";
+        }
+
+        return hasMin ? ">" + minPart : "<" + maxPart;
+    }
+
+    internal static bool TryGetBytes(string input, out long bytes)
+    {
+        bytes = 0;
+        if (string.IsNullOrWhiteSpace(input)
+            || !TryNormalize(input, out var normalized)
+            || IsNamedSize(normalized)
+            || normalized.Contains("..", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        var match = SizeExpression.Match(normalized);
+        if (!match.Success
+            || !decimal.TryParse(match.Groups["n1"].Value, NumberStyles.Number, CultureInfo.InvariantCulture, out var amount))
+        {
+            return false;
+        }
+
+        var multiplier = ExpandUnit(match.Groups["u1"].Value) switch
+        {
+            "kb" => 1024L,
+            "mb" => 1024L * 1024,
+            "gb" => 1024L * 1024 * 1024,
+            "tb" => 1024L * 1024 * 1024 * 1024,
+            _ => 1L
+        };
+
+        var total = amount * multiplier;
+        if (total > long.MaxValue)
+        {
+            return false;
+        }
+
+        bytes = (long)total;
+        return true;
+    }
+
     internal static bool Equals(string left, string right)
     {
         var leftOk = TryNormalize(left ?? string.Empty, out var normalizedLeft);
@@ -85,6 +180,33 @@ internal static class QueryFilterSizeValue
         || value.Equals("large", StringComparison.OrdinalIgnoreCase)
         || value.Equals("huge", StringComparison.OrdinalIgnoreCase)
         || value.Equals("gigantic", StringComparison.OrdinalIgnoreCase);
+
+    private static bool TryNormalizeBoundPart(string input, out string part)
+    {
+        part = string.Empty;
+        if (string.IsNullOrWhiteSpace(input)
+            || !TryNormalize(input, out var normalized)
+            || IsNamedSize(normalized)
+            || normalized.Contains("..", StringComparison.Ordinal))
+        {
+            return false;
+        }
+
+        if (normalized.StartsWith(">=", StringComparison.Ordinal) || normalized.StartsWith("<=", StringComparison.Ordinal))
+        {
+            part = normalized[2..];
+        }
+        else if (normalized[0] is '>' or '<')
+        {
+            part = normalized[1..];
+        }
+        else
+        {
+            part = normalized;
+        }
+
+        return part.Length > 0;
+    }
 
     private static string FormatPart(string number, string unit)
     {

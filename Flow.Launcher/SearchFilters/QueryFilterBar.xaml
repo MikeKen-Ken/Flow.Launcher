@@ -91,7 +91,7 @@
             x:Name="SizePickerPopup"
             AllowsTransparency="True"
             Placement="Bottom"
-            StaysOpen="False">
+            StaysOpen="True">
             <filters:QueryFilterSizePicker x:Name="SizePickerControl" />
         </Popup>
         <Popup
