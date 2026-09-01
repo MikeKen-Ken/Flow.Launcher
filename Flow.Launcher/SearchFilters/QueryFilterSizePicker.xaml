@@ -14,8 +14,8 @@
             <Setter Property="Padding" Value="8 4" />
             <Setter Property="Margin" Value="0 0 6 6" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="#E3E0E3" />
-            <Setter Property="Background" Value="#138A8A8A" />
+            <Setter Property="Foreground" Value="#F5F5F5" />
+            <Setter Property="Background" Value="#59FFFFFF" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -23,12 +23,14 @@
                             x:Name="Bd"
                             Padding="{TemplateBinding Padding}"
                             Background="{TemplateBinding Background}"
+                            BorderBrush="#8FFFFFFF"
+                            BorderThickness="1"
                             CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="Background" Value="#338A8A8A" />
+                                <Setter TargetName="Bd" Property="Background" Value="#80FFFFFF" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -46,7 +48,7 @@
             <TextBlock
                 Margin="0 0 0 6"
                 FontSize="12"
-                Foreground="#8f8f8f"
+                Foreground="#D0D0D0"
                 Text="{DynamicResource searchFilter_size_greaterThan}" />
             <WrapPanel>
                 <Button
@@ -78,7 +80,7 @@
             <TextBlock
                 Margin="0 4 0 6"
                 FontSize="12"
-                Foreground="#8f8f8f"
+                Foreground="#D0D0D0"
                 Text="{DynamicResource searchFilter_size_lessThan}" />
             <WrapPanel>
                 <Button
@@ -105,7 +107,7 @@
             <TextBlock
                 Margin="0 4 0 6"
                 FontSize="12"
-                Foreground="#8f8f8f"
+                Foreground="#D0D0D0"
                 Text="{DynamicResource searchFilter_size_custom}" />
             <DockPanel LastChildFill="True">
                 <Button
@@ -132,7 +134,7 @@
             <TextBlock
                 Margin="0 4 0 8"
                 FontSize="11"
-                Foreground="#8f8f8f"
+                Foreground="#D0D0D0"
                 Text="{DynamicResource searchFilter_size_customHint}" />
             <Button
                 HorizontalAlignment="Left"

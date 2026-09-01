@@ -60,6 +60,15 @@ internal static class QueryFilterSyntax
             }
         }
 
+        if (id == QueryFilterId.Extension && !string.IsNullOrEmpty(value))
+        {
+            value = value.Trim().TrimStart('.').ToLowerInvariant();
+            if (string.IsNullOrEmpty(value))
+            {
+                return queryText;
+            }
+        }
+
         if (id == QueryFilterId.Size && !string.IsNullOrEmpty(value))
         {
             if (!QueryFilterSizeValue.TryNormalize(value, out var normalizedSize))
@@ -68,6 +77,16 @@ internal static class QueryFilterSyntax
             }
 
             value = normalizedSize;
+        }
+
+        if (id == QueryFilterId.Path && !string.IsNullOrEmpty(value))
+        {
+            if (!QueryFilterPathValue.TryNormalize(value, out var normalizedPath))
+            {
+                return queryText;
+            }
+
+            value = normalizedPath;
         }
 
         var group = QueryFilterCatalog.GroupOf(id);
@@ -87,6 +106,11 @@ internal static class QueryFilterSyntax
             _ => true
         };
 
+        if (shouldAdd && id == QueryFilterId.Path && string.IsNullOrEmpty(value))
+        {
+            shouldAdd = false;
+        }
+
         if (shouldAdd)
         {
             remainingFilters.Add(QueryFilterCatalog.Format(id, value));
@@ -102,7 +126,42 @@ internal static class QueryFilterSyntax
             return [];
         }
 
-        return queryText.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var tokens = new List<string>();
+        var index = 0;
+        var length = queryText.Length;
+        while (index < length)
+        {
+            while (index < length && char.IsWhiteSpace(queryText[index]))
+            {
+                index++;
+            }
+
+            if (index >= length)
+            {
+                break;
+            }
+
+            var start = index;
+            var inQuotes = false;
+            while (index < length)
+            {
+                var current = queryText[index];
+                if (current == '"')
+                {
+                    inQuotes = !inQuotes;
+                }
+                else if (!inQuotes && char.IsWhiteSpace(current))
+                {
+                    break;
+                }
+
+                index++;
+            }
+
+            tokens.Add(queryText[start..index]);
+        }
+
+        return tokens;
     }
 
     private static bool ValuesEqual(QueryFilterId id, string left, string right)
@@ -110,6 +169,11 @@ internal static class QueryFilterSyntax
         if (id == QueryFilterId.Size)
         {
             return QueryFilterSizeValue.Equals(left, right);
+        }
+
+        if (id == QueryFilterId.Path)
+        {
+            return QueryFilterPathValue.Equals(left, right);
         }
 
         return string.Equals(left ?? string.Empty, right ?? string.Empty, StringComparison.OrdinalIgnoreCase);

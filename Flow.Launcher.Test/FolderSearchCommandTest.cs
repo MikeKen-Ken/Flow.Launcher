@@ -122,11 +122,11 @@ public class FolderSearchCommandTest
     }
 
     [Test]
-    public void ExplorerFolderContextMenu_DefaultsToDisabled()
+    public void ExplorerFolderContextMenu_DefaultsToEnabled()
     {
         var settings = new Flow.Launcher.Infrastructure.UserSettings.Settings();
 
-        Assert.That(settings.EnableExplorerFolderContextMenu, Is.False);
+        Assert.That(settings.EnableExplorerFolderContextMenu, Is.True);
     }
 
     [Test]

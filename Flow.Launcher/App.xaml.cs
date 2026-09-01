@@ -335,12 +335,6 @@ namespace Flow.Launcher
 
         private static void SyncExplorerFolderContextMenu()
         {
-            if (!ShellFolderSearchMenu.IsSupported)
-            {
-                _settings.EnableExplorerFolderContextMenu = false;
-                return;
-            }
-
             try
             {
                 ShellFolderSearchMenu.Sync(

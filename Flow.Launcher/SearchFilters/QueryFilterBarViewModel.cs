@@ -64,15 +64,21 @@ public class QueryFilterBarViewModel : BaseModel
 
     private QueryFilterItemViewModel[] CreateFilters() =>
     [
+        Create(QueryFilterId.Path, "\uED25"),
         Create(QueryFilterId.File, "\uE8A5"),
         Create(QueryFilterId.Folder, "\uE8B7"),
         Create(QueryFilterId.Image, "\uEB9F"),
         Create(QueryFilterId.Video, "\uE714"),
         Create(QueryFilterId.Audio, "\uE8D6"),
         Create(QueryFilterId.Document, "\uE8C8"),
+        Create(QueryFilterId.Archive, "\uE8F1"),
+        Create(QueryFilterId.Executable, "\uE756"),
+        Create(QueryFilterId.Extension, "\uE71C", QueryFilterCatalog.ExtensionPresets),
         Create(QueryFilterId.Size, "\uE9E9"),
         Create(QueryFilterId.DateModified, "\uE823", QueryFilterCatalog.DatePresets),
-        Create(QueryFilterId.DateCreated, "\uE787", QueryFilterCatalog.DatePresets)
+        Create(QueryFilterId.DateCreated, "\uE787", QueryFilterCatalog.DatePresets),
+        Create(QueryFilterId.DateAccessed, "\uE81C", QueryFilterCatalog.DatePresets),
+        Create(QueryFilterId.Hidden, "\uE7B3")
     ];
 
     private QueryFilterItemViewModel Create(QueryFilterId id, string glyph, IReadOnlyList<string> presetValues = null)

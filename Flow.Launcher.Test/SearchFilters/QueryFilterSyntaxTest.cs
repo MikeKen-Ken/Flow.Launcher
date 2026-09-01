@@ -99,4 +99,73 @@ public class QueryFilterSyntaxTest
 
         Assert.That(result, Is.EqualTo("vacation 2024 folder: type:image"));
     }
+
+    [Test]
+    public void ToggleArchive_ReplacesImage()
+    {
+        var result = QueryFilterSyntax.Apply("backup type:image", QueryFilterId.Archive, string.Empty, QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo("backup type:archive"));
+    }
+
+    [Test]
+    public void SetExtension_InsertsExtToken()
+    {
+        var result = QueryFilterSyntax.Apply("invoice", QueryFilterId.Extension, ".PDF", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo("invoice ext:pdf"));
+    }
+
+    [Test]
+    public void Parse_RecognizesArchiveExeHiddenAndAccessed()
+    {
+        var snapshot = QueryFilterSyntax.Parse("notes zip: attrib:H da:today");
+
+        Assert.That(snapshot.IsActive(QueryFilterId.Archive), Is.True);
+        Assert.That(snapshot.IsActive(QueryFilterId.Hidden), Is.True);
+        Assert.That(snapshot.IsActive(QueryFilterId.DateAccessed), Is.True);
+        Assert.That(snapshot.GetValue(QueryFilterId.DateAccessed), Is.EqualTo("today"));
+    }
+
+    [Test]
+    public void SetPath_InsertsQuotedDirectoryToken()
+    {
+        var result = QueryFilterSyntax.Apply("vacation", QueryFilterId.Path, @"C:\Photos", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo(@"vacation path:""C:\Photos\"""));
+    }
+
+    [Test]
+    public void SetPath_QuotesFoldersWithSpaces()
+    {
+        var result = QueryFilterSyntax.Apply("report", QueryFilterId.Path, @"C:\Program Files", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo(@"report path:""C:\Program Files\"""));
+    }
+
+    [Test]
+    public void Parse_RecognizesQuotedPathWithSpaces()
+    {
+        var snapshot = QueryFilterSyntax.Parse(@"notes path:""C:\Program Files"" type:image");
+
+        Assert.That(snapshot.IsActive(QueryFilterId.Path), Is.True);
+        Assert.That(snapshot.GetValue(QueryFilterId.Path), Is.EqualTo(@"C:\Program Files"));
+        Assert.That(snapshot.IsActive(QueryFilterId.Image), Is.True);
+    }
+
+    [Test]
+    public void SetPath_ReplacesExistingPath()
+    {
+        var result = QueryFilterSyntax.Apply(@"notes path:""C:\Old\""", QueryFilterId.Path, @"D:\New", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo(@"notes path:""D:\New\"""));
+    }
+
+    [Test]
+    public void ClearPath_RemovesPathToken()
+    {
+        var result = QueryFilterSyntax.Apply(@"vacation path:""C:\Photos\"" type:image", QueryFilterId.Path, string.Empty, QueryFilterApplyMode.Clear);
+
+        Assert.That(result, Is.EqualTo("vacation type:image"));
+    }
 }

@@ -12,14 +12,18 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <converters:BrushOpacityConverter x:Key="BrushOpacityConverter" />
         <Style x:Key="SearchFilterChipStyle" TargetType="Button">
             <Setter Property="Focusable" Value="False" />
-            <Setter Property="FontSize" Value="12" />
-            <Setter Property="Padding" Value="8 4" />
-            <Setter Property="Margin" Value="0 0 6 0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Padding" Value="9 5" />
+            <Setter Property="Margin" Value="0 0 6 6" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="#C6C6C6" />
-            <Setter Property="Background" Value="#138A8A8A" />
+            <Setter Property="Foreground" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            <Setter Property="Background" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.34}" />
+            <Setter Property="BorderBrush" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.7}" />
+            <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -27,24 +31,25 @@
                             x:Name="ChipBorder"
                             Padding="{TemplateBinding Padding}"
                             Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
                             CornerRadius="4"
                             SnapsToDevicePixels="True">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="#338A8A8A" />
+                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding ChipForeground, RelativeSource={RelativeSource AncestorType=UserControl}, Converter={StaticResource BrushOpacityConverter}, ConverterParameter=0.5}" />
                             </Trigger>
+                            <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                                <Setter TargetName="ChipBorder" Property="Background" Value="{DynamicResource SystemAccentColorLight1Brush}" />
+                                <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{DynamicResource SystemAccentColorLight1Brush}" />
+                                <Setter Property="Foreground" Value="White" />
+                            </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                    <Setter Property="Background" Value="{DynamicResource SystemAccentColorLight1Brush}" />
-                    <Setter Property="Foreground" Value="White" />
-                </DataTrigger>
-            </Style.Triggers>
         </Style>
     </UserControl.Resources>
     <Grid>

@@ -6,13 +6,19 @@ internal static class QueryFilterLabels
     {
         QueryFilterId.File => Localize.searchFilter_file(),
         QueryFilterId.Folder => Localize.searchFilter_folder(),
+        QueryFilterId.Path => Localize.searchFilter_path(),
         QueryFilterId.Image => Localize.searchFilter_image(),
         QueryFilterId.Video => Localize.searchFilter_video(),
         QueryFilterId.Audio => Localize.searchFilter_audio(),
         QueryFilterId.Document => Localize.searchFilter_document(),
+        QueryFilterId.Archive => Localize.searchFilter_archive(),
+        QueryFilterId.Executable => Localize.searchFilter_exe(),
+        QueryFilterId.Extension => Localize.searchFilter_ext(),
         QueryFilterId.Size => Localize.searchFilter_size(),
         QueryFilterId.DateModified => Localize.searchFilter_modified(),
         QueryFilterId.DateCreated => Localize.searchFilter_created(),
+        QueryFilterId.DateAccessed => Localize.searchFilter_accessed(),
+        QueryFilterId.Hidden => Localize.searchFilter_hidden(),
         _ => id.ToString()
     };
 
@@ -28,6 +34,11 @@ internal static class QueryFilterLabels
 
     internal static string Tooltip(QueryFilterId id, string value)
     {
+        if (id == QueryFilterId.Path && string.IsNullOrEmpty(value))
+        {
+            return Localize.searchFilter_tooltip("path:\"…\"");
+        }
+
         var syntax = QueryFilterCatalog.RequiresValue(id) && !string.IsNullOrEmpty(value)
             ? QueryFilterCatalog.Format(id, value)
             : QueryFilterCatalog.Format(id, QueryFilterCatalog.RequiresValue(id) ? "…" : string.Empty);
@@ -42,9 +53,19 @@ internal static class QueryFilterLabels
             return SizeLabel(value);
         }
 
-        if (id is QueryFilterId.DateModified or QueryFilterId.DateCreated)
+        if (id is QueryFilterId.DateModified or QueryFilterId.DateCreated or QueryFilterId.DateAccessed)
         {
             return DateLabel(value);
+        }
+
+        if (id == QueryFilterId.Extension)
+        {
+            return value.TrimStart('.').ToLowerInvariant();
+        }
+
+        if (id == QueryFilterId.Path)
+        {
+            return QueryFilterPathValue.ToDisplay(value);
         }
 
         return value;

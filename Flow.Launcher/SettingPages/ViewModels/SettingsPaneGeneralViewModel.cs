@@ -178,9 +178,6 @@ public partial class SettingsPaneGeneralViewModel : BaseModel
         get => Settings.EnableExplorerFolderContextMenu;
         set
         {
-            if (!CanEnableExplorerFolderContextMenu)
-                return;
-
             if (Settings.EnableExplorerFolderContextMenu == value)
                 return;
 
@@ -199,8 +196,6 @@ public partial class SettingsPaneGeneralViewModel : BaseModel
             OnPropertyChanged();
         }
     }
-
-    public bool CanEnableExplorerFolderContextMenu => ShellFolderSearchMenu.IsSupported;
 
     public class DialogJumpWindowPositionData : DropdownDataGeneric<DialogJumpWindowPositions> { }
     public class DialogJumpResultBehaviourData : DropdownDataGeneric<DialogJumpResultBehaviours> { }

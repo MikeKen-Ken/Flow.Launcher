@@ -378,8 +378,7 @@
             <ui:SettingsCard
                 Margin="0 4 0 0"
                 Description="{DynamicResource explorerFolderContextMenuToolTip}"
-                Header="{DynamicResource explorerFolderContextMenu}"
-                Visibility="{Binding CanEnableExplorerFolderContextMenu, Converter={StaticResource BoolToVisibilityConverter}}">
+                Header="{DynamicResource explorerFolderContextMenu}">
                 <ui:SettingsCard.HeaderIcon>
                     <ui:FontIcon Glyph="&#xE721;" />
                 </ui:SettingsCard.HeaderIcon>

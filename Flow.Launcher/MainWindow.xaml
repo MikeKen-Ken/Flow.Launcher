@@ -355,6 +355,7 @@
             </Grid>
 
             <filters:QueryFilterBar
+                ChipForeground="{Binding Foreground, ElementName=QueryTextBox}"
                 DataContext="{Binding QueryFilters}"
                 Visibility="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
 

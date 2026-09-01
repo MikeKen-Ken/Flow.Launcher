@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Flow.Launcher.Infrastructure;
-using Flow.Launcher.Infrastructure.UserSettings;
 using Microsoft.Win32;
 
 namespace Flow.Launcher.ShellFolderSearch;
@@ -9,13 +8,12 @@ namespace Flow.Launcher.ShellFolderSearch;
 /// <summary>
 /// Registers a per-user Windows Explorer context menu item that launches Flow Launcher
 /// scoped to the selected folder (or the folder whose background was clicked).
+/// Works for both installed and portable copies; the command points at the current executable.
 /// </summary>
 public static class ShellFolderSearchMenu
 {
     internal const string ShellKeyName = "FlowLauncherSearchFolder";
     private const string SquirrelUninstallArgument = "--squirrel-uninstall";
-
-    public static bool IsSupported => !DataLocation.PortableDataLocationInUse();
 
     private static readonly ShellRegistration[] Registrations =
     [
@@ -34,9 +32,6 @@ public static class ShellFolderSearchMenu
 
     public static void Register(string menuText)
     {
-        if (!IsSupported)
-            throw new InvalidOperationException("Explorer folder search registration is unavailable in portable mode.");
-
         if (string.IsNullOrWhiteSpace(menuText))
             throw new ArgumentException("Menu text is required.", nameof(menuText));
 
