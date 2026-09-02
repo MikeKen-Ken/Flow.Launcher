@@ -40,8 +40,17 @@ jobs:
             $buildVersion = "$env:VersionPrefix.${{ github.run_number }}"
           }
 
+          $packageVersion = if ("${{ github.ref_type }}" -eq "tag") {
+            $buildVersion
+          }
+          else {
+            "$env:VersionPrefix-ci.${{ github.run_number }}"
+          }
+
           "flow_version=$buildVersion" >> $env:GITHUB_OUTPUT
+          "package_version=$packageVersion" >> $env:GITHUB_OUTPUT
           "flowVersion=$buildVersion" >> $env:GITHUB_ENV
+          "flowPackageVersion=$packageVersion" >> $env:GITHUB_ENV
       - name: Update bundled plugin versions
         shell: pwsh
         run: .\Scripts\update_plugin_versions.ps1

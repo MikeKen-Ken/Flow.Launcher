@@ -1,17 +1,33 @@
 param(
     [string]$config = "Release",
-    [string]$solution = (Join-Path $PSScriptRoot ".." -Resolve)
+    [string]$solution = (Join-Path $PSScriptRoot ".." -Resolve),
+    [switch]$PrintPackageVersion
 )
 Write-Host "Config: $config"
 
+function ConvertTo-PackageVersion ([string]$version) {
+    if ($version -match '^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)\.\d+$') {
+        return "$($Matches.major).$($Matches.minor).$($Matches.patch)"
+    }
+
+    if ($version -match '^\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
+        return $version
+    }
+
+    throw "Package version '$version' must be SemVer-compatible."
+}
+
 function Build-Version {
-    if ([string]::IsNullOrEmpty($env:flowVersion)) {
+    if (-not [string]::IsNullOrEmpty($env:flowPackageVersion)) {
+        $v = $env:flowPackageVersion
+    } elseif ([string]::IsNullOrEmpty($env:flowVersion)) {
         $targetPath = Join-Path $solution "Output/Release/Flow.Launcher.dll" -Resolve
         $v = (Get-Command ${targetPath}).FileVersionInfo.FileVersion
     } else {
         $v = $env:flowVersion
     }
 
+    $v = ConvertTo-PackageVersion $v
     Write-Host "Build Version: $v"
     return $v
 }
@@ -132,6 +148,11 @@ function Main {
 
         Publish-Portable $o $v
     }
+}
+
+if ($PrintPackageVersion) {
+    Build-Version
+    exit 0
 }
 
 Main
