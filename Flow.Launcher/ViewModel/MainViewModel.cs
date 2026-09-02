@@ -361,28 +361,35 @@ namespace Flow.Launcher.ViewModel
         private void RemoveSelectedHistoryItem()
         {
             if (!CanRemoveSelectedHistoryItem()
-                || History.SelectedItem?.Result is not LastOpenedHistoryResult selectedHistoryItem)
+                || SelectedResults.SelectedItem?.Result is not LastOpenedHistoryResult selectedHistoryItem)
                 return;
 
             var storedHistoryItem = selectedHistoryItem.SourceHistoryItem ?? selectedHistoryItem;
-            var selectedIndex = History.SelectedIndex;
+            var selectedResults = SelectedResults;
+            var selectedIndex = selectedResults.SelectedIndex;
 
             if (!_history.Remove(storedHistoryItem))
                 return;
 
             _historyItemsStorage.Save();
-            QueryHistory();
-
-            if (History.Results.Count == 0)
+            if (HistorySelected())
             {
-                History.SelectedItem = null;
-                PreviewSelectedItem = null;
+                QueryHistory();
+
+                if (History.Results.Count == 0)
+                {
+                    History.SelectedItem = null;
+                    PreviewSelectedItem = null;
+                    return;
+                }
+
+                var nextSelectedIndex = Math.Clamp(selectedIndex, 0, History.Results.Count - 1);
+                History.SelectedIndex = nextSelectedIndex;
+                History.SelectedItem = History.Results[nextSelectedIndex];
                 return;
             }
 
-            var nextSelectedIndex = Math.Clamp(selectedIndex, 0, History.Results.Count - 1);
-            History.SelectedIndex = nextSelectedIndex;
-            History.SelectedItem = History.Results[nextSelectedIndex];
+            Query(false, isReQuery: true);
         }
 
         [RelayCommand]
@@ -1975,9 +1982,9 @@ namespace Flow.Launcher.ViewModel
 
         internal bool CanRemoveSelectedHistoryItem()
         {
-            return HistorySelected()
+            return (HistorySelected() || QueryResultsSelected())
                    && string.IsNullOrEmpty(QueryText)
-                   && History.SelectedItem?.Result is LastOpenedHistoryResult;
+                   && SelectedResults.SelectedItem?.Result is LastOpenedHistoryResult;
         }
 
         internal bool ResultsSelected(ResultsViewModel results)

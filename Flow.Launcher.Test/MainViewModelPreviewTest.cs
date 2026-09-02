@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Flow.Launcher.Core.Plugin;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
+using Flow.Launcher.Storage;
 using Flow.Launcher.ViewModel;
 using NUnit.Framework;
 using NUnit.Framework.Legacy;
@@ -13,6 +14,27 @@ namespace Flow.Launcher.Test
     [TestFixture]
     internal class MainViewModelPreviewTest
     {
+        [Test]
+        public void GivenHomePageHistoryResultSelected_WhenDeleting_ThenItCanBeRemoved()
+        {
+            var settings = new Settings();
+            var viewModel = (MainViewModel)RuntimeHelpers.GetUninitializedObject(typeof(MainViewModel));
+            var homeResults = new ResultsViewModel
+            {
+                SelectedItem = new ResultViewModel(new LastOpenedHistoryResult(), settings)
+            };
+
+            typeof(MainViewModel)
+                .GetField("<Results>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(viewModel, homeResults);
+            typeof(MainViewModel)
+                .GetField("_selectedResults", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(viewModel, homeResults);
+            viewModel.QueryText = string.Empty;
+
+            Assert.That(viewModel.CanRemoveSelectedHistoryItem(), Is.True);
+        }
+
         [Test]
         public async Task GivenPreviewToggledOn_WhenNeverThenDefaultResultSelected_ThenInternalPreviewIsRestored_Async()
         {
