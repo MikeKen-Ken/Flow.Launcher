@@ -35,6 +35,12 @@ public class LastOpenedHistoryResult : Result
     public bool UseProvenancePresentation { get; set; }
 
     /// <summary>
+    /// The stored entry this temporary presentation copy represents.
+    /// </summary>
+    [JsonIgnore]
+    public LastOpenedHistoryResult SourceHistoryItem { get; init; }
+
+    /// <summary>
     /// Initializes a new instance of <see cref="LastOpenedHistoryResult"/>.
     /// </summary>
     public LastOpenedHistoryResult()
@@ -153,6 +159,7 @@ public class LastOpenedHistoryResult : Result
                 PluginName = PluginID,
                 SearchText = Query
             },
+            SourceHistoryItem = this,
             UseProvenancePresentation = isHistoryStyleLastOpened,
             ExecutedDateTime = ExecutedDateTime,
             // Keep the prepared history order instead of boosting by how often the original result was selected.

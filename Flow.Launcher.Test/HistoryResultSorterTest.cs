@@ -122,6 +122,24 @@ namespace Flow.Launcher.Test
         }
 
         [Test]
+        public void Remove_DeletesOnlyTheSelectedStoredHistoryEntry()
+        {
+            var history = new Storage.History();
+            var first = Item("Notes", new DateTime(2024, 1, 1));
+            var second = Item("Notes", new DateTime(2024, 1, 2));
+            history.LastOpenedHistoryItems.Add(first);
+            history.LastOpenedHistoryItems.Add(second);
+
+            var wasRemoved = history.Remove(first);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(wasRemoved, Is.True);
+                Assert.That(history.LastOpenedHistoryItems, Is.EqualTo(new[] { second }));
+            });
+        }
+
+        [Test]
         public void Prepare_LastOpenedStyle_KeepsDifferentSemanticActions()
         {
             var items = new[]

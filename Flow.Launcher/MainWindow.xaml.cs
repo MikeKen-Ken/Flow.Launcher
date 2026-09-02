@@ -534,6 +534,13 @@ namespace Flow.Launcher
                         }
                     }
                     break;
+                case Key.Delete:
+                    if (_viewModel.CanRemoveSelectedHistoryItem())
+                    {
+                        _viewModel.RemoveSelectedHistoryItemCommand.Execute(null);
+                        e.Handled = true;
+                    }
+                    break;
                 default:
                     break;
             }

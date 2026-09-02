@@ -358,6 +358,34 @@ namespace Flow.Launcher.ViewModel
         }
 
         [RelayCommand]
+        private void RemoveSelectedHistoryItem()
+        {
+            if (!CanRemoveSelectedHistoryItem()
+                || History.SelectedItem?.Result is not LastOpenedHistoryResult selectedHistoryItem)
+                return;
+
+            var storedHistoryItem = selectedHistoryItem.SourceHistoryItem ?? selectedHistoryItem;
+            var selectedIndex = History.SelectedIndex;
+
+            if (!_history.Remove(storedHistoryItem))
+                return;
+
+            _historyItemsStorage.Save();
+            QueryHistory();
+
+            if (History.Results.Count == 0)
+            {
+                History.SelectedItem = null;
+                PreviewSelectedItem = null;
+                return;
+            }
+
+            var nextSelectedIndex = Math.Clamp(selectedIndex, 0, History.Results.Count - 1);
+            History.SelectedIndex = nextSelectedIndex;
+            History.SelectedItem = History.Results[nextSelectedIndex];
+        }
+
+        [RelayCommand]
         public void ReQuery()
         {
             if (QueryResultsSelected())
@@ -1943,6 +1971,13 @@ namespace Flow.Launcher.ViewModel
         {
             var selected = SelectedResults == History;
             return selected;
+        }
+
+        internal bool CanRemoveSelectedHistoryItem()
+        {
+            return HistorySelected()
+                   && string.IsNullOrEmpty(QueryText)
+                   && History.SelectedItem?.Result is LastOpenedHistoryResult;
         }
 
         internal bool ResultsSelected(ResultsViewModel results)

@@ -91,6 +91,17 @@ namespace Flow.Launcher.Storage
         }
 
         /// <summary>
+        /// Removes a specific stored history entry.
+        /// </summary>
+        /// <param name="historyItem">The original entry from <see cref="LastOpenedHistoryItems"/>.</param>
+        /// <returns><see langword="true"/> when the entry was removed.</returns>
+        public bool Remove(LastOpenedHistoryResult historyItem)
+        {
+            ArgumentNullException.ThrowIfNull(historyItem);
+            return LastOpenedHistoryItems.Remove(historyItem);
+        }
+
+        /// <summary>
         /// Attempts to find an existing <see cref="LastOpenedHistoryResult"/> in <see cref="LastOpenedHistoryItems"/>
         /// that is considered equal to the supplied <paramref name="result"/>.
         /// </summary>
