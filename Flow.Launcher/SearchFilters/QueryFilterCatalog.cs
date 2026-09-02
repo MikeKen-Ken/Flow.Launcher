@@ -32,6 +32,14 @@ internal static class QueryFilterCatalog
         "lastyear"
     ];
 
+    internal static readonly IReadOnlyList<string> NameMatchPresets =
+    [
+        "exact",
+        "prefix",
+        "suffix",
+        "word"
+    ];
+
     private static readonly Dictionary<string, QueryFilterId> PrefixMap = new(StringComparer.OrdinalIgnoreCase)
     {
         ["file"] = QueryFilterId.File,
@@ -46,7 +54,15 @@ internal static class QueryFilterCatalog
         ["dm"] = QueryFilterId.DateModified,
         ["datemodified"] = QueryFilterId.DateModified,
         ["dc"] = QueryFilterId.DateCreated,
-        ["datecreated"] = QueryFilterId.DateCreated
+        ["datecreated"] = QueryFilterId.DateCreated,
+        ["match"] = QueryFilterId.NameMatch,
+        ["exact"] = QueryFilterId.NameMatch,
+        ["prefix"] = QueryFilterId.NameMatch,
+        ["suffix"] = QueryFilterId.NameMatch,
+        ["wholeword"] = QueryFilterId.NameMatch,
+        ["wholewords"] = QueryFilterId.NameMatch,
+        ["ww"] = QueryFilterId.NameMatch,
+        ["case"] = QueryFilterId.CaseSensitive
     };
 
     internal static QueryFilterGroup GroupOf(QueryFilterId id) => id switch
@@ -59,12 +75,15 @@ internal static class QueryFilterCatalog
         QueryFilterId.Extension => QueryFilterGroup.Extension,
         QueryFilterId.DateAccessed => QueryFilterGroup.DateAccessed,
         QueryFilterId.Hidden => QueryFilterGroup.Hidden,
+        QueryFilterId.NameMatch => QueryFilterGroup.NameMatch,
+        QueryFilterId.CaseSensitive => QueryFilterGroup.CaseSensitive,
         _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
     };
 
     internal static bool RequiresValue(QueryFilterId id) =>
         id is QueryFilterId.Size or QueryFilterId.DateModified or QueryFilterId.DateCreated
-            or QueryFilterId.Extension or QueryFilterId.DateAccessed or QueryFilterId.Path;
+            or QueryFilterId.Extension or QueryFilterId.DateAccessed or QueryFilterId.Path
+            or QueryFilterId.NameMatch;
 
     internal static string Format(QueryFilterId id, string value) => id switch
     {
@@ -77,6 +96,8 @@ internal static class QueryFilterCatalog
         QueryFilterId.DateCreated => $"dc:{value}",
         QueryFilterId.DateAccessed => $"da:{value}",
         QueryFilterId.Hidden => "attrib:H",
+        QueryFilterId.NameMatch => $"match:{value}",
+        QueryFilterId.CaseSensitive => "case:",
         _ => throw new ArgumentOutOfRangeException(nameof(id), id, null)
     };
 
@@ -99,6 +120,13 @@ internal static class QueryFilterCatalog
         var prefix = token[..colon];
         value = token[(colon + 1)..];
 
+        if (TryMatchNameMode(prefix, value, out var nameMode))
+        {
+            id = QueryFilterId.NameMatch;
+            value = nameMode;
+            return true;
+        }
+
         if (prefix.Equals("attrib", StringComparison.OrdinalIgnoreCase)
             || prefix.Equals("attributes", StringComparison.OrdinalIgnoreCase))
         {
@@ -114,6 +142,16 @@ internal static class QueryFilterCatalog
 
         if (PrefixMap.TryGetValue(prefix, out var mapped))
         {
+            if (mapped == QueryFilterId.NameMatch)
+            {
+                return false;
+            }
+
+            if (mapped == QueryFilterId.CaseSensitive && value.Length != 0)
+            {
+                return false;
+            }
+
             if (mapped == QueryFilterId.Path)
             {
                 if (!QueryFilterPathValue.TryNormalize(value, out var path))
@@ -144,5 +182,36 @@ internal static class QueryFilterCatalog
         }
 
         return false;
+    }
+
+    private static bool TryMatchNameMode(string prefix, string value, out string mode)
+    {
+        mode = string.Empty;
+        if (prefix.Equals("match", StringComparison.OrdinalIgnoreCase))
+        {
+            var normalized = value.ToLowerInvariant();
+            if (NameMatchPresets.Contains(normalized, StringComparer.Ordinal))
+            {
+                mode = normalized;
+                return true;
+            }
+
+            return false;
+        }
+
+        if (value.Length != 0)
+        {
+            return false;
+        }
+
+        mode = prefix.ToLowerInvariant() switch
+        {
+            "exact" => "exact",
+            "prefix" => "prefix",
+            "suffix" => "suffix",
+            "wholeword" or "wholewords" or "ww" => "word",
+            _ => string.Empty
+        };
+        return mode.Length != 0;
     }
 }

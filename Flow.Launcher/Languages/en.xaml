@@ -360,7 +360,7 @@
     <system:String x:Key="TypeIsDarkToolTip">This theme supports two (light/dark) modes.</system:String>
     <system:String x:Key="TypeHasBlurToolTip">This theme supports Blur Transparent Background.</system:String>
     <system:String x:Key="ShowSearchFilterBar">Search filter chips</system:String>
-    <system:String x:Key="ShowSearchFilterBarTip">Show file search filters such as folder path, file/folder, ext, size, dm and dc under the search box</system:String>
+    <system:String x:Key="ShowSearchFilterBarTip">Show file search filters such as exact name, case, folder path, extension, size and dates under the search box</system:String>
     <system:String x:Key="searchFilter_file">File</system:String>
     <system:String x:Key="searchFilter_folder">Folder</system:String>
     <system:String x:Key="searchFilter_path">In</system:String>
@@ -378,6 +378,12 @@
     <system:String x:Key="searchFilter_created">Created</system:String>
     <system:String x:Key="searchFilter_accessed">Accessed</system:String>
     <system:String x:Key="searchFilter_hidden">Hidden</system:String>
+    <system:String x:Key="searchFilter_nameMatch">Name</system:String>
+    <system:String x:Key="searchFilter_caseSensitive">Aa</system:String>
+    <system:String x:Key="searchFilter_match_exact">Exact</system:String>
+    <system:String x:Key="searchFilter_match_prefix">Starts with</system:String>
+    <system:String x:Key="searchFilter_match_suffix">Ends with</system:String>
+    <system:String x:Key="searchFilter_match_word">Whole word</system:String>
     <system:String x:Key="searchFilter_any">Any</system:String>
     <system:String x:Key="searchFilter_tooltip">Inserts {0}</system:String>
     <system:String x:Key="searchFilter_size_empty">Empty</system:String>

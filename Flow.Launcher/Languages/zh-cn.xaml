@@ -358,7 +358,7 @@
     <system:String x:Key="TypeIsDarkToolTip">该主题支持两种（浅色/深色）模式。</system:String>
     <system:String x:Key="TypeHasBlurToolTip">该主题支持模糊透明背景。</system:String>
     <system:String x:Key="ShowSearchFilterBar">搜索筛选选项</system:String>
-    <system:String x:Key="ShowSearchFilterBarTip">在搜索框下方显示目录、文件/文件夹、扩展名、大小、修改/创建时间等筛选选项</system:String>
+    <system:String x:Key="ShowSearchFilterBarTip">在搜索框下方显示精确名称、大小写、目录、扩展名、大小和日期等筛选选项</system:String>
     <system:String x:Key="searchFilter_file">文件</system:String>
     <system:String x:Key="searchFilter_folder">文件夹</system:String>
     <system:String x:Key="searchFilter_path">目录</system:String>
@@ -376,6 +376,12 @@
     <system:String x:Key="searchFilter_created">创建时间</system:String>
     <system:String x:Key="searchFilter_accessed">访问时间</system:String>
     <system:String x:Key="searchFilter_hidden">隐藏</system:String>
+    <system:String x:Key="searchFilter_nameMatch">名称</system:String>
+    <system:String x:Key="searchFilter_caseSensitive">区分大小写</system:String>
+    <system:String x:Key="searchFilter_match_exact">精确匹配</system:String>
+    <system:String x:Key="searchFilter_match_prefix">开头匹配</system:String>
+    <system:String x:Key="searchFilter_match_suffix">结尾匹配</system:String>
+    <system:String x:Key="searchFilter_match_word">完整单词</system:String>
     <system:String x:Key="searchFilter_any">不限</system:String>
     <system:String x:Key="searchFilter_tooltip">插入 {0}</system:String>
     <system:String x:Key="searchFilter_size_empty">空</system:String>

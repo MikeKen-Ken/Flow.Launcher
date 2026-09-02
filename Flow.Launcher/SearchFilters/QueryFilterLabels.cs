@@ -13,6 +13,8 @@ internal static class QueryFilterLabels
         QueryFilterId.DateCreated => Localize.searchFilter_created(),
         QueryFilterId.DateAccessed => Localize.searchFilter_accessed(),
         QueryFilterId.Hidden => Localize.searchFilter_hidden(),
+        QueryFilterId.NameMatch => Localize.searchFilter_nameMatch(),
+        QueryFilterId.CaseSensitive => Localize.searchFilter_caseSensitive(),
         _ => id.ToString()
     };
 
@@ -36,6 +38,11 @@ internal static class QueryFilterLabels
         if (id == QueryFilterId.Extension && string.IsNullOrEmpty(value))
         {
             return Localize.searchFilter_tooltip("ext:png;jpg");
+        }
+
+        if (id == QueryFilterId.NameMatch && string.IsNullOrEmpty(value))
+        {
+            return Localize.searchFilter_tooltip("match:exact");
         }
 
         var syntax = QueryFilterCatalog.RequiresValue(id) && !string.IsNullOrEmpty(value)
@@ -65,6 +72,18 @@ internal static class QueryFilterLabels
         if (id == QueryFilterId.Path)
         {
             return QueryFilterPathValue.ToDisplay(value);
+        }
+
+        if (id == QueryFilterId.NameMatch)
+        {
+            return value.ToLowerInvariant() switch
+            {
+                "exact" => Localize.searchFilter_match_exact(),
+                "prefix" => Localize.searchFilter_match_prefix(),
+                "suffix" => Localize.searchFilter_match_suffix(),
+                "word" => Localize.searchFilter_match_word(),
+                _ => value
+            };
         }
 
         return value;

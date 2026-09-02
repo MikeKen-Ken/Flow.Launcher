@@ -206,4 +206,37 @@ public class QueryFilterSyntaxTest
 
         Assert.That(result, Is.EqualTo(@"C:\Program Files\>vacation ext:jpg"));
     }
+
+    [Test]
+    public void SetNameMatch_InsertsExactMode()
+    {
+        var result = QueryFilterSyntax.Apply("edge ext:exe", QueryFilterId.NameMatch, "exact", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo("edge ext:exe match:exact"));
+    }
+
+    [Test]
+    public void SetNameMatch_ReplacesPreviousMode()
+    {
+        var result = QueryFilterSyntax.Apply("edge match:prefix", QueryFilterId.NameMatch, "suffix", QueryFilterApplyMode.Set);
+
+        Assert.That(result, Is.EqualTo("edge match:suffix"));
+    }
+
+    [Test]
+    public void Parse_RecognizesPrecisionAliases()
+    {
+        var snapshot = QueryFilterSyntax.Parse("Edge ext:exe exact: case:");
+
+        Assert.That(snapshot.GetValue(QueryFilterId.NameMatch), Is.EqualTo("exact"));
+        Assert.That(snapshot.IsActive(QueryFilterId.CaseSensitive), Is.True);
+    }
+
+    [Test]
+    public void Parse_DoesNotConsumeCaseModifierWithAttachedText()
+    {
+        var snapshot = QueryFilterSyntax.Parse("case:Edge");
+
+        Assert.That(snapshot.IsActive(QueryFilterId.CaseSensitive), Is.False);
+    }
 }

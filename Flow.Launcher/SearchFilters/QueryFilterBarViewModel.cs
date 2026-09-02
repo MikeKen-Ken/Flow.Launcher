@@ -68,6 +68,8 @@ public class QueryFilterBarViewModel : BaseModel
         Create(QueryFilterId.File, "\uE8A5"),
         Create(QueryFilterId.Folder, "\uE8B7"),
         Create(QueryFilterId.Extension, "\uE71C", QueryFilterCatalog.ExtensionPresets),
+        Create(QueryFilterId.NameMatch, "\uE8D2", QueryFilterCatalog.NameMatchPresets),
+        Create(QueryFilterId.CaseSensitive, "\uE8D2"),
         Create(QueryFilterId.Size, "\uE9E9"),
         Create(QueryFilterId.DateModified, "\uE823", QueryFilterCatalog.DatePresets),
         Create(QueryFilterId.DateCreated, "\uE787", QueryFilterCatalog.DatePresets),

@@ -10,7 +10,9 @@ internal enum QueryFilterId
     DateCreated,
     Extension,
     DateAccessed,
-    Hidden
+    Hidden,
+    NameMatch,
+    CaseSensitive
 }
 
 internal enum QueryFilterGroup
@@ -22,7 +24,9 @@ internal enum QueryFilterGroup
     DateCreated,
     Extension,
     DateAccessed,
-    Hidden
+    Hidden,
+    NameMatch,
+    CaseSensitive
 }
 
 internal enum QueryFilterApplyMode

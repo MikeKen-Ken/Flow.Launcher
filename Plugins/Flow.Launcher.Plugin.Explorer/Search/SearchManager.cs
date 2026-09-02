@@ -7,6 +7,7 @@ using Flow.Launcher.Plugin.Explorer.Exceptions;
 using Flow.Launcher.Plugin.Explorer.Search.DirectoryInfo;
 using Flow.Launcher.Plugin.Explorer.Search.Everything;
 using Flow.Launcher.Plugin.Explorer.Search.QuickAccessLinks;
+using Flow.Launcher.Plugin.Explorer.Search.PrecisionMatching;
 using Flow.Launcher.Plugin.SharedCommands;
 using static Flow.Launcher.Plugin.Explorer.Settings;
 using Path = System.IO.Path;
@@ -89,7 +90,9 @@ namespace Flow.Launcher.Plugin.Explorer.Search
                 return [.. results];
             }
 
-            var queryIsEmpty = string.IsNullOrEmpty(query.Search);
+            var precisionQuery = SearchPrecisionQuery.Parse(query.Search);
+            var searchText = precisionQuery.ProviderSearch;
+            var queryIsEmpty = string.IsNullOrEmpty(searchText);
             if (queryIsEmpty && activeActionKeywords.ContainsKey(ActionKeyword.QuickAccessActionKeyword))
             {
                 return QuickAccess.AccessLinkListAll(query, Settings.QuickAccessLinks);
@@ -100,9 +103,9 @@ namespace Flow.Launcher.Plugin.Explorer.Search
                 return [.. results];
             }
 
-            var isPathSearch = query.Search.IsLocationPathString()
-                || EnvironmentVariables.IsEnvironmentVariableSearch(query.Search)
-                || EnvironmentVariables.HasEnvironmentVar(query.Search);
+            var isPathSearch = searchText.IsLocationPathString()
+                || EnvironmentVariables.IsEnvironmentVariableSearch(searchText)
+                || EnvironmentVariables.HasEnvironmentVar(searchText);
 
             IAsyncEnumerable<SearchResult> searchResults;
 
@@ -112,7 +115,7 @@ namespace Flow.Launcher.Plugin.Explorer.Search
             {
                 case true
                     when CanUsePathSearchByActionKeywords(activeActionKeywords):
-                    results.UnionWith(await PathSearchAsync(query, token).ConfigureAwait(false));
+                    results.UnionWith(await PathSearchAsync(query, searchText, precisionQuery, token).ConfigureAwait(false));
                     return [.. results];
 
                 case false
@@ -121,7 +124,7 @@ namespace Flow.Launcher.Plugin.Explorer.Search
                     if (Settings.ContentIndexProvider is EverythingSearchManager && !Settings.EnableEverythingContentSearch)
                         return EverythingContentSearchResult(query);
 
-                    searchResults = Settings.ContentIndexProvider.ContentSearchAsync("", query.Search, token);
+                    searchResults = Settings.ContentIndexProvider.ContentSearchAsync("", searchText, token);
                     engineName = Enum.GetName(Settings.ContentSearchEngine);
                     break;
 
@@ -132,7 +135,7 @@ namespace Flow.Launcher.Plugin.Explorer.Search
 
                 case false
                     when CanUseIndexSearchByActionKeywords(activeActionKeywords):
-                    searchResults = Settings.IndexProvider.SearchAsync(query.Search, token);
+                    searchResults = Settings.IndexProvider.SearchAsync(searchText, token);
                     engineName = Enum.GetName(Settings.IndexSearchEngine);
                     break;
                 default:
@@ -148,6 +151,9 @@ namespace Flow.Launcher.Plugin.Explorer.Search
             {
                 await foreach (var search in searchResults.WithCancellation(token).ConfigureAwait(false))
                 {
+                    if (!SearchPrecisionMatcher.IsMatch(search, precisionQuery))
+                        continue;
+
                     if (search.Type == ResultType.File && IsExcludedFile(search))
                         continue;
 
@@ -195,9 +201,13 @@ namespace Flow.Launcher.Plugin.Explorer.Search
             ];
         }
 
-        private async Task<List<Result>> PathSearchAsync(Query query, CancellationToken token = default)
+        private async Task<List<Result>> PathSearchAsync(
+            Query query,
+            string searchText,
+            SearchPrecisionQuery precisionQuery,
+            CancellationToken token = default)
         {
-            var querySearch = query.Search;
+            var querySearch = searchText;
 
             var results = new HashSet<Result>(PathEqualityComparator.Instance);
 
@@ -253,6 +263,9 @@ namespace Flow.Launcher.Plugin.Explorer.Search
             {
                 await foreach (var directory in directoryResult.WithCancellation(token).ConfigureAwait(false))
                 {
+                    if (!SearchPrecisionMatcher.IsMatch(directory, precisionQuery))
+                        continue;
+
                     results.Add(ResultManager.CreateResult(query, directory));
                 }
             }
