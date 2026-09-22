@@ -114,14 +114,15 @@ internal static class QueryFilterExtensionValue
         }
 
         var trimmed = input.Trim().TrimStart('.').ToLowerInvariant();
-        if (trimmed.Length == 0 || trimmed.Length > 12)
+        if (trimmed.Length == 0 || trimmed.Length > 12
+            || !char.IsAsciiLetterOrDigit(trimmed[0]) || !char.IsAsciiLetterOrDigit(trimmed[^1]))
         {
             return false;
         }
 
         foreach (var character in trimmed)
         {
-            if (!char.IsAsciiLetterOrDigit(character))
+            if (!char.IsAsciiLetterOrDigit(character) && character != '-')
             {
                 return false;
             }

@@ -12,9 +12,9 @@ internal static class QueryFilterCatalog
         ("image", ["png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "ico", "heic"]),
         ("video", ["mp4", "mkv", "avi", "mov", "webm", "wmv"]),
         ("audio", ["mp3", "wav", "flac", "aac", "m4a", "ogg"]),
-        ("document", ["pdf", "txt", "md", "docx", "xlsx", "pptx", "csv", "json", "xml", "html"]),
+        ("document", ["pdf", "txt", "md", "docx", "doc", "xlsx", "xls", "pptx", "ppt", "rtf", "csv", "json", "xml", "html"]),
         ("archive", ["zip", "7z", "rar", "tar", "gz"]),
-        ("exe", ["exe", "msi", "dll", "bat", "cmd", "ps1", "iso"])
+        ("exe", ["exe", "msi", "dll", "bat", "cmd", "ps1", "iso", "lnk", "url", "appref-ms"])
     ];
 
     internal static readonly IReadOnlyList<string> ExtensionPresets =

@@ -385,6 +385,9 @@
     <system:String x:Key="searchFilter_match_suffix">Ends with</system:String>
     <system:String x:Key="searchFilter_match_word">Whole word</system:String>
     <system:String x:Key="searchFilter_any">Any</system:String>
+    <system:String x:Key="searchFilter_extension_custom">Custom extension (for example, .log)</system:String>
+    <system:String x:Key="searchFilter_extension_add">Add</system:String>
+    <system:String x:Key="searchFilter_extension_invalid">Enter one extension with 1–12 letters, digits, or internal hyphens.</system:String>
     <system:String x:Key="searchFilter_tooltip">Inserts {0}</system:String>
     <system:String x:Key="searchFilter_size_empty">Empty</system:String>
     <system:String x:Key="searchFilter_size_tiny">Tiny</system:String>

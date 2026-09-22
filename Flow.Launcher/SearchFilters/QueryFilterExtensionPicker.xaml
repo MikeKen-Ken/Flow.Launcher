@@ -40,13 +40,28 @@
         BorderBrush="{Binding PanelStroke, RelativeSource={RelativeSource AncestorType=UserControl}}"
         BorderThickness="1"
         CornerRadius="10">
-        <StackPanel>
-            <Button
-                x:Name="AnyButton"
-                HorizontalAlignment="Left"
-                Click="OnAnyClick"
-                Style="{StaticResource ExtensionTileStyle}" />
-            <StackPanel x:Name="GroupsHost" Margin="0 8 0 0" />
-        </StackPanel>
+        <ScrollViewer MaxHeight="520" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel>
+                <Button
+                    x:Name="AnyButton"
+                    HorizontalAlignment="Left"
+                    Click="OnAnyClick"
+                    Style="{StaticResource ExtensionTileStyle}" />
+                <StackPanel x:Name="GroupsHost" Margin="0 8 0 0" />
+                <WrapPanel x:Name="CustomSelections" />
+                <TextBlock Text="{DynamicResource searchFilter_extension_custom}" Margin="0 8 0 6"
+                           Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Content="{DynamicResource searchFilter_extension_add}"
+                            Click="OnAddCustomClick" Padding="12 5" Margin="8 0 0 0" />
+                    <TextBox x:Name="CustomExtensionInput" MinWidth="160" Padding="6"
+                             TextChanged="OnCustomTextChanged"
+                             ToolTip="{DynamicResource searchFilter_extension_custom}" />
+                </DockPanel>
+                <TextBlock x:Name="CustomError" Visibility="Collapsed" TextWrapping="Wrap" Margin="0 6 0 0"
+                           Text="{DynamicResource searchFilter_extension_invalid}"
+                           Foreground="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            </StackPanel>
+        </ScrollViewer>
     </Border>
 </UserControl>

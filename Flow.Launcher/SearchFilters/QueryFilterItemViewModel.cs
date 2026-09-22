@@ -106,6 +106,16 @@ public partial class QueryFilterItemViewModel : BaseModel
     }
 
     [RelayCommand]
+    private void AddExtension(string value)
+    {
+        if (QueryFilterExtensionValue.TryNormalizeOne(value, out var extension))
+        {
+            var merged = QueryFilterExtensionValue.Join([CurrentValue, extension]);
+            _owner.Apply(Id, merged, QueryFilterApplyMode.Set);
+        }
+    }
+
+    [RelayCommand]
     private void SetSize(string value)
     {
         if (string.IsNullOrWhiteSpace(value))

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -103,6 +104,7 @@ public partial class QueryFilterExtensionPicker : UserControl
     public void Bind(QueryFilterItemViewModel item)
     {
         _item = item;
+        CustomExtensionInput.Clear();
         AnyButton.Content = Localize.searchFilter_any();
         BuildGroups();
         RefreshTiles();
@@ -180,6 +182,13 @@ public partial class QueryFilterExtensionPicker : UserControl
 
     private void OnPreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Enter && CustomExtensionInput.IsKeyboardFocusWithin)
+        {
+            AddCustomExtension();
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key == Key.Escape)
         {
             CloseRequested?.Invoke(this, EventArgs.Empty);
@@ -201,6 +210,51 @@ public partial class QueryFilterExtensionPicker : UserControl
 
             ApplyTile(tile, QueryFilterExtensionValue.Contains(current, extension));
         }
+
+        CustomSelections.Children.Clear();
+        foreach (var extension in QueryFilterExtensionValue.Parse(current)
+                     .Except(QueryFilterCatalog.ExtensionPresets, StringComparer.OrdinalIgnoreCase))
+        {
+            var tile = new Button
+            {
+                Content = extension + " ×",
+                Tag = extension,
+                Style = (Style)FindResource("ExtensionTileStyle")
+            };
+            tile.Click += OnExtensionClick;
+            ApplyTile(tile, true);
+            CustomSelections.Children.Add(tile);
+        }
+    }
+
+    private void OnAddCustomClick(object sender, RoutedEventArgs e) => AddCustomExtension();
+
+    private void OnCustomTextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (CustomError is not null)
+        {
+            CustomError.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void AddCustomExtension()
+    {
+        if (_item is null)
+        {
+            return;
+        }
+
+        if (!QueryFilterExtensionValue.TryNormalizeOne(CustomExtensionInput.Text, out var extension))
+        {
+            CustomError.Visibility = Visibility.Visible;
+            return;
+        }
+
+        _item.AddExtensionCommand.Execute(extension);
+        CustomExtensionInput.Clear();
+        RefreshTiles();
+        Dispatcher.BeginInvoke(RefreshTiles, System.Windows.Threading.DispatcherPriority.Background);
+        CustomExtensionInput.Focus();
     }
 
     private void ApplyTile(Button tile, bool selected)
