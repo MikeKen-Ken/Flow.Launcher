@@ -258,7 +258,9 @@
                             Visibility="Visible"
                             WindowChrome.IsHitTestVisibleInChrome="True">
                             <TextBox.CommandBindings>
+                                <CommandBinding Command="ApplicationCommands.Cut" Executed="QueryTextBox_OnCut" />
                                 <CommandBinding Command="ApplicationCommands.Copy" Executed="QueryTextBox_OnCopy" />
+                                <CommandBinding Command="ApplicationCommands.Paste" CanExecute="QueryTextBox_OnCanPaste" Executed="QueryTextBox_OnPaste" />
                             </TextBox.CommandBindings>
                             <TextBox.ContextMenu>
                                 <ContextMenu MinWidth="160">

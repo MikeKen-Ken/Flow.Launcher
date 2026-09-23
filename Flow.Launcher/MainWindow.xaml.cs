@@ -28,7 +28,6 @@ using Flow.Launcher.Resources.Controls;
 using Flow.Launcher.ViewModel;
 using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
-using DataObject = System.Windows.DataObject;
 using Key = System.Windows.Input.Key;
 using MouseButtons = System.Windows.Forms.MouseButtons;
 using NotifyIcon = System.Windows.Forms.NotifyIcon;
@@ -103,7 +102,6 @@ namespace Flow.Launcher
 
             SyncSoundEffectsState();
             RegisterSoundEffectsEvent();
-            DataObject.AddPastingHandler(QueryTextBox, QueryTextBox_OnPaste);
             _viewModel.ActualApplicationThemeChanged += ViewModel_ActualApplicationThemeChanged;
         }
 

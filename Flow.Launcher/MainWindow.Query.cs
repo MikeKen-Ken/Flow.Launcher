@@ -1,9 +1,8 @@
-using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
-using DataObject = System.Windows.DataObject;
+using Flow.Launcher.Helper;
 
 namespace Flow.Launcher
 {
@@ -25,24 +24,26 @@ namespace Flow.Launcher
             }
         }
 
-        private void QueryTextBox_OnPaste(object sender, DataObjectPastingEventArgs e)
+        private void QueryTextBox_OnCut(object sender, ExecutedRoutedEventArgs e)
         {
-            try
-            {
-                var isText = e.SourceDataObject.GetDataPresent(DataFormats.UnicodeText, true);
-                if (isText)
-                {
-                    var text = e.SourceDataObject.GetData(DataFormats.UnicodeText) as string;
-                    text = text.Replace(Environment.NewLine, " ");
-                    DataObject data = new DataObject();
-                    data.SetData(DataFormats.UnicodeText, text);
-                    e.DataObject = data;
-                }
-            }
-            catch (Exception ex)
-            {
-                App.API.LogException(ClassName, "Failed to paste text", ex);
-            }
+            QueryTextBoxClipboard.Cut(QueryTextBox, text =>
+                App.API.CopyToClipboard(text, showDefaultNotification: false));
+            e.Handled = true;
+        }
+
+        // Handled stops WPF from calling Clipboard.GetDataObject here. That call runs on the
+        // UI thread and freezes the query box whenever the clipboard is busy.
+        private void QueryTextBox_OnCanPaste(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = QueryTextBoxClipboard.CanPaste(QueryTextBox);
+            e.Handled = true;
+        }
+
+        private void QueryTextBox_OnPaste(object sender, ExecutedRoutedEventArgs e)
+        {
+            QueryTextBoxClipboard.Paste(QueryTextBox, ex =>
+                App.API.LogException(ClassName, "Failed to paste text", ex));
+            e.Handled = true;
         }
 
         private void QueryTextBox_KeyUp(object sender, KeyEventArgs e)
