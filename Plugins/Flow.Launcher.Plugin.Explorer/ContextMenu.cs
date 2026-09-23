@@ -17,6 +17,10 @@ namespace Flow.Launcher.Plugin.Explorer
     {
         private static readonly string ClassName = nameof(ContextMenu);
 
+        // Host actions appended after this list (top most, plugin settings, plugin info) use the default score.
+        // Keep inlined shell items under that whole custom menu.
+        private const int InlinedNativeContextMenuScore = -1;
+
         private PluginInitContext Context { get; set; }
 
         private Settings Settings { get; set; }
@@ -294,6 +298,7 @@ namespace Flow.Launcher.Plugin.Explorer
                         {
                             Title = menuItem.Label,
                             Icon = () => menuItem.Icon,
+                            Score = InlinedNativeContextMenuScore,
                             Action = _ =>
                             {
                                 ShellContextMenuDisplayHelper.ExecuteContextMenuItem(record.FullPath, menuItem.CommandId);
