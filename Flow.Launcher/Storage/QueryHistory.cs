@@ -52,24 +52,28 @@ namespace Flow.Launcher.Storage
         /// <summary>
         /// Records a result into the last-opened history list (<see cref="LastOpenedHistoryItems"/>).
         /// This will also update the IcoPath if existing history item has one that is different.
+        /// Reusing a stored entry refreshes its execution time and moves it to the most recent position.
         /// </summary>
         /// <param name="result">The result to add to history. Must have a non-empty <see cref="Result.OriginQuery"/>.<see cref="Query.TrimmedQuery"/>.</param>
-        public void Add(Result result)
+        /// <returns><see langword="true"/> when stored history changed.</returns>
+        public bool Add(Result result)
         {
             // Display copies have an empty plugin ID and may carry the home query.
             // Refresh their stored source without saving the presentation fields.
             if (result is LastOpenedHistoryResult { SourceHistoryItem: { } source })
             {
-                if (LastOpenedHistoryItems.Contains(source))
-                    source.ExecutedDateTime = DateTime.Now;
-                return;
+                if (!LastOpenedHistoryItems.Contains(source))
+                    return false;
+
+                MarkMostRecent(source);
+                return true;
             }
 
-            if (string.IsNullOrEmpty(result.OriginQuery.TrimmedQuery)) return;
+            if (string.IsNullOrEmpty(result.OriginQuery.TrimmedQuery)) return false;
             // History results triggered from homepage do not contain PluginID,
             // these are intentionally not saved otherwise cause duplicates due to subtitle
             // containing datetime string.
-            if (string.IsNullOrEmpty(result.PluginID)) return;
+            if (string.IsNullOrEmpty(result.PluginID)) return false;
 
             var pluginMetadata = PluginManager.GetPluginForId(result.PluginID)?.Metadata;
 
@@ -83,7 +87,6 @@ namespace Flow.Launcher.Storage
             if (LastOpenedHistoryItems.Count > 0 &&
                 TryGetLastOpenedHistoryResult(result, out var existingHistoryItem))
             {
-                existingHistoryItem.ExecutedDateTime = DateTime.Now;
                 existingHistoryItem.Provenance = HistoryProvenance.Capture(result, pluginMetadata);
 
                 if (existingHistoryItem.IcoPath != result.IcoPath)
@@ -92,11 +95,29 @@ namespace Flow.Launcher.Storage
                 if (existingHistoryItem.Glyph?.Glyph != result.Glyph?.Glyph
                     || existingHistoryItem.Glyph?.FontFamily != result.Glyph?.FontFamily)
                     existingHistoryItem.SetGlyph(result.Glyph);
+
+                MarkMostRecent(existingHistoryItem);
             }
             else
             {
                 LastOpenedHistoryItems.Add(new LastOpenedHistoryResult(result, pluginMetadata));
             }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Marks a stored entry as just used and places it last, which is the most recent slot.
+        /// </summary>
+        private void MarkMostRecent(LastOpenedHistoryResult historyItem)
+        {
+            historyItem.ExecutedDateTime = DateTime.Now;
+            var index = LastOpenedHistoryItems.IndexOf(historyItem);
+            if (index < 0 || index == LastOpenedHistoryItems.Count - 1)
+                return;
+
+            LastOpenedHistoryItems.RemoveAt(index);
+            LastOpenedHistoryItems.Add(historyItem);
         }
 
         /// <summary>

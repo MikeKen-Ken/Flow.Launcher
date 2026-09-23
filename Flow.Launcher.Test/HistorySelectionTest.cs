@@ -41,5 +41,46 @@ public class HistorySelectionTest
             Assert.That(original.PluginID, Is.EqualTo("plugin"));
         });
     }
+
+    [Test]
+    public void Add_PresentationCopy_MovesStoredEntryToMostRecent()
+    {
+        var history = new Storage.History();
+        var selected = new LastOpenedHistoryResult
+        {
+            Title = "Selected",
+            Query = "selected",
+            PluginID = "plugin",
+            OriginQuery = new Query { TrimmedQuery = "selected" },
+            ExecutedDateTime = new DateTime(2020, 1, 1)
+        };
+        var other = new LastOpenedHistoryResult
+        {
+            Title = "Other",
+            Query = "other",
+            PluginID = "plugin",
+            OriginQuery = new Query { TrimmedQuery = "other" },
+            ExecutedDateTime = new DateTime(2024, 1, 1)
+        };
+        history.LastOpenedHistoryItems.Add(selected);
+        history.LastOpenedHistoryItems.Add(other);
+        var copy = new LastOpenedHistoryResult
+        {
+            SourceHistoryItem = selected,
+            PluginID = string.Empty,
+            OriginQuery = new Query { TrimmedQuery = string.Empty }
+        };
+        var before = DateTime.Now;
+
+        var changed = history.Add(copy);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(changed, Is.True);
+            Assert.That(history.LastOpenedHistoryItems, Is.EqualTo(new[] { other, selected }));
+            Assert.That(selected.ExecutedDateTime, Is.GreaterThanOrEqualTo(before));
+            Assert.That(other.ExecutedDateTime, Is.EqualTo(new DateTime(2024, 1, 1)));
+        });
+    }
 }
 

@@ -545,7 +545,8 @@ namespace Flow.Launcher.ViewModel
             // Record query results and refresh selected history entries before the next home query.
             if (queryResultsSelected || HistorySelected())
             {
-                _history.Add(result);
+                if (_history.Add(result))
+                    _historyItemsStorage.Save();
                 lastHistoryIndex = 1;
             }
 
@@ -2252,7 +2253,9 @@ namespace Flow.Launcher.ViewModel
                 switch (Settings.LastQueryMode)
                 {
                     case LastQueryMode.Empty:
-                        await ChangeQueryTextAsync(string.Empty);
+                        // Re-query even when the box is already empty so a history click
+                        // that did not change the query still rebuilds newest-first order.
+                        await ChangeQueryTextAsync(string.Empty, true);
                         break;
                     case LastQueryMode.Preserved:
                     case LastQueryMode.Selected:
