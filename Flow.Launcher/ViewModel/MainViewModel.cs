@@ -542,8 +542,8 @@ namespace Flow.Launcher.ViewModel
             // the QueryAsync call will reconstruct the result list without the new item.
             // This must happen before ExecuteAsync because some plugin actions call HideMainWindow() inside their action,
             // which triggers a home query that reads history before _history.Add would have been called.
-            // Also, add item to history only if it is from results but not context menu or history.
-            if (queryResultsSelected)
+            // Record query results and refresh selected history entries before the next home query.
+            if (queryResultsSelected || HistorySelected())
             {
                 _history.Add(result);
                 lastHistoryIndex = 1;
@@ -871,6 +871,8 @@ namespace Flow.Launcher.ViewModel
                 var isReturningFromQueryResults = QueryResultsSelected();
                 var isReturningFromContextMenu = ContextMenuSelected();
                 var isReturningFromHistory = HistorySelected();
+                if (_selectedResults != value)
+                    ResetContextMenuSession();
                 _selectedResults = value;
                 if (QueryResultsSelected())
                 {
@@ -1322,7 +1324,7 @@ namespace Flow.Launcher.ViewModel
             }
             else if (ContextMenuSelected())
             {
-                QueryContextMenu();
+                _ = QueryContextMenuAsync();
             }
             else if (HistorySelected())
             {
@@ -1338,53 +1340,11 @@ namespace Flow.Launcher.ViewModel
             }
             else if (ContextMenuSelected())
             {
-                QueryContextMenu();
+                await QueryContextMenuAsync();
             }
             else if (HistorySelected())
             {
                 QueryHistory();
-            }
-        }
-
-        private void QueryContextMenu()
-        {
-            const string id = "Context Menu ID";
-            var query = QueryText.ToLower().Trim();
-            ContextMenu.Clear();
-
-            var selected = Results.SelectedItem?.Result;
-
-            if (selected != null && // SelectedItem returns null if selection is empty.
-                !string.IsNullOrEmpty(selected.PluginID))  // SelectedItem must have a valid PluginID, history results do not.
-            {
-                List<Result> results = PluginManager.GetContextMenusForPlugin(selected);
-                results.Add(ContextMenuTopMost(selected));
-                results.Add(ContextMenuPluginSettings(selected));
-                results.Add(ContextMenuPluginInfo(selected));
-
-                if (!string.IsNullOrEmpty(query))
-                {
-                    var filtered = results.Select(x => x.Clone()).Where
-                    (
-                        r =>
-                       {
-                           var match = App.API.FuzzySearch(query, r.Title);
-                           if (!match.IsSearchPrecisionScoreMet())
-                           {
-                               match = App.API.FuzzySearch(query, r.SubTitle);
-                           }
-
-                           if (!match.IsSearchPrecisionScoreMet()) return false;
-
-                           r.Score = match.Score;
-                           return true;
-                       }).ToList();
-                    ContextMenu.AddResults(filtered, id);
-                }
-                else
-                {
-                    ContextMenu.AddResults(results, id);
-                }
             }
         }
 
@@ -2470,6 +2430,7 @@ namespace Flow.Launcher.ViewModel
             {
                 if (disposing)
                 {
+                    ResetContextMenuSession();
                     _updateSource?.Dispose();
                     _dialogJumpSource?.Dispose();
                     _resultsUpdateChannelWriter?.Complete();

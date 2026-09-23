@@ -34,6 +34,7 @@ public partial class QueryFilterExtensionPicker : UserControl
     private static readonly FontFamily IconFont = new("Segoe MDL2 Assets");
     private readonly List<Button> _tiles = [];
     private QueryFilterItemViewModel _item;
+    private QueryFilterCustomExtensions _customExtensions;
 
     public QueryFilterExtensionPicker()
     {
@@ -104,6 +105,7 @@ public partial class QueryFilterExtensionPicker : UserControl
     public void Bind(QueryFilterItemViewModel item)
     {
         _item = item;
+        _customExtensions ??= new QueryFilterCustomExtensions();
         CustomExtensionInput.Clear();
         AnyButton.Content = Localize.searchFilter_any();
         BuildGroups();
@@ -212,19 +214,57 @@ public partial class QueryFilterExtensionPicker : UserControl
         }
 
         CustomSelections.Children.Clear();
-        foreach (var extension in QueryFilterExtensionValue.Parse(current)
+        foreach (var extension in QueryFilterExtensionValue.Union(
+                     (_customExtensions?.Values ?? []).Concat(QueryFilterExtensionValue.Parse(current)))
                      .Except(QueryFilterCatalog.ExtensionPresets, StringComparer.OrdinalIgnoreCase))
         {
             var tile = new Button
             {
-                Content = extension + " ×",
+                Content = extension,
                 Tag = extension,
                 Style = (Style)FindResource("ExtensionTileStyle")
             };
             tile.Click += OnExtensionClick;
-            ApplyTile(tile, true);
-            CustomSelections.Children.Add(tile);
+            ApplyTile(tile, QueryFilterExtensionValue.Contains(current, extension));
+            var remove = new Button
+            {
+                Content = "×",
+                Tag = extension,
+                Style = (Style)FindResource("ExtensionTileStyle"),
+                MinWidth = 28,
+                Padding = new Thickness(5, 7, 5, 7)
+            };
+            remove.SetResourceReference(ToolTipProperty, "searchFilter_extension_remove");
+            remove.Click += OnRemoveCustomClick;
+            ApplyTile(remove, false);
+            var pair = new StackPanel { Orientation = Orientation.Horizontal };
+            pair.Children.Add(tile);
+            pair.Children.Add(remove);
+            CustomSelections.Children.Add(pair);
         }
+    }
+
+    private void OnRemoveCustomClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string extension } || _item is null)
+        {
+            return;
+        }
+
+        _customExtensions?.Remove(extension);
+        if (QueryFilterExtensionValue.Contains(_item.CurrentValue, extension))
+        {
+            _item.SelectPresetCommand.Execute(extension);
+        }
+        RefreshTiles();
+        Dispatcher.BeginInvoke(RefreshTiles, System.Windows.Threading.DispatcherPriority.Background);
+    }
+
+    private void OnCustomInputMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        Window.GetWindow(this)?.Activate();
+        CustomExtensionInput.Focus();
+        Keyboard.Focus(CustomExtensionInput);
     }
 
     private void OnAddCustomClick(object sender, RoutedEventArgs e) => AddCustomExtension();
@@ -250,6 +290,7 @@ public partial class QueryFilterExtensionPicker : UserControl
             return;
         }
 
+        _customExtensions?.Add(extension);
         _item.AddExtensionCommand.Execute(extension);
         CustomExtensionInput.Clear();
         RefreshTiles();

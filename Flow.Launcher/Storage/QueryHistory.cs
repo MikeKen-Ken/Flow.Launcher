@@ -56,6 +56,15 @@ namespace Flow.Launcher.Storage
         /// <param name="result">The result to add to history. Must have a non-empty <see cref="Result.OriginQuery"/>.<see cref="Query.TrimmedQuery"/>.</param>
         public void Add(Result result)
         {
+            // Display copies have an empty plugin ID and may carry the home query.
+            // Refresh their stored source without saving the presentation fields.
+            if (result is LastOpenedHistoryResult { SourceHistoryItem: { } source })
+            {
+                if (LastOpenedHistoryItems.Contains(source))
+                    source.ExecutedDateTime = DateTime.Now;
+                return;
+            }
+
             if (string.IsNullOrEmpty(result.OriginQuery.TrimmedQuery)) return;
             // History results triggered from homepage do not contain PluginID,
             // these are intentionally not saved otherwise cause duplicates due to subtitle

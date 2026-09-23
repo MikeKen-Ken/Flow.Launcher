@@ -389,6 +389,8 @@ public static class ShellContextMenuDisplayHelper
                 throw new Exception("Failed to delete HBitmap.");
             }
 
+            // Menu discovery runs on an STA worker; the UI consumes these icons later.
+            bitmapSource.Freeze();
             return bitmapSource;
         }
         catch (COMException)
