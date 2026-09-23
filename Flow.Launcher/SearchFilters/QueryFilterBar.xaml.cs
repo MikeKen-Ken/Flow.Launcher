@@ -354,7 +354,12 @@ public partial class QueryFilterBar : UserControl
     private void OpenFolderPicker(QueryFilterItemViewModel item)
     {
         var owner = Window.GetWindow(this);
+        var mainWindow = owner as MainWindow;
         var wasTopmost = owner?.Topmost ?? false;
+
+        // ShowDialog deactivates the owner. Suspend hide-on-lost-focus first so the
+        // launcher stays up and the folder dialog remains usable.
+        mainWindow?.SuspendHideOnLostFocus();
         if (owner is not null)
         {
             owner.Topmost = false;
@@ -387,6 +392,7 @@ public partial class QueryFilterBar : UserControl
             }
 
             RestoreQueryBoxFocus();
+            mainWindow?.ResumeHideOnLostFocus();
         }
     }
 
