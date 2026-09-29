@@ -455,6 +455,14 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     bool elevated = e.SpecialKeyState.ToModifierKeys() == (ModifierKeys.Control | ModifierKeys.Shift);
 
                     bool shouldRunElevated = elevated && CanRunElevated;
+
+                    // The app may have been uninstalled since it was indexed.
+                    // Keep the window as is instead of hiding and resetting it for a launch that cannot succeed.
+                    if (!Main.EnsureProgramExists(Location, isDirectory: true))
+                    {
+                        return false;
+                    }
+
                     _ = Task.Run(() => Launch(shouldRunElevated)).ConfigureAwait(false);
                     if (elevated && !shouldRunElevated)
                     {

@@ -195,6 +195,13 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     // Ctrl + Shift + Enter to run as admin
                     bool runAsAdmin = c.SpecialKeyState.ToModifierKeys() == (ModifierKeys.Control | ModifierKeys.Shift);
 
+                    // The program may have been removed since it was indexed.
+                    // Keep the window as is instead of hiding and resetting it for a launch that cannot succeed.
+                    if (!Main.EnsureProgramExists(FullPath))
+                    {
+                        return false;
+                    }
+
                     var info = new ProcessStartInfo
                     {
                         FileName = FullPath,
@@ -222,6 +229,11 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     Title = api.GetTranslation("flowlauncher_plugin_program_run_as_different_user"),
                     Action = c =>
                     {
+                        if (!Main.EnsureProgramExists(FullPath))
+                        {
+                            return false;
+                        }
+
                         var info = new ProcessStartInfo
                         {
                             FileName = FullPath, WorkingDirectory = ParentDirectory, UseShellExecute = true
@@ -239,6 +251,11 @@ namespace Flow.Launcher.Plugin.Program.Programs
                     Title = api.GetTranslation("flowlauncher_plugin_program_run_as_administrator"),
                     Action = c =>
                     {
+                        if (!Main.EnsureProgramExists(FullPath))
+                        {
+                            return false;
+                        }
+
                         var info = new ProcessStartInfo
                         {
                             FileName = FullPath,

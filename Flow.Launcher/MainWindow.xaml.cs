@@ -266,6 +266,10 @@ namespace Flow.Launcher
                                         SoundPlay();
                                     }
 
+                                    // Restore the intended size in case the window was resized by the OS while hidden
+                                    // (e.g. display / DPI / UAC desktop changes), which would leave it stuck at a wrong size.
+                                    RestoreWindowSize();
+
                                     // Update position & Activate
                                     UpdatePosition();
                                     Activate();
@@ -386,6 +390,21 @@ namespace Flow.Launcher
             if ((_settings.ShowHomePage || _settings.ShowHistoryResultsForHomePage) && string.IsNullOrEmpty(_viewModel.QueryText))
             {
                 _viewModel.QueryResults();
+            }
+        }
+
+        private void RestoreWindowSize()
+        {
+            // Native resizes switch SizeToContent to Manual, freezing the height. Re-enable auto height.
+            if (SizeToContent != SizeToContent.Height)
+            {
+                SizeToContent = SizeToContent.Height;
+            }
+
+            // SetCurrentValue keeps the Width binding alive, unlike assigning Width directly.
+            if (Width != _settings.WindowSize)
+            {
+                SetCurrentValue(WidthProperty, _settings.WindowSize);
             }
         }
 

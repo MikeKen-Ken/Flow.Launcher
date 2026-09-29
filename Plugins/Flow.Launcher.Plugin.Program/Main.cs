@@ -541,6 +541,24 @@ namespace Flow.Launcher.Plugin.Program
             return false;
         }
 
+        /// <summary>
+        /// Checks that an indexed program still exists (it may have been uninstalled or deleted after indexing).
+        /// If it is gone, an error message is shown immediately and false is returned, so the caller can
+        /// avoid hiding and resetting the main window for a launch that can never succeed.
+        /// </summary>
+        public static bool EnsureProgramExists(string path, bool isDirectory = false)
+        {
+            if (!string.IsNullOrEmpty(path) && (isDirectory ? Directory.Exists(path) : File.Exists(path)))
+            {
+                return true;
+            }
+
+            var title = Context.API.GetTranslation("flowlauncher_plugin_program_disable_dlgtitle_error");
+            var message = string.Format(Context.API.GetTranslation("flowlauncher_plugin_program_run_failed"), path);
+            Context.API.ShowMsgError(title, message);
+            return false;
+        }
+
         public static void StartProcess(Func<ProcessStartInfo, Process> runProcess, ProcessStartInfo info)
         {
             try
