@@ -546,10 +546,12 @@ namespace Flow.Launcher
                     e.Handled = true;
                     break;
                 case Key.Right:
+                    // Bound only on the query list. The history page leaves Right unbound.
                     if (_viewModel.QueryResultsSelected()
-                        && QueryTextBox.CaretIndex == QueryTextBox.Text.Length)            
+                        && QueryTextBox.CaretIndex == QueryTextBox.Text.Length)
                     {
-                        _viewModel.LoadContextMenuCommand.Execute(null);
+                        if (!_viewModel.RestoreSelectedHistorySearch())
+                            _viewModel.LoadContextMenuCommand.Execute(null);
                         e.Handled = true;
                     }
                     break;

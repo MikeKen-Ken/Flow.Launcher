@@ -51,6 +51,25 @@ public static class ResultHelper
         App.API.ChangeQuery(queryText);
     }
 
+    /// <summary>
+    /// Right-click on a home-page or history-page entry restores its saved query text.
+    /// Applies to both query history and last-opened history. Plugin results are left unchanged
+    /// so their context menu still opens.
+    /// </summary>
+    /// <returns><c>true</c> when the result was a history entry and its text was applied.</returns>
+    public static bool TryRestoreHistorySearch(Result? result)
+    {
+        if (result is not LastOpenedHistoryResult history || !string.IsNullOrEmpty(history.PluginID))
+            return false;
+
+        var queryText = !string.IsNullOrEmpty(history.Query)
+            ? history.Query
+            : history.SourceHistoryItem?.Query ?? string.Empty;
+        App.API.BackToQueryResults();
+        App.API.ChangeQuery(queryText);
+        return true;
+    }
+
     public static async Task<Result?> PopulateResultsAsync(string pluginId, string trimmedQuery, string title, string subTitle, string recordKey)
     {
         var plugin = PluginManager.GetPluginForId(pluginId);

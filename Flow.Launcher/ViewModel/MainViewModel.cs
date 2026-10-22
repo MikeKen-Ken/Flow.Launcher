@@ -438,15 +438,15 @@ namespace Flow.Launcher.ViewModel
         }
 
         [RelayCommand]
-        private async Task LoadContextMenuAsync()
+        private async Task LoadContextMenuAsync(Result result)
         {
             // For Dialog Jump and right click mode, we need to navigate to the path
             if (_isDialogJump && Settings.DialogJumpResultBehaviour == DialogJumpResultBehaviours.RightClick)
             {
                 if (SelectedResults.SelectedItem != null && DialogWindowHandle != nint.Zero)
                 {
-                    var result = SelectedResults.SelectedItem.Result;
-                    if (result is DialogJumpResult dialogJumpResult)
+                    var dialogResult = SelectedResults.SelectedItem.Result;
+                    if (dialogResult is DialogJumpResult dialogJumpResult)
                     {
                         Win32Helper.SetForegroundWindow(DialogWindowHandle);
                         _ = Task.Run(() => DialogJump.JumpToPathAsync(DialogWindowHandle, dialogJumpResult.DialogJumpPath));
@@ -454,6 +454,10 @@ namespace Flow.Launcher.ViewModel
                 }
                 return;
             }
+
+            // History rows have no plugin menu. Right-click fills the box with the saved query text.
+            if (TryRestoreHistorySearch(result))
+                return;
 
             // For query mode, we load context menu
             if (QueryResultsSelected())
@@ -472,6 +476,19 @@ namespace Flow.Launcher.ViewModel
                 PreviewSelectedItem = Results.SelectedItem;
                 await UpdatePreviewAsync();
             }
+        }
+
+        /// <summary>
+        /// Right arrow in the query list, on a history row, fills the search box with that row's saved text.
+        /// </summary>
+        internal bool RestoreSelectedHistorySearch()
+        {
+            return TryRestoreHistorySearch(null);
+        }
+
+        private bool TryRestoreHistorySearch(Result result)
+        {
+            return ResultHelper.TryRestoreHistorySearch(result ?? SelectedResults.SelectedItem?.Result);
         }
 
         [RelayCommand]
