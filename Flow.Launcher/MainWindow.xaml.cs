@@ -562,6 +562,19 @@ namespace Flow.Launcher
                         e.Handled = true;
                     }
                     break;
+                case Key.A:
+                    // Select the query text and consume the key.
+                    if (specialKeyState.CtrlPressed
+                        && !specialKeyState.AltPressed
+                        && !specialKeyState.ShiftPressed
+                        && !specialKeyState.WinPressed
+                        && !PreviewMarkdownScrollViewer.IsCodeBlockFocused(e.OriginalSource)
+                        && IsInQueryTextBox(e.OriginalSource as DependencyObject))
+                    {
+                        QueryTextBox.SelectAll();
+                        e.Handled = true;
+                    }
+                    break;
                 case Key.Back:
                     if (specialKeyState.CtrlPressed)
                     {
@@ -590,6 +603,21 @@ namespace Flow.Launcher
                 default:
                     break;
             }
+        }
+
+        private bool IsInQueryTextBox(DependencyObject source)
+        {
+            while (source != null)
+            {
+                if (source == QueryTextBox)
+                    return true;
+
+                source = source is Visual
+                    ? VisualTreeHelper.GetParent(source)
+                    : LogicalTreeHelper.GetParent(source);
+            }
+
+            return false;
         }
 
         private void OnKeyUp(object sender, KeyEventArgs e)

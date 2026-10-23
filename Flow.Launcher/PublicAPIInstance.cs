@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -194,14 +193,7 @@ namespace Flow.Launcher
                 // Sometimes the clipboard is locked and cannot be accessed,
                 // we need to retry a few times before giving up
                 var exception = await RetryActionOnSTAThreadAsync(() =>
-                {
-                    var paths = new StringCollection
-                    {
-                        stringToCopy
-                    };
-
-                    Clipboard.SetFileDropList(paths);
-                });
+                    ClipboardWriter.SetFileDrop(stringToCopy));
 
                 if (exception == null)
                 {
@@ -223,10 +215,7 @@ namespace Flow.Launcher
                 // Sometimes the clipboard is locked and cannot be accessed,
                 // we need to retry a few times before giving up
                 var exception = await RetryActionOnSTAThreadAsync(() =>
-                {
-                    // We should use SetText instead of SetDataObject to avoid the clipboard being locked by other applications
-                    Clipboard.SetText(stringToCopy);
-                });
+                    ClipboardWriter.SetText(stringToCopy));
 
                 if (exception == null)
                 {

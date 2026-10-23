@@ -12,6 +12,8 @@ namespace Flow.Launcher
 
         private void QueryTextBox_OnCopy(object sender, ExecutedRoutedEventArgs e)
         {
+            // Handled keeps WPF from also calling the clipboard on the UI thread.
+            e.Handled = true;
             var result = _viewModel.Results.SelectedItem?.Result;
             if (QueryTextBox.SelectionLength == 0 && result != null)
             {
