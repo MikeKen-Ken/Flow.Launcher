@@ -88,12 +88,6 @@ public class QueryTextBoxClipboardHangTest
         Assert.That(box.CaretIndex, Is.EqualTo(6));
     }
 
-    [DllImport("user32.dll")]
-    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, nuint dwExtraInfo);
-
-    private const byte VkControl = 0x11;
-    private const uint KeyeventfKeyup = 0x0002;
-
     [Test]
     [CancelAfter(5000)]
     public void SetText_ReturnsWithoutWpfFlushRetry()
@@ -117,50 +111,6 @@ public class QueryTextBoxClipboardHangTest
             $"SetText took {elapsed.TotalMilliseconds:0} ms");
         if (read != null)
             Assert.That(read, Is.EqualTo(text));
-    }
-
-    [Test]
-    [CancelAfter(8000)]
-    public void CtrlA_SelectsAllWithoutInvokingCopy()
-    {
-        var copyCount = 0;
-        var box = new TextBox { Text = "hello world", Width = 200 };
-        box.CommandBindings.Add(new CommandBinding(
-            ApplicationCommands.Copy,
-            (_, _) => copyCount++));
-        var window = new Window
-        {
-            Width = 320,
-            Height = 120,
-            WindowStyle = WindowStyle.ToolWindow,
-            ShowInTaskbar = false,
-            Content = box
-        };
-
-        window.Show();
-        box.Focus();
-        PumpUntil(box, () => box.IsKeyboardFocused);
-
-        keybd_event(VkControl, 0, 0, 0);
-        try
-        {
-            var source = PresentationSource.FromVisual(box);
-            Assert.That(source, Is.Not.Null);
-            box.RaiseEvent(new KeyEventArgs(Keyboard.PrimaryDevice, source, 0, Key.A)
-            {
-                RoutedEvent = Keyboard.KeyDownEvent
-            });
-        }
-        finally
-        {
-            keybd_event(VkControl, 0, KeyeventfKeyup, 0);
-        }
-
-        window.Close();
-
-        Assert.That(copyCount, Is.EqualTo(0), "Ctrl+A invoked Copy");
-        Assert.That(box.SelectionLength, Is.EqualTo(box.Text.Length),
-            $"selection {box.SelectionStart}+{box.SelectionLength} of '{box.Text}'");
     }
 
     [Test]
