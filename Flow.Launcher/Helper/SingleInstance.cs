@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.IO.Pipes;
-using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,8 +67,21 @@ namespace Flow.Launcher.Helper
 
             string channelName = string.Concat(applicationIdentifier, Delimiter, ChannelNameSuffix);
 
-            // Create mutex based on unique application Id to check if this is the first instance of the application. 
-            SingleInstanceMutex = new Mutex(true, applicationIdentifier, out var firstInstance);
+            // Create mutex based on unique application Id to check if this is the first instance of the application.
+            // Explorer launches a normal-integrity process. An elevated Flow must still be openable by that process.
+            bool firstInstance;
+            try
+            {
+                SingleInstanceMutex = new Mutex(true, applicationIdentifier, out firstInstance);
+                if (firstInstance)
+                    SingleInstanceNativeMethods.AllowMediumIntegrityClients(SingleInstanceMutex.SafeWaitHandle);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                // The running instance was started elevated before its mutex allowed medium-integrity clients.
+                firstInstance = false;
+            }
+
             if (firstInstance)
             {
                 _ = CreateRemoteServiceAsync(channelName);
@@ -115,12 +127,10 @@ namespace Flow.Launcher.Helper
 
         private static async Task ServeConnectionAsync(string channelName)
         {
-            using NamedPipeServerStream pipeServer = new(
-                channelName,
-                PipeDirection.In,
-                1,
-                PipeTransmissionMode.Byte,
-                PipeOptions.Asynchronous);
+            // Created with a medium integrity label. An elevated instance would otherwise stamp a
+            // high label, and Explorer's normal-integrity launch is denied before it can ask this
+            // instance to show the window.
+            using NamedPipeServerStream pipeServer = SingleInstanceNativeMethods.CreateInboundPipe(channelName);
 
             await pipeServer.WaitForConnectionAsync();
 
@@ -244,20 +254,5 @@ namespace Flow.Launcher.Helper
         }
 
         #endregion
-    }
-
-    /// <summary>
-    /// Native APIs used by <see cref="SingleInstance{TApplication}"/>.
-    /// Isolated because DllImport cannot be applied inside a generic type.
-    /// </summary>
-    internal static class SingleInstanceNativeMethods
-    {
-        [DllImport("user32.dll")]
-        internal static extern bool AllowSetForegroundWindow(int dwProcessId);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        internal static extern bool GetNamedPipeServerProcessId(
-            SafePipeHandle pipe,
-            out uint serverProcessId);
     }
 }

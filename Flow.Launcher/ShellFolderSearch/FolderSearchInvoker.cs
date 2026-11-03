@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Windows;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using Flow.Launcher.Infrastructure;
 using Flow.Launcher.ViewModel;
 
 namespace Flow.Launcher.ShellFolderSearch;
@@ -14,6 +15,7 @@ public static class FolderSearchInvoker
     private static readonly Lock SyncRoot = new();
     private static string _pendingFolderPath;
     private static bool _pluginsReady;
+    private static bool _holdingWindowOpen;
 
     public static bool HasPending
     {
@@ -64,23 +66,78 @@ public static class FolderSearchInvoker
             Apply(toApply);
     }
 
-    private static void Apply(string folderPath)
+    /// <summary>
+    /// Shows the pending folder search before hotkey registration steals focus.
+    /// The hold stays until <see cref="NotifyPluginsReady"/> applies the query.
+    /// </summary>
+    public static void ShowPendingShell()
     {
-        var query = FolderSearchCommand.BuildQuery(folderPath);
-        if (string.IsNullOrEmpty(query))
-            return;
-
         var dispatcher = Application.Current?.Dispatcher;
         if (dispatcher == null)
             return;
 
         dispatcher.Invoke(() =>
         {
-            var mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
-            // Prevent Show() from SelectAll-ing the previous query over the folder path.
-            mainViewModel.LastQuerySelected = true;
+            BeginHoldWindowOpen();
             App.API.ShowMainWindow();
-            App.API.ChangeQuery(query);
+            BringToForeground();
         });
+    }
+
+    private static void Apply(string folderPath)
+    {
+        var query = FolderSearchCommand.BuildQuery(folderPath);
+        var dispatcher = Application.Current?.Dispatcher;
+        if (string.IsNullOrEmpty(query) || dispatcher == null)
+        {
+            EndHoldWindowOpen();
+            return;
+        }
+
+        dispatcher.Invoke(() =>
+        {
+            BeginHoldWindowOpen();
+            try
+            {
+                var mainViewModel = Ioc.Default.GetRequiredService<MainViewModel>();
+                // Prevent Show() from SelectAll-ing the previous query over the folder path.
+                mainViewModel.LastQuerySelected = true;
+                App.API.ShowMainWindow();
+                BringToForeground();
+                App.API.ChangeQuery(query);
+            }
+            finally
+            {
+                EndHoldWindowOpen();
+            }
+        });
+    }
+
+    private static void BeginHoldWindowOpen()
+    {
+        if (_holdingWindowOpen)
+            return;
+
+        if (Application.Current?.MainWindow is MainWindow mainWindow)
+        {
+            mainWindow.SuspendHideOnLostFocus();
+            _holdingWindowOpen = true;
+        }
+    }
+
+    private static void EndHoldWindowOpen()
+    {
+        if (!_holdingWindowOpen)
+            return;
+
+        _holdingWindowOpen = false;
+        if (Application.Current?.MainWindow is MainWindow mainWindow)
+            mainWindow.ResumeHideOnLostFocus();
+    }
+
+    private static void BringToForeground()
+    {
+        if (Application.Current?.MainWindow is MainWindow mainWindow)
+            Win32Helper.SetForegroundWindow(mainWindow);
     }
 }

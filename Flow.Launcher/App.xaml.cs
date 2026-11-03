@@ -250,7 +250,7 @@ namespace Flow.Launcher
                 Current.MainWindow.Title = Constant.FlowLauncher;
 
                 if (FolderSearchInvoker.HasPending)
-                    API.ShowMainWindow();
+                    FolderSearchInvoker.ShowPendingShell();
 
                 // Initialize Dialog Jump before hotkey mapper since hotkey mapper will register its hotkey
                 // Initialize Dialog Jump after main window is created so that it can access main window handle
