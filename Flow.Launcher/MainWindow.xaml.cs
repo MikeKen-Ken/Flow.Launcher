@@ -305,10 +305,16 @@ namespace Flow.Launcher
                     case nameof(MainViewModel.QueryTextCursorMovedToEnd):
                         if (_viewModel.QueryTextCursorMovedToEnd)
                         {
-                            // QueryTextBox seems to be update with a DispatcherPriority as low as ContextIdle.
-                            // To ensure QueryTextBox is up to date with QueryText from the View, we need to Dispatch with such a priority
-                            Dispatcher.Invoke(() => QueryTextBox.CaretIndex = QueryTextBox.Text.Length);
+                            // The query binding writes the text box at DataBind priority. Invoke()
+                            // runs at Send, before that write, so the caret lands on the previous
+                            // text and the binding then parks it at the start. A folder search
+                            // such as C:\folder\> then takes the next characters in front of the path.
                             _viewModel.QueryTextCursorMovedToEnd = false;
+                            Dispatcher.BeginInvoke(() =>
+                            {
+                                QueryTextBox.SelectionLength = 0;
+                                QueryTextBox.CaretIndex = QueryTextBox.Text.Length;
+                            }, DispatcherPriority.ContextIdle);
                         }
                         break;
                     case nameof(MainViewModel.GameModeStatus):
