@@ -179,11 +179,8 @@ public class AutoStartup
         td.Triggers.Add(new LogonTrigger { UserId = WindowsIdentity.GetCurrent().Name, Delay = TimeSpan.FromSeconds(2) });
         td.Actions.Add(Constant.ExecutablePath);
 
-        if (IsCurrentUserIsAdmin())
-        {
-            td.Principal.RunLevel = TaskRunLevel.Highest;
-        }
-
+        // Stay at the default limited run level. Highest starts Flow as administrator,
+        // and every program it launches then inherits that token.
         td.Settings.StopIfGoingOnBatteries = false;
         td.Settings.DisallowStartIfOnBatteries = false;
         td.Settings.ExecutionTimeLimit = TimeSpan.Zero;
@@ -214,13 +211,6 @@ public class AutoStartup
             App.API.LogError(ClassName, $"Failed to unschedule logon task: {e}");
             return false;
         }
-    }
-
-    private static bool IsCurrentUserIsAdmin()
-    {
-        var identity = WindowsIdentity.GetCurrent();
-        var principal = new WindowsPrincipal(identity);
-        return principal.IsInRole(WindowsBuiltInRole.Administrator);
     }
 
     private static bool UnscheduleRegistry()
