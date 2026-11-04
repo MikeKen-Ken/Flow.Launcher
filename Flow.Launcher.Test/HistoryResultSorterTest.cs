@@ -130,11 +130,11 @@ namespace Flow.Launcher.Test
             history.LastOpenedHistoryItems.Add(first);
             history.LastOpenedHistoryItems.Add(second);
 
-            var wasRemoved = history.Remove(first);
+            var removedCount = history.Remove(first);
 
             Assert.Multiple(() =>
             {
-                Assert.That(wasRemoved, Is.True);
+                Assert.That(removedCount, Is.EqualTo(1));
                 Assert.That(history.LastOpenedHistoryItems, Is.EqualTo(new[] { second }));
             });
         }

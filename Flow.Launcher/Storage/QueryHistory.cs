@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -125,14 +125,27 @@ namespace Flow.Launcher.Storage
         }
 
         /// <summary>
-        /// Removes a specific stored history entry.
+        /// Removes an item from history.
         /// </summary>
-        /// <param name="historyItem">The original entry from <see cref="LastOpenedHistoryItems"/>.</param>
-        /// <returns><see langword="true"/> when the entry was removed.</returns>
-        public bool Remove(LastOpenedHistoryResult historyItem)
+        /// <param name="historyItem">The stored history item to remove.</param>
+        /// <param name="removeAllMatchingResults">
+        /// Whether to remove every entry representing the same result. This is used by the last-opened history
+        /// style, which displays entries with different queries as a single result.
+        /// </param>
+        /// <returns>The number of removed history entries.</returns>
+        public int Remove(LastOpenedHistoryResult historyItem, bool removeAllMatchingResults = false)
         {
             ArgumentNullException.ThrowIfNull(historyItem);
-            return LastOpenedHistoryItems.Remove(historyItem);
+            if (!removeAllMatchingResults)
+            {
+                return LastOpenedHistoryItems.Remove(historyItem) ? 1 : 0;
+            }
+
+            return LastOpenedHistoryItems.RemoveAll(item =>
+                item.Title == historyItem.Title
+                && item.SubTitle == historyItem.SubTitle
+                && item.PluginID == historyItem.PluginID
+                && item.RecordKey == historyItem.RecordKey);
         }
 
         /// <summary>
