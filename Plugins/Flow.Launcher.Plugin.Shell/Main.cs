@@ -605,6 +605,13 @@ namespace Flow.Launcher.Plugin.Shell
                 new()
                 {
                     Title = Localize.flowlauncher_plugin_cmd_run_as_different_user(),
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "shell.run-as-different-user",
+                        Label = Localize.flowlauncher_plugin_cmd_run_as_different_user(),
+                        Kind = HistoryActionKind.Execute,
+                        ReplayMode = HistoryReplayMode.Execute
+                    },
                     Action = c =>
                     {
                         Execute(ShellCommand.RunAsDifferentUser, PrepareProcessStartInfo(selectedResult.Title));
@@ -616,6 +623,13 @@ namespace Flow.Launcher.Plugin.Shell
                 new()
                 {
                     Title = Localize.flowlauncher_plugin_cmd_run_as_administrator(),
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "shell.run-as-administrator",
+                        Label = Localize.flowlauncher_plugin_cmd_run_as_administrator(),
+                        Kind = HistoryActionKind.Execute,
+                        ReplayMode = HistoryReplayMode.Execute
+                    },
                     Action = c =>
                     {
                         Execute(Process.Start, PrepareProcessStartInfo(selectedResult.Title, true));

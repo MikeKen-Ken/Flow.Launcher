@@ -560,9 +560,18 @@ namespace Flow.Launcher.ViewModel
             // This must happen before ExecuteAsync because some plugin actions call HideMainWindow() inside their action,
             // which triggers a home query that reads history before _history.Add would have been called.
             // Record query results and refresh selected history entries before the next home query.
+            // Context-menu commands are saved as an action on the result they belong to.
             if (queryResultsSelected || HistorySelected())
             {
                 if (_history.Add(result))
+                    _historyItemsStorage.Save();
+                lastHistoryIndex = 1;
+            }
+            else if (ContextMenuSelected())
+            {
+                var source = _contextMenuSource ?? Results.SelectedItem?.Result;
+                var recorded = ContextMenuHistory.TryCreate(source, result);
+                if (recorded != null && _history.Add(recorded, fromContextMenu: true))
                     _historyItemsStorage.Save();
                 lastHistoryIndex = 1;
             }
@@ -1400,9 +1409,13 @@ namespace Flow.Launcher.ViewModel
 
             foreach (var item in historyItems)
             {
-                var copiedItem = item.DeepCopyForHistoryStyle(Settings.HistoryStyle == HistoryStyle.LastOpened);
+                // Query style normally shows only the search text. A context-menu command
+                // still needs the file name and the command label, in either history style.
+                var replayContextMenu = item.Provenance?.FromContextMenu == true;
+                var copiedItem = item.DeepCopyForHistoryStyle(
+                    Settings.HistoryStyle == HistoryStyle.LastOpened || replayContextMenu);
 
-                if (Settings.HistoryStyle == HistoryStyle.LastOpened)
+                if (Settings.HistoryStyle == HistoryStyle.LastOpened || replayContextMenu)
                 {
                     copiedItem.AsyncAction = async c =>
                     {
@@ -1412,6 +1425,18 @@ namespace Flow.Launcher.ViewModel
                         {
                             ResultHelper.NavigateToHistoryQuery(item);
                             return false;
+                        }
+
+                        if (item.Provenance?.FromContextMenu == true)
+                        {
+                            var replay = await ResultHelper.TryExecuteContextMenuAsync(item, c);
+                            if (replay == null)
+                            {
+                                ResultHelper.NavigateToHistoryQuery(item);
+                                return false;
+                            }
+
+                            return replay.Value;
                         }
 
                         // Use original history item to reflect correct result because properties like subtitle have been modified in copiedItem

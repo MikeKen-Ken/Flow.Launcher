@@ -176,9 +176,29 @@ public class LastOpenedHistoryResult : Result
     /// <returns><c>true</c> if the results are considered equal; otherwise <c>false</c>.</returns>
     public bool Equals(Result r)
     {
+        return Matches(r, incomingFromContextMenu: false);
+    }
+
+    /// <summary>
+    /// Compares this stored entry with a result that is about to be recorded.
+    /// Context-menu actions stay separate from opening the same result.
+    /// </summary>
+    internal bool Matches(Result r, bool incomingFromContextMenu)
+    {
         var actionId = r.HistoryAction?.Id ?? string.Empty;
-        if (!string.IsNullOrEmpty(Provenance?.ActionId)
-            && !string.Equals(Provenance.ActionId, actionId, StringComparison.Ordinal))
+        var storedActionId = Provenance?.ActionId ?? string.Empty;
+        var storedFromContextMenu = Provenance?.FromContextMenu == true;
+
+        if (incomingFromContextMenu || storedFromContextMenu)
+        {
+            if (incomingFromContextMenu != storedFromContextMenu
+                || !string.Equals(storedActionId, actionId, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+        else if (!string.IsNullOrEmpty(storedActionId)
+                 && !string.Equals(storedActionId, actionId, StringComparison.Ordinal))
         {
             return false;
         }
@@ -190,11 +210,9 @@ public class LastOpenedHistoryResult : Result
                 && PluginID == r.PluginID
                 && Query == r.OriginQuery.TrimmedQuery;
         }
-        else
-        {
-            return RecordKey == r.RecordKey
-                && PluginID == r.PluginID
-                && Query == r.OriginQuery.TrimmedQuery;
-        }
+
+        return RecordKey == r.RecordKey
+            && PluginID == r.PluginID
+            && Query == r.OriginQuery.TrimmedQuery;
     }
 }

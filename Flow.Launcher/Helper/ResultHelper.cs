@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Flow.Launcher.Core.Plugin;
 using Flow.Launcher.History;
+using Flow.Launcher.Infrastructure;
 using Flow.Launcher.Plugin;
 using Flow.Launcher.Storage;
 
@@ -12,7 +14,41 @@ namespace Flow.Launcher.Helper;
 
 public static class ResultHelper
 {
-    public static async Task<Result?> PopulateResultsAsync(LastOpenedHistoryResult item)
+    public static Task<Result?> PopulateResultsAsync(LastOpenedHistoryResult item)
+    {
+        return PopulateResultsAsync(item, matchAction: true);
+    }
+
+    /// <summary>
+    /// Re-runs a context-menu command saved in history.
+    /// Returns null when the source result or the menu command can no longer be found.
+    /// </summary>
+    public static async Task<bool?> TryExecuteContextMenuAsync(LastOpenedHistoryResult item, ActionContext context)
+    {
+        var source = await PopulateResultsAsync(item, matchAction: false).ConfigureAwait(false);
+        if (source == null)
+            return null;
+
+        List<Result> menus;
+        try
+        {
+            menus = await Win32Helper.StartSTATaskAsync(() => PluginManager.GetContextMenusForPlugin(source))
+                .ConfigureAwait(false);
+        }
+        catch (System.Exception e)
+        {
+            App.API.LogException(nameof(ResultHelper), "Failed to reload a context menu from history", e);
+            return null;
+        }
+
+        var menu = ContextMenuHistory.FindMenuItem(menus, item.Provenance);
+        if (menu == null)
+            return null;
+
+        return await menu.ExecuteAsync(context).ConfigureAwait(false);
+    }
+
+    private static async Task<Result?> PopulateResultsAsync(LastOpenedHistoryResult item, bool matchAction)
     {
         var plugin = PluginManager.GetPluginForId(item.PluginID);
         if (plugin == null) return null;
@@ -24,15 +60,17 @@ public static class ResultHelper
         try
         {
             var freshResults = await PluginManager.QueryForPluginAsync(plugin, query, CancellationToken.None);
-            var semanticMatches = freshResults?.Where(r => HistoryReplay.IsSemanticMatch(item, r));
+            var candidates = freshResults?.AsEnumerable() ?? Enumerable.Empty<Result>();
+            if (matchAction)
+                candidates = candidates.Where(r => HistoryReplay.IsSemanticMatch(item, r));
 
             if (string.IsNullOrEmpty(item.RecordKey))
             {
-                return semanticMatches?.FirstOrDefault(r => r.Title == item.Title && r.SubTitle == item.SubTitle);
+                return candidates.FirstOrDefault(r => r.Title == item.Title && r.SubTitle == item.SubTitle);
             }
 
-            return semanticMatches?.FirstOrDefault(r => r.RecordKey == item.RecordKey)
-                ?? semanticMatches?.FirstOrDefault(r => r.Title == item.Title && r.SubTitle == item.SubTitle);
+            return candidates.FirstOrDefault(r => r.RecordKey == item.RecordKey)
+                ?? candidates.FirstOrDefault(r => r.Title == item.Title && r.SubTitle == item.SubTitle);
         }
         catch (System.Exception e)
         {

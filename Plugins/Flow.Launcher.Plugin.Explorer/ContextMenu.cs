@@ -187,6 +187,13 @@ namespace Flow.Launcher.Plugin.Explorer
                     {
                         Title = Localize.plugin_explorer_deletefilefolder(),
                         SubTitle = isFile ? Localize.plugin_explorer_deletefile_subtitle(): Localize.plugin_explorer_deletefolder_subtitle(),
+                        HistoryAction = new HistoryActionDescriptor
+                        {
+                            Id = "explorer.delete",
+                            Label = Localize.plugin_explorer_deletefilefolder(),
+                            Kind = HistoryActionKind.Destructive,
+                            ReplayMode = HistoryReplayMode.ShowQuery
+                        },
                         Action = (context) =>
                         {
                             try
@@ -248,6 +255,13 @@ namespace Flow.Launcher.Plugin.Explorer
                     {
                         Title = Localize.plugin_explorer_runasdifferentuser(),
                         SubTitle = Localize.plugin_explorer_runasdifferentuser_subtitle(),
+                        HistoryAction = new HistoryActionDescriptor
+                        {
+                            Id = "explorer.run-as-different-user",
+                            Label = Localize.plugin_explorer_runasdifferentuser(),
+                            Kind = HistoryActionKind.Execute,
+                            ReplayMode = HistoryReplayMode.Execute
+                        },
                         Action = (context) =>
                         {
                             try

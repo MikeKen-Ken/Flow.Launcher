@@ -24,6 +24,12 @@ public sealed class HistoryProvenance
 
     public HistoryReplayMode ReplayMode { get; set; } = HistoryReplayMode.Execute;
 
+    /// <summary>
+    /// True when the saved action came from the result's context menu
+    /// rather than from activating the result itself.
+    /// </summary>
+    public bool FromContextMenu { get; set; }
+
     public static HistoryProvenance Capture(Result result, PluginMetadata pluginMetadata)
     {
         var action = result.HistoryAction;
@@ -91,7 +97,8 @@ public sealed class HistoryProvenance
             ActionId = ActionId,
             ActionLabel = ActionLabel,
             ActionKind = ActionKind,
-            ReplayMode = ReplayMode
+            ReplayMode = ReplayMode,
+            FromContextMenu = FromContextMenu
         };
     }
 }

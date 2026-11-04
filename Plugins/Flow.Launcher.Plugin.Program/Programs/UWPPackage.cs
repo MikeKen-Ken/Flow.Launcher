@@ -503,6 +503,13 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 contextMenus.Add(new Result
                 {
                     Title = api.GetTranslation("flowlauncher_plugin_program_run_as_administrator"),
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "program.run-as-administrator",
+                        Label = api.GetTranslation("flowlauncher_plugin_program_run_as_administrator"),
+                        Kind = HistoryActionKind.Execute,
+                        ReplayMode = HistoryReplayMode.Execute
+                    },
                     Action = c =>
                     {
                         _ = Task.Run(() => Launch(true)).ConfigureAwait(false);

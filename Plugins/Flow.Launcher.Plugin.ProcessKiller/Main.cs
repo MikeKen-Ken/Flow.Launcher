@@ -53,6 +53,13 @@ namespace Flow.Launcher.Plugin.ProcessKiller
                 {
                     Title = Localize.flowlauncher_plugin_processkiller_kill_instances(),
                     SubTitle = processPath,
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "process.kill-instances",
+                        Label = Localize.flowlauncher_plugin_processkiller_kill_instances(),
+                        Kind = HistoryActionKind.Destructive,
+                        ReplayMode = HistoryReplayMode.ShowQuery
+                    },
                     Action = _ =>
                     {
                         foreach (var p in similarProcesses)

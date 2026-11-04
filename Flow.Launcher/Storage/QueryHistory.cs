@@ -55,8 +55,9 @@ namespace Flow.Launcher.Storage
         /// Reusing a stored entry refreshes its execution time and moves it to the most recent position.
         /// </summary>
         /// <param name="result">The result to add to history. Must have a non-empty <see cref="Result.OriginQuery"/>.<see cref="Query.TrimmedQuery"/>.</param>
+        /// <param name="fromContextMenu">True when <paramref name="result"/> describes a context-menu action on a source result.</param>
         /// <returns><see langword="true"/> when stored history changed.</returns>
-        public bool Add(Result result)
+        public bool Add(Result result, bool fromContextMenu = false)
         {
             // Display copies have an empty plugin ID and may carry the home query.
             // Refresh their stored source without saving the presentation fields.
@@ -85,9 +86,10 @@ namespace Flow.Launcher.Storage
 
             // If the last item is the same as the current result, just update the timestamp and the icon path
             if (LastOpenedHistoryItems.Count > 0 &&
-                TryGetLastOpenedHistoryResult(result, out var existingHistoryItem))
+                TryGetLastOpenedHistoryResult(result, fromContextMenu, out var existingHistoryItem))
             {
                 existingHistoryItem.Provenance = HistoryProvenance.Capture(result, pluginMetadata);
+                existingHistoryItem.Provenance.FromContextMenu = fromContextMenu;
 
                 if (existingHistoryItem.IcoPath != result.IcoPath)
                     existingHistoryItem.IcoPath = result.IcoPath;
@@ -100,7 +102,9 @@ namespace Flow.Launcher.Storage
             }
             else
             {
-                LastOpenedHistoryItems.Add(new LastOpenedHistoryResult(result, pluginMetadata));
+                var historyItem = new LastOpenedHistoryResult(result, pluginMetadata);
+                historyItem.Provenance.FromContextMenu = fromContextMenu;
+                LastOpenedHistoryItems.Add(historyItem);
             }
 
             return true;
@@ -135,9 +139,9 @@ namespace Flow.Launcher.Storage
         /// Attempts to find an existing <see cref="LastOpenedHistoryResult"/> in <see cref="LastOpenedHistoryItems"/>
         /// that is considered equal to the supplied <paramref name="result"/>.
         /// </summary>
-        private bool TryGetLastOpenedHistoryResult(Result result, out LastOpenedHistoryResult historyItem)
+        private bool TryGetLastOpenedHistoryResult(Result result, bool fromContextMenu, out LastOpenedHistoryResult historyItem)
         {
-            historyItem = LastOpenedHistoryItems.FirstOrDefault(x => x.Equals(result));
+            historyItem = LastOpenedHistoryItems.FirstOrDefault(x => x.Matches(result, fromContextMenu));
             return historyItem is not null;
         }
 

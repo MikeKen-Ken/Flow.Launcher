@@ -227,6 +227,13 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 new()
                 {
                     Title = api.GetTranslation("flowlauncher_plugin_program_run_as_different_user"),
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "program.run-as-different-user",
+                        Label = api.GetTranslation("flowlauncher_plugin_program_run_as_different_user"),
+                        Kind = HistoryActionKind.Execute,
+                        ReplayMode = HistoryReplayMode.Execute
+                    },
                     Action = c =>
                     {
                         if (!Main.EnsureProgramExists(FullPath))
@@ -249,6 +256,13 @@ namespace Flow.Launcher.Plugin.Program.Programs
                 new()
                 {
                     Title = api.GetTranslation("flowlauncher_plugin_program_run_as_administrator"),
+                    HistoryAction = new HistoryActionDescriptor
+                    {
+                        Id = "program.run-as-administrator",
+                        Label = api.GetTranslation("flowlauncher_plugin_program_run_as_administrator"),
+                        Kind = HistoryActionKind.Execute,
+                        ReplayMode = HistoryReplayMode.Execute
+                    },
                     Action = c =>
                     {
                         if (!Main.EnsureProgramExists(FullPath))
