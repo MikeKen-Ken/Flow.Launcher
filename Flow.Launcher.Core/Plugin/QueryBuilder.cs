@@ -35,11 +35,11 @@ namespace Flow.Launcher.Core.Plugin
             string possibleActionKeyword = terms[0];
             string[] searchTerms;
 
-            if (nonGlobalPlugins.TryGetValue(possibleActionKeyword, out var pluginPairs) && HasAnyEnabledPlugin(pluginPairs))
+            if (TryGetActionKeyword(nonGlobalPlugins, possibleActionKeyword, out actionKeyword))
             {
                 // use non global plugin for query
-                actionKeyword = possibleActionKeyword;
-                search = terms.Length > 1 ? trimmedQuery[(actionKeyword.Length + 1)..].TrimStart() : string.Empty;
+                // Slice by the typed token. Case-insensitive matches have the same length.
+                search = terms.Length > 1 ? trimmedQuery[(possibleActionKeyword.Length + 1)..].TrimStart() : string.Empty;
                 searchTerms = terms[1..];
             }
             else
@@ -59,6 +59,48 @@ namespace Flow.Launcher.Core.Plugin
                 ActionKeyword = actionKeyword,
                 IsHomeQuery = false
             };
+        }
+
+        /// <summary>
+        /// Matches an action keyword without requiring the same letter case.
+        /// The returned keyword is the registered spelling, so later exact comparisons still succeed.
+        /// An exact registered keyword that belongs only to disabled plugins stays unmatched.
+        /// </summary>
+        private static bool TryGetActionKeyword(
+            Dictionary<string, List<PluginPair>> nonGlobalPlugins,
+            string possibleActionKeyword,
+            out string actionKeyword)
+        {
+            if (nonGlobalPlugins.TryGetValue(possibleActionKeyword, out var exactPairs))
+            {
+                if (HasAnyEnabledPlugin(exactPairs))
+                {
+                    actionKeyword = possibleActionKeyword;
+                    return true;
+                }
+
+                actionKeyword = string.Empty;
+                return false;
+            }
+
+            foreach (var pair in nonGlobalPlugins)
+            {
+                if (!string.Equals(pair.Key, possibleActionKeyword, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                if (!HasAnyEnabledPlugin(pair.Value))
+                {
+                    continue;
+                }
+
+                actionKeyword = pair.Key;
+                return true;
+            }
+
+            actionKeyword = string.Empty;
+            return false;
         }
 
         private static bool HasAnyEnabledPlugin(List<PluginPair> pluginPairs)

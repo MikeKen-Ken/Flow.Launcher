@@ -70,6 +70,50 @@ namespace Flow.Launcher.Test
         }
 
         [Test]
+        public void ActionKeywordIgnoresCase()
+        {
+            var nonGlobalPlugins = new Dictionary<string, List<PluginPair>>
+            {
+                { "doc:", new List<PluginPair>(){ new() { Metadata = new PluginMetadata { ActionKeywords = ["doc:"] } } } }
+            };
+
+            Query q = QueryBuilder.Build("DOC:   report.pdf", "DOC:   report.pdf", nonGlobalPlugins);
+
+            ClassicAssert.AreEqual("doc:", q.ActionKeyword, "ActionKeyword should keep the registered spelling.");
+            ClassicAssert.AreEqual("report.pdf", q.Search, "Search should not start with the ActionKeyword.");
+            ClassicAssert.AreEqual("report.pdf", q.FirstSearch);
+        }
+
+        [Test]
+        public void ActionKeywordAloneIgnoresCase()
+        {
+            var nonGlobalPlugins = new Dictionary<string, List<PluginPair>>
+            {
+                { "sys", new List<PluginPair>(){ new() { Metadata = new PluginMetadata { ActionKeywords = ["sys"] } } } }
+            };
+
+            Query q = QueryBuilder.Build("SYS", "SYS", nonGlobalPlugins);
+
+            ClassicAssert.AreEqual("sys", q.ActionKeyword);
+            ClassicAssert.AreEqual(string.Empty, q.Search);
+            ClassicAssert.AreEqual(0, q.SearchTerms.Length);
+        }
+
+        [Test]
+        public void DisabledActionKeywordIgnoresCase()
+        {
+            var nonGlobalPlugins = new Dictionary<string, List<PluginPair>>
+            {
+                { "sys", new List<PluginPair>(){ new() { Metadata = new PluginMetadata { ActionKeywords = ["sys"], Disabled = true } } } }
+            };
+
+            Query q = QueryBuilder.Build("SYS ping", "SYS ping", nonGlobalPlugins);
+
+            ClassicAssert.AreEqual(string.Empty, q.ActionKeyword, "A disabled keyword should not match in another case.");
+            ClassicAssert.AreEqual("SYS ping", q.Search);
+        }
+
+        [Test]
         public void GenericPluginQueryTest()
         {
             Query q = QueryBuilder.Build("file.txt file2 file3", "file.txt file2 file3", []);
