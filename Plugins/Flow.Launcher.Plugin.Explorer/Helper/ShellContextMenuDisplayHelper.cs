@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -169,8 +170,38 @@ public static class ShellContextMenuDisplayHelper
         return (IMalloc)Marshal.GetTypedObjectForIUnknown(pMalloc, typeof(IMalloc));
     }
 
-    public static void ExecuteContextMenuItem(string fileName, uint menuItemId)
+    /// <summary>
+    /// Whether the given shell command string is the canonical verb used by the "Run as administrator" menu item.
+    /// </summary>
+    public static bool IsRunAsAdministratorVerb(string verb)
     {
+        return string.Equals(verb, "runas", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Runs the file through the shell's RunAs verb directly, instead of invoking a menu item by its position-based id.
+    /// Menu item ids are only stable for the enumeration that produced them, so invoking "Run as administrator" by id can
+    /// hit a different command when the shell menu changed between displaying and executing it.
+    /// </summary>
+    private static void ExecuteRunAsAdministrator(string fileName)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = fileName,
+            WorkingDirectory = Path.GetDirectoryName(fileName),
+            UseShellExecute = true,
+            Verb = "runas"
+        });
+    }
+
+    public static void ExecuteContextMenuItem(string fileName, uint menuItemId, string verb = null)
+    {
+        if (IsRunAsAdministratorVerb(verb))
+        {
+            ExecuteRunAsAdministrator(fileName);
+            return;
+        }
+
         IMalloc malloc = null;
         IntPtr originalPidl = IntPtr.Zero;
         IntPtr pShellFolder = IntPtr.Zero;
@@ -368,7 +399,7 @@ public static class ShellContextMenuDisplayHelper
                     icon = GetBitmapSourceFromHBitmap(mii.hbmpChecked);
                 }
 
-                menuItems.Add(new ContextMenuItem(prefix + menuText, icon, mii.wID));
+                menuItems.Add(new ContextMenuItem(prefix + menuText, icon, mii.wID, commandBuilder.ToString()));
             }
         }
     }
@@ -521,6 +552,6 @@ public interface IContextMenu
     int GetCommandString(uint idcmd, uint uflags, IntPtr reserved, StringBuilder commandstring, int cch);
 }
 
-public record ContextMenuItem(string Label, ImageSource Icon, uint CommandId);
+public record ContextMenuItem(string Label, ImageSource Icon, uint CommandId, string Verb);
 
 #endregion

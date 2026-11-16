@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -282,6 +283,9 @@ namespace Flow.Launcher.Plugin.Explorer
                         Glyph = new GlyphInfo(FontFamily: "/Resources/#Segoe Fluent Icons", Glyph: "\ue748"),
                     });
 
+                if (record.Type == ResultType.File && CanRunAsAdministrator(record.FullPath))
+                    contextMenus.Add(CreateRunAsAdministratorResult(record));
+
                 if (record.Type is ResultType.File or ResultType.Folder && Settings.ShowInlinedWindowsContextMenu)
                 {
                     var includedItems = Settings
@@ -305,7 +309,10 @@ namespace Flow.Launcher.Plugin.Explorer
                             (excludedItems.Length == 0 || !excludedItems.Any(filter =>
                                 contextMenuItem.Label.Contains(filter, StringComparison.OrdinalIgnoreCase)
                             ))
-                        );
+                        )
+                        // The plugin provides its own stable "Run as administrator" entry, so hide the shell's
+                        // position-id based one to avoid duplicate menu items with inconsistent behaviour.
+                        .Where(contextMenuItem => !ShellContextMenuDisplayHelper.IsRunAsAdministratorVerb(contextMenuItem.Verb));
                     foreach (var menuItem in menuItems)
                     {
                         contextMenus.Add(new Result
@@ -315,7 +322,7 @@ namespace Flow.Launcher.Plugin.Explorer
                             Score = InlinedNativeContextMenuScore,
                             Action = _ =>
                             {
-                                ShellContextMenuDisplayHelper.ExecuteContextMenuItem(record.FullPath, menuItem.CommandId);
+                                ShellContextMenuDisplayHelper.ExecuteContextMenuItem(record.FullPath, menuItem.CommandId, menuItem.Verb);
                                 return true;
                             }
                         });
@@ -324,6 +331,52 @@ namespace Flow.Launcher.Plugin.Explorer
             }
 
             return contextMenus;
+        }
+
+        private Result CreateRunAsAdministratorResult(SearchResult record)
+        {
+            return new Result
+            {
+                Title = Localize.plugin_explorer_runasadministrator(),
+                SubTitle = Localize.plugin_explorer_runasadministrator_subtitle(),
+                HistoryAction = new HistoryActionDescriptor
+                {
+                    Id = "explorer.run-as-administrator",
+                    Label = Localize.plugin_explorer_runasadministrator(),
+                    Kind = HistoryActionKind.Execute,
+                    ReplayMode = HistoryReplayMode.Execute
+                },
+                Action = context =>
+                {
+                    var info = new ProcessStartInfo
+                    {
+                        FileName = record.FullPath,
+                        WorkingDirectory = Path.GetDirectoryName(record.FullPath),
+                        UseShellExecute = true,
+                        Verb = "runas"
+                    };
+
+                    _ = Task.Run(() =>
+                    {
+                        try
+                        {
+                            Process.Start(info);
+                        }
+                        catch (Win32Exception e) when (e.NativeErrorCode == 1223)
+                        {
+                            // ERROR_CANCELLED: the user dismissed the UAC prompt, so there is nothing to report.
+                        }
+                        catch (Exception e)
+                        {
+                            LogException($"Fail to run {record.FullPath} as administrator", e);
+                            Context.API.ShowMsgError(Localize.plugin_explorer_fail_to_run_as_administrator(record.FullPath));
+                        }
+                    });
+
+                    return true;
+                },
+                Glyph = new GlyphInfo(FontFamily: "/Resources/#Segoe Fluent Icons", Glyph: "\ue7ef"),
+            };
         }
 
         private Result CreateOpenContainingFolderResult(SearchResult record)
@@ -507,6 +560,17 @@ namespace Flow.Launcher.Plugin.Explorer
                 ".exe" or ".bat" or ".msi" => true,
                 _ => false,
             };
+        }
+
+        private static bool CanRunAsAdministrator(string path)
+        {
+            var extension = Path.GetExtension(path);
+
+            return extension.Equals(".exe", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".msi", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".bat", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".cmd", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".com", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

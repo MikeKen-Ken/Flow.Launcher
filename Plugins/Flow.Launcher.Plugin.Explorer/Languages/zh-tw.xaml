@@ -110,6 +110,9 @@
     <system:String x:Key="plugin_explorer_deletefilefolder_subtitle">刪除所選內容</system:String>
     <system:String x:Key="plugin_explorer_runasdifferentuser">以另一個使用者的身分執行</system:String>
     <system:String x:Key="plugin_explorer_runasdifferentuser_subtitle">使用其他帳戶運行所選的程式</system:String>
+    <system:String x:Key="plugin_explorer_runasadministrator">以系統管理員身分執行</system:String>
+    <system:String x:Key="plugin_explorer_runasadministrator_subtitle">以系統管理員權限執行所選項目（會顯示 UAC 提示）</system:String>
+    <system:String x:Key="plugin_explorer_fail_to_run_as_administrator">無法以系統管理員身分執行 {0}</system:String>
     <system:String x:Key="plugin_explorer_opencontainingfolder">開啟檔案位置</system:String>
     <system:String x:Key="plugin_explorer_opencontainingfolder_subtitle">Open the location that contains current item</system:String>
     <system:String x:Key="plugin_explorer_openwitheditor">在編輯器中開啟:</system:String>

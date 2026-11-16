@@ -110,6 +110,9 @@
     <system:String x:Key="plugin_explorer_deletefilefolder_subtitle">删除所选内容</system:String>
     <system:String x:Key="plugin_explorer_runasdifferentuser">以其他用户身份运行</system:String>
     <system:String x:Key="plugin_explorer_runasdifferentuser_subtitle">使用其他用户帐户运行所选内容</system:String>
+    <system:String x:Key="plugin_explorer_runasadministrator">以管理员身份运行</system:String>
+    <system:String x:Key="plugin_explorer_runasadministrator_subtitle">以管理员权限运行所选内容（会弹出 UAC 提示）</system:String>
+    <system:String x:Key="plugin_explorer_fail_to_run_as_administrator">无法以管理员身份运行 {0}</system:String>
     <system:String x:Key="plugin_explorer_opencontainingfolder">打开文件所在文件夹</system:String>
     <system:String x:Key="plugin_explorer_opencontainingfolder_subtitle">打开包含该项目的文件夹</system:String>
     <system:String x:Key="plugin_explorer_openwitheditor">使用编辑器打开：</system:String>

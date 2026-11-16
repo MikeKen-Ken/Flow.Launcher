@@ -114,6 +114,9 @@
     <system:String x:Key="plugin_explorer_deletefilefolder_subtitle">Delete the selected</system:String>
     <system:String x:Key="plugin_explorer_runasdifferentuser">Run as different user</system:String>
     <system:String x:Key="plugin_explorer_runasdifferentuser_subtitle">Run the selected using a different user account</system:String>
+    <system:String x:Key="plugin_explorer_runasadministrator">Run as administrator</system:String>
+    <system:String x:Key="plugin_explorer_runasadministrator_subtitle">Run the selected with administrator privileges (UAC prompt)</system:String>
+    <system:String x:Key="plugin_explorer_fail_to_run_as_administrator">Fail to run {0} as administrator</system:String>
     <system:String x:Key="plugin_explorer_opencontainingfolder">Open containing folder</system:String>
     <system:String x:Key="plugin_explorer_opencontainingfolder_subtitle">Open the location that contains current item</system:String>
     <system:String x:Key="plugin_explorer_openwitheditor">Open With Editor:</system:String>
