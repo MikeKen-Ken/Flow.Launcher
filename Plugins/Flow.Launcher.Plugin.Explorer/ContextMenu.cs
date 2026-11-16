@@ -57,6 +57,9 @@ namespace Flow.Launcher.Plugin.Explorer
                 if (record.Type == ResultType.File)
                 {
                     contextMenus.Add(CreateOpenWithMenu(record));
+
+                    if (CanRunAsAdministrator(record.FullPath))
+                        contextMenus.Add(CreateRunAsAdministratorResult(record));
                 }
 
                 if (record.WindowsIndexed)
@@ -282,9 +285,6 @@ namespace Flow.Launcher.Plugin.Explorer
                         IcoPath = Constants.DifferentUserIconImagePath,
                         Glyph = new GlyphInfo(FontFamily: "/Resources/#Segoe Fluent Icons", Glyph: "\ue748"),
                     });
-
-                if (record.Type == ResultType.File && CanRunAsAdministrator(record.FullPath))
-                    contextMenus.Add(CreateRunAsAdministratorResult(record));
 
                 if (record.Type is ResultType.File or ResultType.Folder && Settings.ShowInlinedWindowsContextMenu)
                 {
