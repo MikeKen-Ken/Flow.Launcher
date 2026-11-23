@@ -398,7 +398,7 @@ namespace Flow.Launcher.Plugin.Explorer.Search
             return MediaExtensions.Contains(extension.ToLowerInvariant());
         }
 
-        private static void OpenFile(string filePath, string workingDir = "", bool asAdmin = false)
+        internal static void OpenFile(string filePath, string workingDir = "", bool asAdmin = false)
         {
             IncrementEverythingRunCounterIfNeeded(filePath);
             FilesFolders.OpenFile(filePath, workingDir, asAdmin, (string str) => Context.API.ShowMsgBox(str));

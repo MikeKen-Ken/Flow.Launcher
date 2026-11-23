@@ -56,6 +56,7 @@ namespace Flow.Launcher.Plugin.Explorer
 
                 if (record.Type == ResultType.File)
                 {
+                    contextMenus.Add(CreateOpenResult(record));
                     contextMenus.Add(CreateOpenWithMenu(record));
 
                     if (CanRunAsAdministrator(record.FullPath))
@@ -351,10 +352,14 @@ namespace Flow.Launcher.Plugin.Explorer
                     var info = new ProcessStartInfo
                     {
                         FileName = record.FullPath,
-                        WorkingDirectory = Path.GetDirectoryName(record.FullPath),
                         UseShellExecute = true,
                         Verb = "runas"
                     };
+
+                    // A shortcut keeps its own start directory. Setting WorkingDirectory would
+                    // replace that with the folder that contains the .lnk.
+                    if (!record.FullPath.EndsWith(".lnk", StringComparison.OrdinalIgnoreCase))
+                        info.WorkingDirectory = Path.GetDirectoryName(record.FullPath);
 
                     _ = Task.Run(() =>
                     {
@@ -532,6 +537,39 @@ namespace Flow.Launcher.Plugin.Explorer
             };
         }
 
+        private Result CreateOpenResult(SearchResult record)
+        {
+            return new Result
+            {
+                Title = Localize.plugin_explorer_open(),
+                SubTitle = Localize.plugin_explorer_open_subtitle(),
+                HistoryAction = new HistoryActionDescriptor
+                {
+                    Id = "explorer.open",
+                    Label = Localize.plugin_explorer_open(),
+                    Kind = HistoryActionKind.Execute,
+                    ReplayMode = HistoryReplayMode.Execute
+                },
+                Action = _ =>
+                {
+                    try
+                    {
+                        var directory = Path.GetDirectoryName(record.FullPath) ?? string.Empty;
+                        ResultManager.OpenFile(record.FullPath, Settings.UseLocationAsWorkingDir ? directory : string.Empty);
+                        return true;
+                    }
+                    catch (Exception e)
+                    {
+                        LogException($"Fail to open {record.FullPath}", e);
+                        Context.API.ShowMsgError(Localize.plugin_explorer_fail_to_open(record.FullPath));
+                        return false;
+                    }
+                },
+                IcoPath = Constants.FileImagePath,
+                Glyph = new GlyphInfo(FontFamily: "/Resources/#Segoe Fluent Icons", Glyph: "\ue8e5"),
+            };
+        }
+
         private static Result CreateOpenWithMenu(SearchResult record)
         {
             return new Result
@@ -566,11 +604,14 @@ namespace Flow.Launcher.Plugin.Explorer
         {
             var extension = Path.GetExtension(path);
 
+            // These are the types whose Explorer menu contains "Run as administrator".
+            // .lnk elevates the shortcut target. .msc and .cpl use their own runas commands.
             return extension.Equals(".exe", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".msi", StringComparison.OrdinalIgnoreCase)
                 || extension.Equals(".bat", StringComparison.OrdinalIgnoreCase)
                 || extension.Equals(".cmd", StringComparison.OrdinalIgnoreCase)
-                || extension.Equals(".com", StringComparison.OrdinalIgnoreCase);
+                || extension.Equals(".msc", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".cpl", StringComparison.OrdinalIgnoreCase)
+                || extension.Equals(".lnk", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
