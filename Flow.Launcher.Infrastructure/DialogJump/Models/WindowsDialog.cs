@@ -112,6 +112,7 @@ namespace Flow.Launcher.Infrastructure.DialogJump.Models
 
         private readonly DialogType _dialogType;
 
+        private HWND _addressBand { get; set; } = HWND.Null;
         private HWND _pathControl { get; set; } = HWND.Null;
         private HWND _pathEditor { get; set; } = HWND.Null;
         private HWND _fileEditor { get; set; } = HWND.Null;
@@ -134,7 +135,8 @@ namespace Flow.Launcher.Infrastructure.DialogJump.Models
 
         public string GetCurrentFolder()
         {
-            if (_pathEditor.IsNull && !GetPathControlEditor()) return string.Empty;
+            // Enter closes the breadcrumb editor, so a handle cached from the last jump is not reusable.
+            if ((_pathEditor.IsNull || !PInvoke.IsWindow(_pathEditor)) && !GetPathControlEditor()) return string.Empty;
             return GetWindowText(_pathEditor);
         }
 
@@ -154,10 +156,13 @@ namespace Flow.Launcher.Infrastructure.DialogJump.Models
             }
 
             // Ctrl-L focuses the address bar without conflicting with localized dialog mnemonics.
+            // Folder pickers show a breadcrumb until Ctrl-L, so the edit control does not exist yet.
+            // A missing edit is not the same as a dialog with no address band.
+            _addressBand = HWND.Null;
             _pathControl = HWND.Null;
             _pathEditor = HWND.Null;
             GetPathControlEditor();
-            if (_pathControl.IsNull) return JumpFolderWithFileEditor(path, true);
+            if (_addressBand.IsNull) return JumpFolderWithFileEditor(path, true);
 
             // The Dialog Jump hotkey (Alt+G by default) runs while its modifiers are still held,
             // which would turn Ctrl-L into Ctrl-Alt-L and Enter into Alt-Enter. Allow a brief
@@ -244,24 +249,45 @@ namespace Flow.Launcher.Infrastructure.DialogJump.Models
             return PInvoke.GetGUIThreadInfo(threadId, &info) && info.hwndFocus == _pathEditor;
         }
 
-        private bool GetPathControlEditor()
+        private bool EnsureAddressBand()
         {
-            // Get the handle of the path editor
+            if (!_addressBand.IsNull && PInvoke.IsWindow(_addressBand))
+                return true;
+
             // Must use PInvoke.FindWindowEx because PInvoke.GetDlgItem(Handle, 0x0000) will get another control
-            if ((_pathControl = PInvoke.FindWindowEx(new(Handle), HWND.Null, "WorkerW", null)).IsNull ||
-                (_pathControl = PInvoke.FindWindowEx(_pathControl, HWND.Null, "ReBarWindow32", null)).IsNull ||
-                (_pathControl = PInvoke.FindWindowEx(_pathControl, HWND.Null, "Address Band Root", null)).IsNull ||
-                (_pathControl = PInvoke.FindWindowEx(_pathControl, HWND.Null, "msctls_progress32", null)).IsNull ||
-                (_pathControl = PInvoke.FindWindowEx(_pathControl, HWND.Null, "ComboBoxEx32", null)).IsNull)
+            var current = PInvoke.FindWindowEx(new(Handle), HWND.Null, "WorkerW", null);
+            if (current.IsNull ||
+                (current = PInvoke.FindWindowEx(current, HWND.Null, "ReBarWindow32", null)).IsNull ||
+                (current = PInvoke.FindWindowEx(current, HWND.Null, "Address Band Root", null)).IsNull ||
+                (current = PInvoke.FindWindowEx(current, HWND.Null, "msctls_progress32", null)).IsNull)
             {
-                _pathEditor = HWND.Null;
-            }
-            else
-            {
-                _pathEditor = PInvoke.GetDlgItem(_pathControl, 0xA205); // ComboBox
-                _pathEditor = PInvoke.GetDlgItem(_pathEditor, 0xA205); // Edit
+                _addressBand = HWND.Null;
+                return false;
             }
 
+            _addressBand = current;
+            return true;
+        }
+
+        private bool GetPathControlEditor()
+        {
+            if (!EnsureAddressBand())
+            {
+                _pathControl = HWND.Null;
+                _pathEditor = HWND.Null;
+                return false;
+            }
+
+            // Folder dialogs keep a breadcrumb here until Ctrl-L replaces it with the editor.
+            _pathControl = PInvoke.FindWindowEx(_addressBand, HWND.Null, "ComboBoxEx32", null);
+            if (_pathControl.IsNull)
+            {
+                _pathEditor = HWND.Null;
+                return false;
+            }
+
+            _pathEditor = PInvoke.GetDlgItem(_pathControl, 0xA205); // ComboBox
+            _pathEditor = PInvoke.GetDlgItem(_pathEditor, 0xA205); // Edit
             return !_pathEditor.IsNull;
         }
 

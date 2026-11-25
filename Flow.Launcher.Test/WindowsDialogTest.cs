@@ -1,6 +1,7 @@
 extern alias Infrastructure;
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -268,6 +269,26 @@ public class WindowsDialogTest
         }
     }
 
+    private static void ForceForeground(HWND handle)
+    {
+        var foreground = PInvoke.GetForegroundWindow();
+        if (foreground != handle)
+        {
+            var foregroundThread = GetWindowThreadProcessId((IntPtr)foreground, IntPtr.Zero);
+            var thread = GetCurrentThreadId();
+            AttachThreadInput(thread, foregroundThread, true);
+            new InputSimulator().Keyboard.KeyPress(VirtualKeyCode.MENU);
+            PInvoke.SetForegroundWindow(handle);
+            AttachThreadInput(thread, foregroundThread, false);
+        }
+
+        SpinWait.SpinUntil(() =>
+        {
+            PInvoke.SetForegroundWindow(handle);
+            return PInvoke.GetForegroundWindow() == handle;
+        }, 3000);
+    }
+
     private static void PressHotkeyAndJump(IDialogJumpDialogWindowTab tab, string destination)
     {
         const int hotkeyId = 0x4696;
@@ -424,6 +445,92 @@ public class WindowsDialogTest
             Directory.Delete(root, true);
         }
     }
+
+    [Test]
+    [Apartment(ApartmentState.STA)]
+    public void JumpFolder_NavigatesOpenFolderDialog()
+    {
+        var root = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        var initial = Directory.CreateDirectory(Path.Combine(root, "initial")).FullName;
+        var destination = Directory.CreateDirectory(Path.Combine(root, "destination")).FullName;
+        var title = $"Flow folder dialog {Guid.NewGuid()}";
+        var owner = new Window { Title = title + " owner", Width = 200, Height = 100 };
+        owner.Show();
+        var ownerHandle = new HWND(new WindowInteropHelper(owner).Handle);
+        var nativeDialog = new OpenFolderDialog { Title = title, InitialDirectory = initial };
+        var worker = Task.Run(() =>
+        {
+            HWND handle = HWND.Null;
+            try
+            {
+                Assert.That(SpinWait.SpinUntil(() =>
+                {
+                    handle = PInvoke.FindWindowEx(HWND.Null, HWND.Null, "#32770", title);
+                    return !handle.IsNull && IsWindowVisible((IntPtr)handle);
+                }, 10000), Is.True, "Folder dialog did not open.");
+                ForceForeground(handle);
+                // The shell view is created after the dialog is shown. Sample twice so a late
+                // address bar is visible in the failure output.
+                Thread.Sleep(400);
+                var tree = DescribeWindowTree(handle);
+                TestContext.Out.WriteLine(tree);
+                var dialog = new WindowsDialog().CheckDialogWindow((IntPtr)handle);
+                Assert.That(dialog, Is.Not.Null, "Folder dialog was not recognized.\n" + tree);
+                using var tab = dialog.GetCurrentTab();
+                ForceForeground(handle);
+                Assert.That(tab.JumpFolder(destination, false), Is.True, "JumpFolder returned false.\n" + tree);
+                Assert.That(IsWindow((IntPtr)handle) && IsWindowVisible((IntPtr)handle), Is.True,
+                    "Folder dialog closed instead of navigating.");
+                Thread.Sleep(250);
+                new InputSimulator().Keyboard.ModifiedKeyStroke(VirtualKeyCode.LCONTROL, VirtualKeyCode.VK_L);
+                Assert.That(SpinWait.SpinUntil(() => tab.GetCurrentFolder() == destination, 3000), Is.True,
+                    $"Current folder: '{tab.GetCurrentFolder()}'\n{DescribeWindowTree(handle)}");
+            }
+            finally
+            {
+                CloseDialog(handle, ownerHandle);
+            }
+        });
+        try
+        {
+            nativeDialog.ShowDialog(owner);
+#pragma warning disable VSTHRD002
+            worker.GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
+        }
+        finally
+        {
+            owner.Close();
+            Directory.Delete(root, true);
+        }
+    }
+
+    [DllImport("user32.dll")]
+    private static extern bool EnumChildWindows(IntPtr hwnd, EnumWindowsProc proc, IntPtr lParam);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetClassName(IntPtr hwnd, char[] className, int maxCount);
+
+    [DllImport("user32.dll")]
+    private static extern int GetDlgCtrlID(IntPtr hwnd);
+
+    private delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
+
+    private static string DescribeWindowTree(HWND root)
+    {
+        var lines = new List<string>();
+        EnumChildWindows((IntPtr)root, (child, _) =>
+        {
+            var className = new char[256];
+            var length = GetClassName(child, className, className.Length);
+            lines.Add($"id=0x{GetDlgCtrlID(child):X4} class={new string(className, 0, length)} parent=0x{GetParent(child):X}");
+            return true;
+        }, IntPtr.Zero);
+        return string.Join(Environment.NewLine, lines);
+    }
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr GetParent(IntPtr hwnd);
 
     private const uint CDM_GETSPEC = 0x0464; // WM_USER + 100
     private const uint CDM_GETFOLDERPATH = 0x0466; // WM_USER + 102

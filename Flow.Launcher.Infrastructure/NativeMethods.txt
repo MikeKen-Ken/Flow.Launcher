@@ -26,6 +26,7 @@ SetForegroundWindow
 
 WINDOW_LONG_PTR_INDEX
 GetForegroundWindow
+IsWindow
 GetDesktopWindow
 GetShellWindow
 GetWindowRect
