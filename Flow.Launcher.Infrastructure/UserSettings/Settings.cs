@@ -109,7 +109,7 @@ namespace Flow.Launcher.Infrastructure.UserSettings
         public string CycleHistoryDownHotkey { get; set; } = $"{KeyConstant.Alt} + Down";
         public string DialogJumpHotkey { get; set; } = $"{KeyConstant.Alt} + G";
 
-        private string _language = Constant.SystemLanguageCode;
+        private string _language = "zh-cn";
         public string Language
         {
             get => _language;

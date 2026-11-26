@@ -18,7 +18,7 @@ namespace Flow.Launcher.Core.Resource
         private static readonly string ClassName = nameof(Internationalization);
 
         private const string Folder = "Languages";
-        private const string DefaultLanguageCode = "en";
+        private const string DefaultLanguageCode = "zh-cn";
         private const string DefaultFile = "en.xaml";
         private const string Extension = ".xaml";
         private readonly Settings _settings;
