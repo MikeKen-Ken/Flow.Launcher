@@ -1,5 +1,6 @@
 <UserControl
     x:Class="Flow.Launcher.SearchFilters.QueryFilterBar"
+    x:Name="FilterBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:Flow.Launcher.Converters"
@@ -12,6 +13,7 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <filters:QueryFilterBrushProxy x:Key="FilterBrushes" Data="{Binding RelativeSource={RelativeSource AncestorType=filters:QueryFilterBar}}" />
         <Style x:Key="SearchFilterChipStyle" TargetType="Button">
             <Setter Property="Focusable" Value="False" />
             <Setter Property="FontSize" Value="12" />
@@ -19,9 +21,9 @@
             <Setter Property="Padding" Value="11 6" />
             <Setter Property="Margin" Value="0 0 8 8" />
             <Setter Property="Cursor" Value="Hand" />
-            <Setter Property="Foreground" Value="{Binding ChipText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-            <Setter Property="Background" Value="{Binding ChipFill, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-            <Setter Property="BorderBrush" Value="{Binding ChipStroke, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+            <Setter Property="Foreground" Value="{Binding Data.ChipText, Source={StaticResource FilterBrushes}}" />
+            <Setter Property="Background" Value="{Binding Data.ChipFill, Source={StaticResource FilterBrushes}}" />
+            <Setter Property="BorderBrush" Value="{Binding Data.ChipStroke, Source={StaticResource FilterBrushes}}" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -38,55 +40,118 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding ChipFillHover, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding Data.ChipFillHover, Source={StaticResource FilterBrushes}}" />
                             </Trigger>
                             <DataTrigger Binding="{Binding IsSelected}" Value="True">
-                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding ChipSelectedFill, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-                                <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{Binding ChipSelectedFill, RelativeSource={RelativeSource AncestorType=UserControl}}" />
-                                <Setter Property="Foreground" Value="{Binding ChipSelectedText, RelativeSource={RelativeSource AncestorType=UserControl}}" />
+                                <Setter TargetName="ChipBorder" Property="Background" Value="{Binding Data.ChipSelectedFill, Source={StaticResource FilterBrushes}}" />
+                                <Setter TargetName="ChipBorder" Property="BorderBrush" Value="{Binding Data.ChipSelectedFill, Source={StaticResource FilterBrushes}}" />
+                                <Setter Property="Foreground" Value="{Binding Data.ChipSelectedText, Source={StaticResource FilterBrushes}}" />
                             </DataTrigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
+        <DataTemplate x:Key="SearchFilterChipTemplate" DataType="{x:Type filters:QueryFilterItemViewModel}">
+            <Button
+                Click="OnFilterChipClick"
+                Style="{StaticResource SearchFilterChipStyle}"
+                ToolTip="{Binding Tooltip}">
+                <StackPanel Orientation="Horizontal">
+                    <ui:FontIcon
+                        Margin="0 0 6 0"
+                        VerticalAlignment="Center"
+                        FontSize="13"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Glyph="{Binding Glyph}" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Text="{Binding DisplayText}" />
+                    <ui:FontIcon
+                        Margin="5 0 0 0"
+                        VerticalAlignment="Center"
+                        FontSize="8"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Glyph="&#xE70D;"
+                        Visibility="{Binding ShowsMenu, Converter={StaticResource BoolToVisibilityConverter}}" />
+                </StackPanel>
+            </Button>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid>
-        <ItemsControl ItemsSource="{Binding Filters}">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Margin="12 6 12 10" />
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type filters:QueryFilterItemViewModel}">
-                    <Button
-                        Click="OnFilterChipClick"
-                        Style="{StaticResource SearchFilterChipStyle}"
-                        ToolTip="{Binding Tooltip}">
-                        <StackPanel Orientation="Horizontal">
-                            <ui:FontIcon
-                                Margin="0 0 6 0"
-                                VerticalAlignment="Center"
-                                FontSize="13"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Glyph="{Binding Glyph}" />
+        <StackPanel Margin="12 6 12 2" Orientation="Horizontal">
+            <Button
+                x:Name="FiltersButton"
+                Click="OnFiltersButtonClick"
+                DataContext="{Binding Menu}"
+                Style="{StaticResource SearchFilterChipStyle}"
+                ToolTip="{DynamicResource searchFilter_more_tip}">
+                <StackPanel Orientation="Horizontal">
+                    <ui:FontIcon
+                        Margin="0 0 6 0"
+                        VerticalAlignment="Center"
+                        FontSize="13"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Glyph="&#xE71C;" />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Text="{DynamicResource searchFilter_more}" />
+                    <ui:FontIcon
+                        Margin="5 0 0 0"
+                        VerticalAlignment="Center"
+                        FontSize="8"
+                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                        Glyph="&#xE70D;" />
+                </StackPanel>
+            </Button>
+            <ItemsControl HorizontalAlignment="Left" ItemsSource="{Binding DataContext.QuickExtensions, ElementName=FilterBar}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type filters:QueryFilterQuickExtensionViewModel}">
+                        <Button
+                            Click="OnQuickExtensionClick"
+                            Style="{StaticResource SearchFilterChipStyle}"
+                            ToolTip="{Binding Tooltip}">
                             <TextBlock
                                 VerticalAlignment="Center"
                                 Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{Binding DisplayText}" />
-                            <ui:FontIcon
-                                Margin="5 0 0 0"
-                                VerticalAlignment="Center"
-                                FontSize="8"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Glyph="&#xE70D;"
-                                Visibility="{Binding ShowsMenu, Converter={StaticResource BoolToVisibilityConverter}}" />
-                        </StackPanel>
-                    </Button>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                                Text="{Binding Label}" />
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+        <Popup
+            x:Name="FiltersPopup"
+            AllowsTransparency="True"
+            DataContext="{Binding DataContext, ElementName=FilterBar}"
+            Placement="Bottom"
+            PlacementTarget="{Binding ElementName=FiltersButton}"
+            StaysOpen="True">
+            <Border
+                x:Name="FiltersPanel"
+                Width="560"
+                Padding="14 12 14 4"
+                DataContext="{Binding DataContext, ElementName=FilterBar}"
+                Background="{Binding Data.PanelFill, Source={StaticResource FilterBrushes}}"
+                BorderBrush="{Binding Data.PanelStroke, Source={StaticResource FilterBrushes}}"
+                BorderThickness="1"
+                CornerRadius="10">
+                <ItemsControl ItemTemplate="{StaticResource SearchFilterChipTemplate}" ItemsSource="{Binding Filters}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </Border>
+        </Popup>
         <Popup
             x:Name="SizePickerPopup"
             AllowsTransparency="True"

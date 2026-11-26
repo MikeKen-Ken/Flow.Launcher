@@ -358,7 +358,7 @@
     <system:String x:Key="TypeIsDarkToolTip">该主题支持两种（浅色/深色）模式。</system:String>
     <system:String x:Key="TypeHasBlurToolTip">该主题支持模糊透明背景。</system:String>
     <system:String x:Key="ShowSearchFilterBar">搜索筛选选项</system:String>
-    <system:String x:Key="ShowSearchFilterBarTip">在搜索框下方显示精确名称、大小写、目录、扩展名、大小和日期等筛选选项</system:String>
+    <system:String x:Key="ShowSearchFilterBarTip">在搜索框下方显示筛选面板，以及常用的 .exe / .lnk 快捷筛选</system:String>
     <system:String x:Key="searchFilter_file">文件</system:String>
     <system:String x:Key="searchFilter_folder">文件夹</system:String>
     <system:String x:Key="searchFilter_path">目录</system:String>
@@ -371,6 +371,8 @@
     <system:String x:Key="searchFilter_archive">压缩包</system:String>
     <system:String x:Key="searchFilter_exe">程序</system:String>
     <system:String x:Key="searchFilter_ext">扩展名</system:String>
+    <system:String x:Key="searchFilter_more">筛选</system:String>
+    <system:String x:Key="searchFilter_more_tip">打开文件、文件夹、目录、扩展名、大小和日期筛选</system:String>
     <system:String x:Key="searchFilter_size">大小</system:String>
     <system:String x:Key="searchFilter_modified">修改时间</system:String>
     <system:String x:Key="searchFilter_created">创建时间</system:String>

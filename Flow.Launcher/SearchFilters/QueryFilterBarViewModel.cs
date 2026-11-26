@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using Flow.Launcher.Infrastructure.UserSettings;
 using Flow.Launcher.Plugin;
 
@@ -19,11 +20,18 @@ public class QueryFilterBarViewModel : BaseModel
         _getQuery = getQuery;
         _changeQuery = changeQuery;
         Filters = new ObservableCollection<QueryFilterItemViewModel>(CreateFilters());
+        QuickExtensions = new ObservableCollection<QueryFilterQuickExtensionViewModel>(
+            QueryFilterCatalog.PinnedExtensions.Select(extension => new QueryFilterQuickExtensionViewModel(extension)));
+        Menu = new QueryFilterMenuState();
 
         _settings.PropertyChanged += OnSettingsChanged;
     }
 
     public ObservableCollection<QueryFilterItemViewModel> Filters { get; }
+
+    public ObservableCollection<QueryFilterQuickExtensionViewModel> QuickExtensions { get; }
+
+    public QueryFilterMenuState Menu { get; }
 
     public bool IsVisible => _settings.ShowSearchFilterBar;
 
@@ -34,6 +42,29 @@ public class QueryFilterBarViewModel : BaseModel
         {
             filter.Sync(snapshot);
         }
+
+        SyncQuickSelection(snapshot);
+    }
+
+    internal void SyncQuickSelection(string queryText)
+    {
+        SyncQuickSelection(QueryFilterSyntax.Parse(queryText));
+    }
+
+    private void SyncQuickSelection(QueryFilterSnapshot snapshot)
+    {
+        var extensions = snapshot.GetValue(QueryFilterId.Extension);
+        foreach (var quick in QuickExtensions)
+        {
+            quick.Sync(extensions);
+        }
+
+        Menu.Sync(HasUnpinnedSelection(snapshot));
+    }
+
+    internal void ToggleQuickExtension(string extension)
+    {
+        Apply(QueryFilterId.Extension, extension, QueryFilterApplyMode.Toggle);
     }
 
     internal void Apply(QueryFilterId id, string value, QueryFilterApplyMode mode)
@@ -48,6 +79,30 @@ public class QueryFilterBarViewModel : BaseModel
         {
             filter.RefreshLabels();
         }
+
+        foreach (var quick in QuickExtensions)
+        {
+            quick.RefreshLabel();
+        }
+    }
+
+    private static bool HasUnpinnedSelection(QueryFilterSnapshot snapshot)
+    {
+        foreach (var pair in snapshot.Values)
+        {
+            if (pair.Key != QueryFilterId.Extension)
+            {
+                return true;
+            }
+
+            if (QueryFilterExtensionValue.Parse(pair.Value).Any(extension =>
+                    !QueryFilterCatalog.PinnedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void OnSettingsChanged(object sender, PropertyChangedEventArgs e)
@@ -90,5 +145,43 @@ public class QueryFilterBarViewModel : BaseModel
         }
 
         return new QueryFilterItemViewModel(this, id, glyph, presets);
+    }
+}
+
+public sealed class QueryFilterMenuState : BaseModel
+{
+    public bool IsSelected { get; private set; }
+
+    internal void Sync(bool active)
+    {
+        IsSelected = active;
+    }
+}
+
+public sealed class QueryFilterQuickExtensionViewModel : BaseModel
+{
+    public QueryFilterQuickExtensionViewModel(string extension)
+    {
+        Extension = extension;
+        Label = "." + extension;
+        Tooltip = "ext:" + extension;
+    }
+
+    public string Extension { get; }
+
+    public string Label { get; }
+
+    public bool IsSelected { get; private set; }
+
+    public string Tooltip { get; private set; }
+
+    internal void Sync(string currentExtensions)
+    {
+        IsSelected = QueryFilterExtensionValue.Contains(currentExtensions, Extension);
+    }
+
+    internal void RefreshLabel()
+    {
+        Tooltip = Localize.searchFilter_tooltip("ext:" + Extension);
     }
 }

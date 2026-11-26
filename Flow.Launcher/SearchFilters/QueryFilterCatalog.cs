@@ -20,6 +20,8 @@ internal static class QueryFilterCatalog
     internal static readonly IReadOnlyList<string> ExtensionPresets =
         [.. ExtensionGroups.SelectMany(group => group.Extensions)];
 
+    internal static readonly IReadOnlyList<string> PinnedExtensions = ["exe", "lnk"];
+
     internal static readonly IReadOnlyList<string> DatePresets =
     [
         "today",

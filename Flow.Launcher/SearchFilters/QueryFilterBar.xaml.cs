@@ -36,11 +36,18 @@ public partial class QueryFilterBar : UserControl
     public static readonly DependencyProperty ChipSelectedTextProperty = DependencyProperty.Register(
         nameof(ChipSelectedText), typeof(Brush), typeof(QueryFilterBar));
 
+    public static readonly DependencyProperty PanelFillProperty = DependencyProperty.Register(
+        nameof(PanelFill), typeof(Brush), typeof(QueryFilterBar));
+
+    public static readonly DependencyProperty PanelStrokeProperty = DependencyProperty.Register(
+        nameof(PanelStroke), typeof(Brush), typeof(QueryFilterBar));
+
     public QueryFilterBar()
     {
         InitializeComponent();
         SizePickerControl.CloseRequested += OnPickerCloseRequested;
         ExtensionPickerControl.CloseRequested += OnPickerCloseRequested;
+        FiltersPopup.Closed += (_, _) => OnPickerClosed();
         SizePickerPopup.Closed += (_, _) => OnPickerClosed();
         ExtensionPickerPopup.Closed += (_, _) => OnPickerClosed();
         Loaded += OnLoaded;
@@ -88,6 +95,18 @@ public partial class QueryFilterBar : UserControl
     {
         get => (Brush)GetValue(ChipSelectedTextProperty);
         set => SetValue(ChipSelectedTextProperty, value);
+    }
+
+    public Brush PanelFill
+    {
+        get => (Brush)GetValue(PanelFillProperty);
+        set => SetValue(PanelFillProperty, value);
+    }
+
+    public Brush PanelStroke
+    {
+        get => (Brush)GetValue(PanelStrokeProperty);
+        set => SetValue(PanelStrokeProperty, value);
     }
 
     private QueryFilterChipBrushes _palette;
@@ -140,6 +159,8 @@ public partial class QueryFilterBar : UserControl
         ChipStroke = _palette.Stroke;
         ChipSelectedFill = _palette.SelectedFill;
         ChipSelectedText = _palette.SelectedText;
+        PanelFill = _palette.PanelFill;
+        PanelStroke = _palette.PanelStroke;
         SizePickerControl?.ApplyPalette(_palette);
         ExtensionPickerControl?.ApplyPalette(_palette);
     }
@@ -229,6 +250,32 @@ public partial class QueryFilterBar : UserControl
         menu.IsOpen = true;
     }
 
+    private void OnFiltersButtonClick(object sender, RoutedEventArgs e)
+    {
+        if (FiltersPopup.IsOpen)
+        {
+            FiltersPopup.IsOpen = false;
+            return;
+        }
+
+        SizePickerPopup.IsOpen = false;
+        ExtensionPickerPopup.IsOpen = false;
+        FiltersPopup.IsOpen = true;
+        HookPickerOutsideClick(true);
+    }
+
+    private void OnQuickExtensionClick(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { DataContext: QueryFilterQuickExtensionViewModel quick }
+            || DataContext is not QueryFilterBarViewModel bar)
+        {
+            return;
+        }
+
+        bar.ToggleQuickExtension(quick.Extension);
+        RestoreQueryBoxFocus();
+    }
+
     private void OpenSizePicker(Button button, QueryFilterItemViewModel item)
     {
         SizePickerPopup.IsOpen = false;
@@ -271,7 +318,12 @@ public partial class QueryFilterBar : UserControl
 
     private void OnWindowPreviewMouseDownForPicker(object sender, MouseButtonEventArgs e)
     {
-        if ((!SizePickerPopup.IsOpen && !ExtensionPickerPopup.IsOpen) || e.OriginalSource is not DependencyObject source)
+        if (!AnyPopupOpen || e.OriginalSource is not DependencyObject source || IsInside(FiltersButton, source))
+        {
+            return;
+        }
+
+        if (FiltersPopup.IsOpen && IsInside(FiltersPanel, source))
         {
             return;
         }
@@ -286,13 +338,17 @@ public partial class QueryFilterBar : UserControl
             return;
         }
 
+        FiltersPopup.IsOpen = false;
         SizePickerPopup.IsOpen = false;
         ExtensionPickerPopup.IsOpen = false;
     }
 
+    private bool AnyPopupOpen =>
+        FiltersPopup.IsOpen || SizePickerPopup.IsOpen || ExtensionPickerPopup.IsOpen;
+
     private void OnPickerClosed()
     {
-        if (!SizePickerPopup.IsOpen && !ExtensionPickerPopup.IsOpen)
+        if (!AnyPopupOpen)
         {
             HookPickerOutsideClick(false);
         }
