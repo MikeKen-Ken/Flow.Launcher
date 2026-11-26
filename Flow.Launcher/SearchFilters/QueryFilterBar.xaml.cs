@@ -273,6 +273,17 @@ public partial class QueryFilterBar : UserControl
         HookPickerOutsideClick(true);
     }
 
+    private void OnHistorySearchClick(object sender, RoutedEventArgs e)
+    {
+        FiltersPopup.IsOpen = false;
+        if (DataContext is QueryFilterBarViewModel bar)
+        {
+            bar.ToggleHistorySearch();
+        }
+
+        RestoreQueryBoxFocus();
+    }
+
     private void OnQuickExtensionClick(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { DataContext: QueryFilterQuickExtensionViewModel quick }

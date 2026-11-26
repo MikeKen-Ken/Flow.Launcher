@@ -14,18 +14,26 @@ public class QueryFilterBarViewModel : BaseModel
     private readonly Func<string> _getQuery;
     private readonly Action<string> _changeQuery;
 
-    public QueryFilterBarViewModel(Settings settings, Func<string> getQuery, Action<string> changeQuery)
+    private readonly Action _toggleHistorySearch;
+
+    public QueryFilterBarViewModel(
+        Settings settings,
+        Func<string> getQuery,
+        Action<string> changeQuery,
+        Action toggleHistorySearch = null)
     {
         _settings = settings;
         _getQuery = getQuery;
         _changeQuery = changeQuery;
+        _toggleHistorySearch = toggleHistorySearch;
         var filters = CreateFilters();
         Filters = new ObservableCollection<QueryFilterItemViewModel>(filters);
         PanelFilters = new ObservableCollection<QueryFilterItemViewModel>(filters.Where(filter => IsInPanel(filter.Id)));
         QuickExtensions = new ObservableCollection<QueryFilterQuickExtensionViewModel>(
             QueryFilterCatalog.PinnedExtensions.Select(extension => new QueryFilterQuickExtensionViewModel(extension)));
         Menu = new QueryFilterMenuState();
-        BarItems = BuildBarItems(filters, Menu);
+        HistorySearch = new QueryFilterHistorySearchState();
+        BarItems = BuildBarItems(filters, QuickExtensions, HistorySearch, Menu);
 
         _settings.PropertyChanged += OnSettingsChanged;
     }
@@ -39,6 +47,12 @@ public class QueryFilterBarViewModel : BaseModel
     public ObservableCollection<QueryFilterQuickExtensionViewModel> QuickExtensions { get; }
 
     public QueryFilterMenuState Menu { get; }
+
+    public QueryFilterHistorySearchState HistorySearch { get; }
+
+    public void SyncHistorySearch(bool active) => HistorySearch.Sync(active);
+
+    internal void ToggleHistorySearch() => _toggleHistorySearch?.Invoke();
 
     public bool IsVisible => _settings.ShowSearchFilterBar;
 
@@ -74,14 +88,24 @@ public class QueryFilterBarViewModel : BaseModel
         id is QueryFilterId.Size or QueryFilterId.DateModified or QueryFilterId.DateCreated
             or QueryFilterId.DateAccessed or QueryFilterId.Hidden;
 
-    private static IReadOnlyList<object> BuildBarItems(QueryFilterItemViewModel[] filters, QueryFilterMenuState menu)
+    private static IReadOnlyList<object> BuildBarItems(
+        QueryFilterItemViewModel[] filters,
+        IEnumerable<QueryFilterQuickExtensionViewModel> quickExtensions,
+        QueryFilterHistorySearchState historySearch,
+        QueryFilterMenuState menu)
     {
-        var items = new List<object>();
+        var items = new List<object> { historySearch };
         foreach (var filter in filters)
         {
-            if (!IsInPanel(filter.Id))
+            if (IsInPanel(filter.Id))
             {
-                items.Add(filter);
+                continue;
+            }
+
+            items.Add(filter);
+            if (filter.Id == QueryFilterId.Folder)
+            {
+                items.AddRange(quickExtensions);
             }
         }
 
@@ -153,6 +177,16 @@ public class QueryFilterBarViewModel : BaseModel
         }
 
         return new QueryFilterItemViewModel(this, id, glyph, presets);
+    }
+}
+
+public sealed class QueryFilterHistorySearchState : BaseModel
+{
+    public bool IsSelected { get; private set; }
+
+    internal void Sync(bool active)
+    {
+        IsSelected = active;
     }
 }
 

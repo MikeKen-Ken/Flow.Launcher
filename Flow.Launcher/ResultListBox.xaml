@@ -87,12 +87,30 @@
                             <ColumnDefinition Width="9*" />
                             <ColumnDefinition Width="Auto" MinWidth="8" />
                         </Grid.ColumnDefinitions>
-                        <StackPanel
-                            x:Name="HotkeyArea"
+                        <DockPanel
                             Grid.Column="2"
-                            Margin="0 0 10 0"
-                            VerticalAlignment="Center"
-                            Visibility="{Binding Settings.ShowOpenResultHotkey, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
+                            Margin="0 0 8 0"
+                            LastChildFill="False">
+                            <Button
+                                Padding="8 4"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Cursor="Hand"
+                                DockPanel.Dock="Right"
+                                Focusable="False"
+                                Tag="DeleteHistory"
+                                ToolTip="{DynamicResource searchFilter_history_remove}"
+                                Visibility="{Binding ShowHistoryPresentation}">
+                                <TextBlock
+                                    FontSize="16"
+                                    Text="&#x00D7;" />
+                            </Button>
+                            <StackPanel
+                                x:Name="HotkeyArea"
+                                VerticalAlignment="Center"
+                                Visibility="{Binding Settings.ShowOpenResultHotkey, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}">
                             <Border x:Name="HotkeyBG" Style="{DynamicResource ItemHotkeyBGStyle}">
                                 <Border.Visibility>
                                     <Binding Converter="{StaticResource ResourceKey=OpenResultHotkeyVisibilityConverter}" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=ListBoxItem}" />
@@ -112,6 +130,7 @@
                                 </TextBlock>
                             </Border>
                         </StackPanel>
+                        </DockPanel>
 
                         <Grid Grid.Column="0">
                             <Grid.ColumnDefinitions>

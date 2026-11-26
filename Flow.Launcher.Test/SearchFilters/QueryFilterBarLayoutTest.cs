@@ -34,8 +34,15 @@ public class QueryFilterBarLayoutTest
                 .ToList();
             Assert.That(barOrder, Is.EqualTo(new[]
             {
-                "Path", "File", "Folder", "Extension", "NameMatch", "CaseSensitive", "Menu"
+                "History", "Path", "File", "Folder", "exe", "lnk", "Extension", "NameMatch", "CaseSensitive", "Menu"
             }));
+
+            Click(FindButtons(bar).Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "exe" }));
+            Click(FindButtons(bar).Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "lnk" }));
+            vm.SyncQuickSelection(query);
+
+            Assert.That(query, Is.EqualTo("ext:exe;lnk"));
+            Assert.That(vm.QuickExtensions.All(item => item.IsSelected), Is.True);
 
             Click(FindButtons(bar).Single(button => button.DataContext is QueryFilterMenuState));
             Pump();
@@ -46,16 +53,8 @@ public class QueryFilterBarLayoutTest
             var panelOrder = FindButtons(panel).Select(Describe).Where(name => name is not null).ToList();
             Assert.That(panelOrder, Is.EqualTo(new[]
             {
-                "exe", "lnk", "Size", "DateModified", "DateCreated", "DateAccessed", "Hidden"
+                "Size", "DateModified", "DateCreated", "DateAccessed", "Hidden"
             }));
-
-            Click(FindButtons(panel).Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "exe" }));
-            Click(FindButtons(panel).Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "lnk" }));
-            vm.SyncQuickSelection(query);
-            Pump();
-
-            Assert.That(query, Is.EqualTo("ext:exe;lnk"));
-            Assert.That(vm.QuickExtensions.All(item => item.IsSelected), Is.True);
         }
         finally
         {
@@ -87,6 +86,7 @@ public class QueryFilterBarLayoutTest
     private static string Describe(Button button) => button.DataContext switch
     {
         QueryFilterItemViewModel filter => filter.Id.ToString(),
+        QueryFilterHistorySearchState => "History",
         QueryFilterMenuState => "Menu",
         QueryFilterQuickExtensionViewModel quick => quick.Extension,
         _ => null

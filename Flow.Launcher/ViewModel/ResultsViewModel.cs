@@ -74,6 +74,8 @@ namespace Flow.Launcher.ViewModel
             }
         }
 
+        public void RemoveHistoryResult(Result result) => _mainVM?.RemoveHistoryItem(result);
+
         public double ItemHeightSize
         {
             get => _settings.ItemHeightSize;

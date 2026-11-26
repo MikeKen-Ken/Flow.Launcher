@@ -372,7 +372,10 @@
     <system:String x:Key="searchFilter_exe">程序</system:String>
     <system:String x:Key="searchFilter_ext">扩展名</system:String>
     <system:String x:Key="searchFilter_more">其他</system:String>
-    <system:String x:Key="searchFilter_more_tip">大小、修改时间、创建时间、访问时间、隐藏，以及 .exe 和 .lnk。两个扩展名可以同时选中</system:String>
+    <system:String x:Key="searchFilter_more_tip">大小、修改时间、创建时间、访问时间、隐藏</system:String>
+    <system:String x:Key="searchFilter_history">历史</system:String>
+    <system:String x:Key="searchFilter_history_tip">之后输入的内容只在历史记录里搜索。再点一次回到普通搜索。</system:String>
+    <system:String x:Key="searchFilter_history_remove">删除这条历史记录</system:String>
     <system:String x:Key="searchFilter_size">大小</system:String>
     <system:String x:Key="searchFilter_modified">修改时间</system:String>
     <system:String x:Key="searchFilter_created">创建时间</system:String>

@@ -18,7 +18,7 @@ public class QueryFilterBarViewModelTest
         Assert.That(vm.Filters.Count, Is.EqualTo(11));
         Assert.That(vm.BarItems.Select(Describe), Is.EqualTo(new[]
         {
-            "Path", "File", "Folder", "Extension", "NameMatch", "CaseSensitive", "Menu"
+            "History", "Path", "File", "Folder", "exe", "lnk", "Extension", "NameMatch", "CaseSensitive", "Menu"
         }));
         Assert.That(vm.PanelFilters.Select(filter => filter.Id), Is.EqualTo(new[]
         {
@@ -79,6 +79,8 @@ public class QueryFilterBarViewModelTest
     private static string Describe(object item) => item switch
     {
         QueryFilterItemViewModel filter => filter.Id.ToString(),
+        QueryFilterQuickExtensionViewModel quick => quick.Extension,
+        QueryFilterHistorySearchState => "History",
         QueryFilterMenuState => "Menu",
         _ => item.GetType().Name
     };

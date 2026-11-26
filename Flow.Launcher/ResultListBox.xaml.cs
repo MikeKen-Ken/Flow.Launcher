@@ -4,6 +4,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using Flow.Launcher.ViewModel;
 
 namespace Flow.Launcher
@@ -163,10 +164,37 @@ namespace Flow.Launcher
 
         private void ResultListBox_OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (TryDeleteHistory(e))
+            {
+                e.Handled = true;
+                return;
+            }
+
             if (Mouse.DirectlyOver is not FrameworkElement { DataContext: ResultViewModel result })
                 return;
 
             LeftClickResultCommand?.Execute(null);
+        }
+
+        private bool TryDeleteHistory(MouseButtonEventArgs e)
+        {
+            if (e.OriginalSource is not DependencyObject source || DataContext is not ResultsViewModel results)
+            {
+                return false;
+            }
+
+            while (source is not null)
+            {
+                if (source is FrameworkElement { Tag: "DeleteHistory", DataContext: ResultViewModel item })
+                {
+                    results.RemoveHistoryResult(item.Result);
+                    return true;
+                }
+
+                source = VisualTreeHelper.GetParent(source) ?? LogicalTreeHelper.GetParent(source);
+            }
+
+            return false;
         }
     }
 }

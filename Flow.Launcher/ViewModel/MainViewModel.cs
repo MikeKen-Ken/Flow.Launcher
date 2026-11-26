@@ -191,7 +191,11 @@ namespace Flow.Launcher.ViewModel
             };
             _selectedResults = Results;
 
-            QueryFilters = new QueryFilterBarViewModel(Settings, () => QueryText, query => ChangeQueryText(query));
+            QueryFilters = new QueryFilterBarViewModel(
+                Settings,
+                () => QueryText,
+                query => ChangeQueryText(query),
+                ToggleHistorySearch);
 
             ResultAreaColumn = Settings.AlwaysPreview ? ResultAreaColumnPreviewShown : ResultAreaColumnPreviewHidden;
 
@@ -346,6 +350,12 @@ namespace Flow.Launcher.ViewModel
         }
 
         [RelayCommand]
+        private void ToggleHistorySearch()
+        {
+            SelectedResults = HistorySelected() ? Results : History;
+        }
+
+        [RelayCommand]
         private async Task LoadHistoryAsync()
         {
             if (QueryResultsSelected())
@@ -369,12 +379,20 @@ namespace Flow.Launcher.ViewModel
         private void RemoveSelectedHistoryItem()
         {
             if (!CanRemoveSelectedHistoryItem()
-                || SelectedResults.SelectedItem?.Result is not LastOpenedHistoryResult selectedHistoryItem)
+                || SelectedResults.SelectedItem?.Result is not LastOpenedHistoryResult selected)
+                return;
+
+            RemoveHistoryItem(selected);
+        }
+
+        internal void RemoveHistoryItem(Result result)
+        {
+            if (result is not LastOpenedHistoryResult selectedHistoryItem || _historyItemsStorage == null)
                 return;
 
             var storedHistoryItem = selectedHistoryItem.SourceHistoryItem ?? selectedHistoryItem;
             var selectedResults = SelectedResults;
-            var selectedIndex = selectedResults.SelectedIndex;
+            var selectedIndex = selectedResults?.SelectedIndex ?? 0;
 
             if (_history.Remove(storedHistoryItem) == 0)
                 return;
@@ -1045,6 +1063,8 @@ namespace Flow.Launcher.ViewModel
                         }
                     }
                 }
+
+                QueryFilters?.SyncHistorySearch(HistorySelected());
             }
         }
 
