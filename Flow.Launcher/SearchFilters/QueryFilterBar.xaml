@@ -52,7 +52,7 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <DataTemplate x:Key="SearchFilterChipTemplate" DataType="{x:Type filters:QueryFilterItemViewModel}">
+        <DataTemplate DataType="{x:Type filters:QueryFilterItemViewModel}">
             <Button
                 Click="OnFilterChipClick"
                 Style="{StaticResource SearchFilterChipStyle}"
@@ -78,13 +78,10 @@
                 </StackPanel>
             </Button>
         </DataTemplate>
-    </UserControl.Resources>
-    <Grid>
-        <StackPanel Margin="12 6 12 2" Orientation="Horizontal">
+        <DataTemplate DataType="{x:Type filters:QueryFilterMenuState}">
             <Button
-                x:Name="FiltersButton"
                 Click="OnFiltersButtonClick"
-                DataContext="{Binding Menu}"
+                Loaded="OnFiltersButtonLoaded"
                 Style="{StaticResource SearchFilterChipStyle}"
                 ToolTip="{DynamicResource searchFilter_more_tip}">
                 <StackPanel Orientation="Horizontal">
@@ -106,50 +103,60 @@
                         Glyph="&#xE70D;" />
                 </StackPanel>
             </Button>
-            <ItemsControl HorizontalAlignment="Left" ItemsSource="{Binding DataContext.QuickExtensions, ElementName=FilterBar}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type filters:QueryFilterQuickExtensionViewModel}">
-                        <Button
-                            Click="OnQuickExtensionClick"
-                            Style="{StaticResource SearchFilterChipStyle}"
-                            ToolTip="{Binding Tooltip}">
-                            <TextBlock
-                                VerticalAlignment="Center"
-                                Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                                Text="{Binding Label}" />
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+    <Grid>
+        <ItemsControl Margin="12 6 12 2" ItemsSource="{Binding BarItems}">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel />
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+        </ItemsControl>
         <Popup
             x:Name="FiltersPopup"
             AllowsTransparency="True"
             DataContext="{Binding DataContext, ElementName=FilterBar}"
             Placement="Bottom"
-            PlacementTarget="{Binding ElementName=FiltersButton}"
             StaysOpen="True">
             <Border
                 x:Name="FiltersPanel"
-                Width="560"
-                Padding="14 12 14 4"
+                MaxWidth="520"
+                Padding="14 12 6 4"
                 DataContext="{Binding DataContext, ElementName=FilterBar}"
                 Background="{Binding Data.PanelFill, Source={StaticResource FilterBrushes}}"
                 BorderBrush="{Binding Data.PanelStroke, Source={StaticResource FilterBrushes}}"
                 BorderThickness="1"
                 CornerRadius="10">
-                <ItemsControl ItemTemplate="{StaticResource SearchFilterChipTemplate}" ItemsSource="{Binding Filters}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding QuickExtensions}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="{x:Type filters:QueryFilterQuickExtensionViewModel}">
+                                <Button
+                                    Click="OnQuickExtensionClick"
+                                    Style="{StaticResource SearchFilterChipStyle}"
+                                    ToolTip="{Binding Tooltip}">
+                                    <TextBlock
+                                        VerticalAlignment="Center"
+                                        Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                        Text="{Binding Label}" />
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <ItemsControl ItemsSource="{Binding PanelFilters}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
             </Border>
         </Popup>
         <Popup

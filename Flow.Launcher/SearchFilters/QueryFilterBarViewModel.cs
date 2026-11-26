@@ -19,15 +19,22 @@ public class QueryFilterBarViewModel : BaseModel
         _settings = settings;
         _getQuery = getQuery;
         _changeQuery = changeQuery;
-        Filters = new ObservableCollection<QueryFilterItemViewModel>(CreateFilters());
+        var filters = CreateFilters();
+        Filters = new ObservableCollection<QueryFilterItemViewModel>(filters);
+        PanelFilters = new ObservableCollection<QueryFilterItemViewModel>(filters.Where(filter => IsInPanel(filter.Id)));
         QuickExtensions = new ObservableCollection<QueryFilterQuickExtensionViewModel>(
             QueryFilterCatalog.PinnedExtensions.Select(extension => new QueryFilterQuickExtensionViewModel(extension)));
         Menu = new QueryFilterMenuState();
+        BarItems = BuildBarItems(filters, Menu);
 
         _settings.PropertyChanged += OnSettingsChanged;
     }
 
     public ObservableCollection<QueryFilterItemViewModel> Filters { get; }
+
+    public ObservableCollection<QueryFilterItemViewModel> PanelFilters { get; }
+
+    public IReadOnlyList<object> BarItems { get; }
 
     public ObservableCollection<QueryFilterQuickExtensionViewModel> QuickExtensions { get; }
 
@@ -59,7 +66,27 @@ public class QueryFilterBarViewModel : BaseModel
             quick.Sync(extensions);
         }
 
-        Menu.Sync(HasUnpinnedSelection(snapshot));
+        Menu.Sync(QuickExtensions.Any(item => item.IsSelected)
+            || PanelFilters.Any(filter => snapshot.IsActive(filter.Id)));
+    }
+
+    private static bool IsInPanel(QueryFilterId id) =>
+        id is QueryFilterId.Size or QueryFilterId.DateModified or QueryFilterId.DateCreated
+            or QueryFilterId.DateAccessed or QueryFilterId.Hidden;
+
+    private static IReadOnlyList<object> BuildBarItems(QueryFilterItemViewModel[] filters, QueryFilterMenuState menu)
+    {
+        var items = new List<object>();
+        foreach (var filter in filters)
+        {
+            if (!IsInPanel(filter.Id))
+            {
+                items.Add(filter);
+            }
+        }
+
+        items.Add(menu);
+        return items;
     }
 
     internal void ToggleQuickExtension(string extension)
@@ -84,25 +111,6 @@ public class QueryFilterBarViewModel : BaseModel
         {
             quick.RefreshLabel();
         }
-    }
-
-    private static bool HasUnpinnedSelection(QueryFilterSnapshot snapshot)
-    {
-        foreach (var pair in snapshot.Values)
-        {
-            if (pair.Key != QueryFilterId.Extension)
-            {
-                return true;
-            }
-
-            if (QueryFilterExtensionValue.Parse(pair.Value).Any(extension =>
-                    !QueryFilterCatalog.PinnedExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase)))
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private void OnSettingsChanged(object sender, PropertyChangedEventArgs e)

@@ -362,7 +362,7 @@
     <system:String x:Key="TypeIsDarkToolTip">This theme supports two (light/dark) modes.</system:String>
     <system:String x:Key="TypeHasBlurToolTip">This theme supports Blur Transparent Background.</system:String>
     <system:String x:Key="ShowSearchFilterBar">Search filter chips</system:String>
-    <system:String x:Key="ShowSearchFilterBarTip">Show a filters panel and quick .exe / .lnk chips under the search box</system:String>
+    <system:String x:Key="ShowSearchFilterBarTip">Show the search filter chips under the search box, plus a panel for .exe and .lnk</system:String>
     <system:String x:Key="searchFilter_file">File</system:String>
     <system:String x:Key="searchFilter_folder">Folder</system:String>
     <system:String x:Key="searchFilter_path">In</system:String>
@@ -375,8 +375,8 @@
     <system:String x:Key="searchFilter_archive">Archive</system:String>
     <system:String x:Key="searchFilter_exe">Exe</system:String>
     <system:String x:Key="searchFilter_ext">Ext</system:String>
-    <system:String x:Key="searchFilter_more">Filters</system:String>
-    <system:String x:Key="searchFilter_more_tip">Open file, folder, path, extension, size and date filters</system:String>
+    <system:String x:Key="searchFilter_more">Other</system:String>
+    <system:String x:Key="searchFilter_more_tip">Size, modified, created, accessed, hidden, plus .exe and .lnk. Both extensions can stay selected.</system:String>
     <system:String x:Key="searchFilter_size">Size</system:String>
     <system:String x:Key="searchFilter_modified">Modified</system:String>
     <system:String x:Key="searchFilter_created">Created</system:String>

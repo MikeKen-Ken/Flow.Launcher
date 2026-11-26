@@ -110,6 +110,7 @@ public partial class QueryFilterBar : UserControl
     }
 
     private QueryFilterChipBrushes _palette;
+    private Button _filtersButton;
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -250,8 +251,16 @@ public partial class QueryFilterBar : UserControl
         menu.IsOpen = true;
     }
 
+    private void OnFiltersButtonLoaded(object sender, RoutedEventArgs e)
+    {
+        _filtersButton = (Button)sender;
+        FiltersPopup.PlacementTarget = _filtersButton;
+    }
+
     private void OnFiltersButtonClick(object sender, RoutedEventArgs e)
     {
+        _filtersButton = (Button)sender;
+        FiltersPopup.PlacementTarget = _filtersButton;
         if (FiltersPopup.IsOpen)
         {
             FiltersPopup.IsOpen = false;
@@ -318,7 +327,7 @@ public partial class QueryFilterBar : UserControl
 
     private void OnWindowPreviewMouseDownForPicker(object sender, MouseButtonEventArgs e)
     {
-        if (!AnyPopupOpen || e.OriginalSource is not DependencyObject source || IsInside(FiltersButton, source))
+        if (!AnyPopupOpen || e.OriginalSource is not DependencyObject source || IsInside(_filtersButton, source))
         {
             return;
         }

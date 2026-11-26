@@ -16,40 +16,46 @@ namespace Flow.Launcher.Test.SearchFilters;
 public class QueryFilterBarLayoutTest
 {
     [Test]
-    public void PinnedChips_StayOnTheBarAndTheOtherFiltersOpenInAPanel()
+    public void OriginalFiltersStayOnTheBarAndThePanelOnlyHasExeAndLnk()
     {
         var query = string.Empty;
         var vm = new QueryFilterBarViewModel(new Settings(), () => query, next => query = next);
-        var bar = new QueryFilterBar { DataContext = vm, Width = 720, Height = 72 };
-        var window = new Window { Content = bar, Width = 800, Height = 240, ShowInTaskbar = false };
+        var bar = new QueryFilterBar { DataContext = vm, Width = 720, Height = 160 };
+        var window = new Window { Content = bar, Width = 800, Height = 320, ShowInTaskbar = false };
 
         try
         {
             window.Show();
             Pump();
 
-            var barButtons = FindButtons(bar).ToList();
-            Assert.That(barButtons.Count(button => button.DataContext is QueryFilterQuickExtensionViewModel), Is.EqualTo(2));
+            var barOrder = FindButtons(bar)
+                .Select(Describe)
+                .Where(name => name is not null)
+                .ToList();
+            Assert.That(barOrder, Is.EqualTo(new[]
+            {
+                "Path", "File", "Folder", "Extension", "NameMatch", "CaseSensitive", "Menu"
+            }));
 
-            Click(barButtons.Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "exe" }));
-            Click(barButtons.Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "lnk" }));
+            Click(FindButtons(bar).Single(button => button.DataContext is QueryFilterMenuState));
+            Pump();
+
+            var popup = (Popup)bar.FindName("FiltersPopup");
+            var panel = (DependencyObject)bar.FindName("FiltersPanel");
+            Assert.That(popup.IsOpen, Is.True);
+            var panelOrder = FindButtons(panel).Select(Describe).Where(name => name is not null).ToList();
+            Assert.That(panelOrder, Is.EqualTo(new[]
+            {
+                "exe", "lnk", "Size", "DateModified", "DateCreated", "DateAccessed", "Hidden"
+            }));
+
+            Click(FindButtons(panel).Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "exe" }));
+            Click(FindButtons(panel).Single(button => button.DataContext is QueryFilterQuickExtensionViewModel { Extension: "lnk" }));
             vm.SyncQuickSelection(query);
             Pump();
 
             Assert.That(query, Is.EqualTo("ext:exe;lnk"));
             Assert.That(vm.QuickExtensions.All(item => item.IsSelected), Is.True);
-
-            var filters = (Button)bar.FindName("FiltersButton");
-            Click(filters);
-            Pump();
-
-            var popup = (Popup)bar.FindName("FiltersPopup");
-            Assert.That(popup.IsOpen, Is.True);
-            var panelButtons = FindButtons((DependencyObject)bar.FindName("FiltersPanel"))
-                .Where(button => button.DataContext is QueryFilterItemViewModel)
-                .ToList();
-            Assert.That(panelButtons, Has.Count.EqualTo(11));
-            Assert.That(panelButtons.Any(button => button.DataContext is QueryFilterItemViewModel { Id: QueryFilterId.Extension }), Is.True);
         }
         finally
         {
@@ -77,6 +83,14 @@ public class QueryFilterBarLayoutTest
             }
         }
     }
+
+    private static string Describe(Button button) => button.DataContext switch
+    {
+        QueryFilterItemViewModel filter => filter.Id.ToString(),
+        QueryFilterMenuState => "Menu",
+        QueryFilterQuickExtensionViewModel quick => quick.Extension,
+        _ => null
+    };
 
     private static void Pump() =>
         Dispatcher.CurrentDispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
